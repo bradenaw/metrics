@@ -208,7 +208,7 @@ type Histogram struct {
 	sampleRate float64
 }
 
-func (h *Histogram) Record(value float64) {
+func (h *Histogram) Observe(value float64) {
 	h.m.p.Histogram(h.name, value, h.tags, h.sampleRate)
 }
 
@@ -219,8 +219,8 @@ type Distribution struct {
 	sampleRate float64
 }
 
-func (h *Histogram) Distribution(value float64) {
-	h.m.p.Histogram(h.name, value, h.tags, h.sampleRate)
+func (h *Distribution) Observe(value float64) {
+	h.m.p.Distribution(h.name, value, h.tags, h.sampleRate)
 }
 
 type Set[K any] struct {
@@ -230,7 +230,7 @@ type Set[K any] struct {
 	sampleRate float64
 }
 
-func (s *Set[K]) Set(value K) {
+func (s *Set[K]) Observe(value K) {
 	s.m.p.Set(s.name, fmt.Sprint(value), s.tags, s.sampleRate)
 }
 
