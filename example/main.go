@@ -9,6 +9,19 @@ import (
 	"github.com/bradenaw/metrics"
 )
 
+type frobber struct {
+	fooCalls *metrics.Counter
+	barCalls *metrics.Counter
+}
+
+func (f *frobber) Foo() {
+	f.fooCalls.Add(1)
+}
+
+func (f *frobber) Bar() {
+	f.barCalls.Add(1)
+}
+
 func main() {
 	var showMetricsMetadata bool
 	flag.BoolVar(
@@ -31,4 +44,14 @@ func main() {
 
 	runCount.Bind(m).Add(1)
 	runningGauge.Bind(m).Set(1)
+
+	f := &frobber{
+		// logs as function_calls with tag name:Foo
+		fooCalls: functionCallCount.Bind(m, "Foo"),
+		// logs as function_calls with tag name:Bar
+		barCalls: functionCallCount.Bind(m, "Bar"),
+	}
+	f.Foo()
+	f.Bar()
+	f.Bar()
 }

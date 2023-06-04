@@ -25,7 +25,7 @@ type CounterDef1[V0 TagValue] struct {
 	key  string
 }
 
-func NewCounterDef1[V0 TagValue, V1 TagValue](
+func NewCounterDef1[V0 TagValue](
 	name string,
 	unit Unit,
 	key string,
