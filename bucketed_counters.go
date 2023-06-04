@@ -12,14 +12,13 @@ type BucketedCounter struct {
 }
 
 func NewBucketedCounter(
-	m *Metrics,
-	def *CounterDef1[string],
+	c *Counter,
 	boundaries []float64,
 ) *BucketedCounter {
 	var counters []*Counter
 
 	if len(boundaries) == 0 {
-		counters = []*Counter{def.Bind(m, "")}
+		counters = []*Counter{c}
 	} else {
 		// https://docs.datadoghq.com/getting_started/tagging/
 		//
@@ -32,15 +31,18 @@ func NewBucketedCounter(
 		// - Periods
 		// - Slashes
 		//
-		// [-./] all have meanings in numbers, so that leaves alphanum and [:_]
-		//
-		// Colons already used for tag key:values.
-		counters = make([]*Counter, len(boundaries)+1)
-		counters[0] = def.Bind(m, fmt.Sprintf("lt_%f", boundaries[0]))
-		for i := 1; i < len(boundaries); i++ {
-			counters[i] = def.Bind(m, fmt.Sprintf("in_%f_%f", boundaries[i-1], boundaries[i]))
+		// [-./] all have meanings in numbers, colons already used for tag key:values, so that leaves alphanum and _
+
+		addCounter := func(tag string) *Counter {
+			return c.m.counter(c.name, append(c.tags[0:len(c.tags):len(c.tags)], tag))
 		}
-		counters[len(boundaries)] = def.Bind(m, fmt.Sprintf("gt_%f", boundaries[len(boundaries)-1]))
+
+		counters = make([]*Counter, len(boundaries)+1)
+		counters[0] = addCounter(fmt.Sprintf("bucket:lt_%f", boundaries[0]))
+		for i := 1; i < len(boundaries); i++ {
+			counters[i] = addCounter(fmt.Sprintf("bucket:in_%f_%f", boundaries[i-1], boundaries[i]))
+		}
+		counters[len(boundaries)] = addCounter(fmt.Sprintf("bucket:gt_%f", boundaries[len(boundaries)-1]))
 	}
 
 	return &BucketedCounter{

@@ -379,10 +379,3 @@ func metadatasByName() []*metadata {
 	})
 	return result
 }
-
-func joinStrings(a []string, b []string) []string {
-	if len(a) == 0 {
-		return b
-	}
-	return append(a[0:len(a):len(a)], b...)
-}

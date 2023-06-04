@@ -21,9 +21,8 @@ func (d *CounterDef) Bind(m *Metrics) *Counter {
 }
 
 type CounterDef1[V0 TagValue] struct {
-	name   string
-	prefix []string
-	key    string
+	name string
+	key  string
 }
 
 func NewCounterDef1[V0 TagValue](
@@ -41,9 +40,9 @@ func NewCounterDef1[V0 TagValue](
 
 // Bind binds a set of tag values to this definition and returns the resulting Counter.
 func (d *CounterDef1[V0]) Bind(m *Metrics, v0 V0) *Counter {
-	return m.counter(d.name, joinStrings(d.prefix, []string{
+	return m.counter(d.name, []string{
 		makeTag(d.key, tagValueString(v0)),
-	}))
+	})
 }
 
 type GaugeDef struct {
