@@ -25,10 +25,10 @@ const (
 	UnitWeek        Unit = "week"
 
 	// PERCENTAGE
-	UnitPercent_nano Unit = "percent_nano"
-	UnitPercent      Unit = "percent"
-	UnitApdex        Unit = "apdex"
-	UnitFraction     Unit = "fraction"
+	UnitPercentNano Unit = "percent_nano"
+	UnitPercent     Unit = "percent"
+	UnitApdex       Unit = "apdex"
+	UnitFraction    Unit = "fraction"
 
 	// NETWORK
 	UnitConnection Unit = "connection"
@@ -52,7 +52,7 @@ const (
 	UnitFault    Unit = "fault"
 	UnitService  Unit = "service"
 	UnitInstance Unit = "instance"
-	UnitCpu      Unit = "cpu"
+	UnitCPU      Unit = "cpu"
 
 	// DISK
 	UnitFile   Unit = "file"
