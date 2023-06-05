@@ -346,7 +346,7 @@ func FormatMetadataJSON() string {
 			for _, suffix := range [...]string{"avg", "median", "95percentile", "max"} {
 				writeMetadataJSON(m.name+"."+suffix, m.unit, m.description, m.multipleDefs.Load())
 			}
-			writeMetadataJSON(m.name+".count", "", m.description, m.multipleDefs.Load())
+			writeMetadataJSON(m.name+".count", UnitEvent, m.description, m.multipleDefs.Load())
 		case distributionType:
 			for _, prefix := range [...]string{
 				"avg",
@@ -361,7 +361,7 @@ func FormatMetadataJSON() string {
 			} {
 				writeMetadataJSON(prefix+":"+m.name, m.unit, m.description, m.multipleDefs.Load())
 			}
-			writeMetadataJSON("count:"+m.name, "" /*unit*/, m.description, m.multipleDefs.Load())
+			writeMetadataJSON("count:"+m.name, UnitEvent, m.description, m.multipleDefs.Load())
 		}
 	}
 
