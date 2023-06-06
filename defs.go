@@ -21,8 +21,9 @@ func (d *CounterDef) Bind(m *Metrics) *Counter {
 }
 
 type CounterDef1[V0 TagValue] struct {
-	name string
-	key  string
+	name   string
+	prefix []string
+	keys   [1]string
 }
 
 func NewCounterDef1[V0 TagValue](
@@ -34,15 +35,15 @@ func NewCounterDef1[V0 TagValue](
 	registerDef(counterType, name, unit, description)
 	return &CounterDef1[V0]{
 		name: name,
-		key:  key,
+		keys: [1]string{key},
 	}
 }
 
 // Bind binds a set of tag values to this definition and returns the resulting Counter.
 func (d *CounterDef1[V0]) Bind(m *Metrics, v0 V0) *Counter {
-	return m.counter(d.name, []string{
-		makeTag(d.key, tagValueString(v0)),
-	})
+	return m.counter(d.name, joinStrings(d.prefix, []string{
+		makeTag(d.keys[0], tagValueString(v0)),
+	}))
 }
 
 type GaugeDef struct {
@@ -65,8 +66,9 @@ func (d *GaugeDef) Bind(m *Metrics) *Gauge {
 }
 
 type GaugeDef1[V0 TagValue] struct {
-	name string
-	key  string
+	name   string
+	prefix []string
+	keys   [1]string
 }
 
 func NewGaugeDef1[V0 TagValue](
@@ -78,14 +80,14 @@ func NewGaugeDef1[V0 TagValue](
 	registerDef(gaugeType, name, unit, description)
 	return &GaugeDef1[V0]{
 		name: name,
-		key:  key,
+		keys: [1]string{key},
 	}
 }
 
 func (d *GaugeDef1[V0]) Bind(m *Metrics, v0 V0) *Gauge {
-	return m.gauge(d.name, []string{
-		makeTag(d.key, tagValueString(v0)),
-	})
+	return m.gauge(d.name, joinStrings(d.prefix, []string{
+		makeTag(d.keys[0], tagValueString(v0)),
+	}))
 }
 
 type HistogramDef struct {

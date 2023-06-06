@@ -34,6 +34,26 @@ func main() {
 				Metric:      metric,
 				MetricLower: strings.ToLower(metric),
 			})
+
+			for k := 1; k <= i-1; k++ {
+				bindPrefixTmpl.Execute(os.Stdout, struct {
+					N        int
+					Ns       []int
+					K        int
+					Ks       []int
+					NMinusK  int
+					NMinusKs []int
+					Metric   string
+				}{
+					N:        i,
+					Ns:       ns[:i],
+					K:        k,
+					Ks:       ns[:k],
+					NMinusK:  i - k,
+					NMinusKs: ns[k:i],
+					Metric:   metric,
+				})
+			}
 		}
 	}
 	for _, metric := range []string{"Histogram", "Distribution"} {
@@ -59,8 +79,9 @@ func main() {
 
 var counterGaugeTmpl = template.Must(template.New("name").Parse(`
 type {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}] struct {
-	name       string
-	keys       [{{.N}}]string
+	name   string
+	prefix []string
+	keys   [{{.N}}]string
 }
 
 func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
@@ -77,11 +98,11 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 }
 
 func (h *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Bind(m *Metrics {{range .Ns}}, v{{.}} V{{.}} {{end}}) *{{.Metric}} {
-	return m.{{.MetricLower}}(h.name,  []string{
+	return m.{{.MetricLower}}(h.name,  joinStrings(h.prefix, []string{
 		{{range .Ns}}
 		makeTag(h.keys[{{.}}], tagValueString(v{{.}})),
 		{{ end }}
-	})
+	}))
 }
 `))
 
@@ -153,6 +174,20 @@ func (h *{{.Metric}}Def{{.N}}[K, {{range .Ns}} V{{.}}, {{end}}]) Bind(m *Metrics
 			{{ end }}
 		},
 		sampleRate: h.sampleRate,
+	}
+}
+`))
+
+var bindPrefixTmpl = template.Must(template.New("name").Parse(`
+func (h *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) BindPrefix{{.K}}(m *Metrics {{range .Ks}}, v{{.}} V{{.}} {{end}}) *{{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}] {
+	return &{{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}]{
+		name: h.name,
+		prefix: []string{
+			{{range .Ks}}
+			makeTag(h.keys[{{.}}], tagValueString(v{{.}})),
+			{{ end }}
+		},
+		keys: *((*[{{.NMinusK}}]string)(h.keys[{{.K}}:])),
 	}
 }
 `))
