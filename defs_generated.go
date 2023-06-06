@@ -30,7 +30,7 @@ func (h *CounterDef2[V0, V1]) Bind(m *Metrics, v0 V0, v1 V1) *Counter {
 	}))
 }
 
-func (h *CounterDef2[V0, V1]) BindPrefix1(m *Metrics, v0 V0) *CounterDef1[V1] {
+func (h *CounterDef2[V0, V1]) BindPrefix1(v0 V0) *CounterDef1[V1] {
 	return &CounterDef1[V1]{
 		name: h.name,
 		prefix: []string{
@@ -71,7 +71,7 @@ func (h *CounterDef3[V0, V1, V2]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2) *Counter
 	}))
 }
 
-func (h *CounterDef3[V0, V1, V2]) BindPrefix1(m *Metrics, v0 V0) *CounterDef2[V1, V2] {
+func (h *CounterDef3[V0, V1, V2]) BindPrefix1(v0 V0) *CounterDef2[V1, V2] {
 	return &CounterDef2[V1, V2]{
 		name: h.name,
 		prefix: []string{
@@ -82,7 +82,7 @@ func (h *CounterDef3[V0, V1, V2]) BindPrefix1(m *Metrics, v0 V0) *CounterDef2[V1
 	}
 }
 
-func (h *CounterDef3[V0, V1, V2]) BindPrefix2(m *Metrics, v0 V0, v1 V1) *CounterDef1[V2] {
+func (h *CounterDef3[V0, V1, V2]) BindPrefix2(v0 V0, v1 V1) *CounterDef1[V2] {
 	return &CounterDef1[V2]{
 		name: h.name,
 		prefix: []string{
@@ -127,7 +127,7 @@ func (h *CounterDef4[V0, V1, V2, V3]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2, v3 V
 	}))
 }
 
-func (h *CounterDef4[V0, V1, V2, V3]) BindPrefix1(m *Metrics, v0 V0) *CounterDef3[V1, V2, V3] {
+func (h *CounterDef4[V0, V1, V2, V3]) BindPrefix1(v0 V0) *CounterDef3[V1, V2, V3] {
 	return &CounterDef3[V1, V2, V3]{
 		name: h.name,
 		prefix: []string{
@@ -138,7 +138,7 @@ func (h *CounterDef4[V0, V1, V2, V3]) BindPrefix1(m *Metrics, v0 V0) *CounterDef
 	}
 }
 
-func (h *CounterDef4[V0, V1, V2, V3]) BindPrefix2(m *Metrics, v0 V0, v1 V1) *CounterDef2[V2, V3] {
+func (h *CounterDef4[V0, V1, V2, V3]) BindPrefix2(v0 V0, v1 V1) *CounterDef2[V2, V3] {
 	return &CounterDef2[V2, V3]{
 		name: h.name,
 		prefix: []string{
@@ -151,7 +151,7 @@ func (h *CounterDef4[V0, V1, V2, V3]) BindPrefix2(m *Metrics, v0 V0, v1 V1) *Cou
 	}
 }
 
-func (h *CounterDef4[V0, V1, V2, V3]) BindPrefix3(m *Metrics, v0 V0, v1 V1, v2 V2) *CounterDef1[V3] {
+func (h *CounterDef4[V0, V1, V2, V3]) BindPrefix3(v0 V0, v1 V1, v2 V2) *CounterDef1[V3] {
 	return &CounterDef1[V3]{
 		name: h.name,
 		prefix: []string{
@@ -200,7 +200,7 @@ func (h *CounterDef5[V0, V1, V2, V3, V4]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2, 
 	}))
 }
 
-func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix1(m *Metrics, v0 V0) *CounterDef4[V1, V2, V3, V4] {
+func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix1(v0 V0) *CounterDef4[V1, V2, V3, V4] {
 	return &CounterDef4[V1, V2, V3, V4]{
 		name: h.name,
 		prefix: []string{
@@ -211,7 +211,7 @@ func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix1(m *Metrics, v0 V0) *Counte
 	}
 }
 
-func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix2(m *Metrics, v0 V0, v1 V1) *CounterDef3[V2, V3, V4] {
+func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix2(v0 V0, v1 V1) *CounterDef3[V2, V3, V4] {
 	return &CounterDef3[V2, V3, V4]{
 		name: h.name,
 		prefix: []string{
@@ -224,7 +224,7 @@ func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix2(m *Metrics, v0 V0, v1 V1) 
 	}
 }
 
-func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix3(m *Metrics, v0 V0, v1 V1, v2 V2) *CounterDef2[V3, V4] {
+func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix3(v0 V0, v1 V1, v2 V2) *CounterDef2[V3, V4] {
 	return &CounterDef2[V3, V4]{
 		name: h.name,
 		prefix: []string{
@@ -239,7 +239,7 @@ func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix3(m *Metrics, v0 V0, v1 V1, 
 	}
 }
 
-func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix4(m *Metrics, v0 V0, v1 V1, v2 V2, v3 V3) *CounterDef1[V4] {
+func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix4(v0 V0, v1 V1, v2 V2, v3 V3) *CounterDef1[V4] {
 	return &CounterDef1[V4]{
 		name: h.name,
 		prefix: []string{
@@ -284,7 +284,7 @@ func (h *GaugeDef2[V0, V1]) Bind(m *Metrics, v0 V0, v1 V1) *Gauge {
 	}))
 }
 
-func (h *GaugeDef2[V0, V1]) BindPrefix1(m *Metrics, v0 V0) *GaugeDef1[V1] {
+func (h *GaugeDef2[V0, V1]) BindPrefix1(v0 V0) *GaugeDef1[V1] {
 	return &GaugeDef1[V1]{
 		name: h.name,
 		prefix: []string{
@@ -325,7 +325,7 @@ func (h *GaugeDef3[V0, V1, V2]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2) *Gauge {
 	}))
 }
 
-func (h *GaugeDef3[V0, V1, V2]) BindPrefix1(m *Metrics, v0 V0) *GaugeDef2[V1, V2] {
+func (h *GaugeDef3[V0, V1, V2]) BindPrefix1(v0 V0) *GaugeDef2[V1, V2] {
 	return &GaugeDef2[V1, V2]{
 		name: h.name,
 		prefix: []string{
@@ -336,7 +336,7 @@ func (h *GaugeDef3[V0, V1, V2]) BindPrefix1(m *Metrics, v0 V0) *GaugeDef2[V1, V2
 	}
 }
 
-func (h *GaugeDef3[V0, V1, V2]) BindPrefix2(m *Metrics, v0 V0, v1 V1) *GaugeDef1[V2] {
+func (h *GaugeDef3[V0, V1, V2]) BindPrefix2(v0 V0, v1 V1) *GaugeDef1[V2] {
 	return &GaugeDef1[V2]{
 		name: h.name,
 		prefix: []string{
@@ -381,7 +381,7 @@ func (h *GaugeDef4[V0, V1, V2, V3]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2, v3 V3)
 	}))
 }
 
-func (h *GaugeDef4[V0, V1, V2, V3]) BindPrefix1(m *Metrics, v0 V0) *GaugeDef3[V1, V2, V3] {
+func (h *GaugeDef4[V0, V1, V2, V3]) BindPrefix1(v0 V0) *GaugeDef3[V1, V2, V3] {
 	return &GaugeDef3[V1, V2, V3]{
 		name: h.name,
 		prefix: []string{
@@ -392,7 +392,7 @@ func (h *GaugeDef4[V0, V1, V2, V3]) BindPrefix1(m *Metrics, v0 V0) *GaugeDef3[V1
 	}
 }
 
-func (h *GaugeDef4[V0, V1, V2, V3]) BindPrefix2(m *Metrics, v0 V0, v1 V1) *GaugeDef2[V2, V3] {
+func (h *GaugeDef4[V0, V1, V2, V3]) BindPrefix2(v0 V0, v1 V1) *GaugeDef2[V2, V3] {
 	return &GaugeDef2[V2, V3]{
 		name: h.name,
 		prefix: []string{
@@ -405,7 +405,7 @@ func (h *GaugeDef4[V0, V1, V2, V3]) BindPrefix2(m *Metrics, v0 V0, v1 V1) *Gauge
 	}
 }
 
-func (h *GaugeDef4[V0, V1, V2, V3]) BindPrefix3(m *Metrics, v0 V0, v1 V1, v2 V2) *GaugeDef1[V3] {
+func (h *GaugeDef4[V0, V1, V2, V3]) BindPrefix3(v0 V0, v1 V1, v2 V2) *GaugeDef1[V3] {
 	return &GaugeDef1[V3]{
 		name: h.name,
 		prefix: []string{
@@ -454,7 +454,7 @@ func (h *GaugeDef5[V0, V1, V2, V3, V4]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2, v3
 	}))
 }
 
-func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix1(m *Metrics, v0 V0) *GaugeDef4[V1, V2, V3, V4] {
+func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix1(v0 V0) *GaugeDef4[V1, V2, V3, V4] {
 	return &GaugeDef4[V1, V2, V3, V4]{
 		name: h.name,
 		prefix: []string{
@@ -465,7 +465,7 @@ func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix1(m *Metrics, v0 V0) *GaugeDef
 	}
 }
 
-func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix2(m *Metrics, v0 V0, v1 V1) *GaugeDef3[V2, V3, V4] {
+func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix2(v0 V0, v1 V1) *GaugeDef3[V2, V3, V4] {
 	return &GaugeDef3[V2, V3, V4]{
 		name: h.name,
 		prefix: []string{
@@ -478,7 +478,7 @@ func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix2(m *Metrics, v0 V0, v1 V1) *G
 	}
 }
 
-func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix3(m *Metrics, v0 V0, v1 V1, v2 V2) *GaugeDef2[V3, V4] {
+func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix3(v0 V0, v1 V1, v2 V2) *GaugeDef2[V3, V4] {
 	return &GaugeDef2[V3, V4]{
 		name: h.name,
 		prefix: []string{
@@ -493,7 +493,7 @@ func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix3(m *Metrics, v0 V0, v1 V1, v2
 	}
 }
 
-func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix4(m *Metrics, v0 V0, v1 V1, v2 V2, v3 V3) *GaugeDef1[V4] {
+func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix4(v0 V0, v1 V1, v2 V2, v3 V3) *GaugeDef1[V4] {
 	return &GaugeDef1[V4]{
 		name: h.name,
 		prefix: []string{

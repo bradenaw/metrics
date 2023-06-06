@@ -179,7 +179,7 @@ func (h *{{.Metric}}Def{{.N}}[K, {{range .Ns}} V{{.}}, {{end}}]) Bind(m *Metrics
 `))
 
 var bindPrefixTmpl = template.Must(template.New("name").Parse(`
-func (h *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) BindPrefix{{.K}}(m *Metrics {{range .Ks}}, v{{.}} V{{.}} {{end}}) *{{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}] {
+func (h *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) BindPrefix{{.K}}({{range .Ks}} v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}] {
 	return &{{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}]{
 		name: h.name,
 		prefix: []string{
