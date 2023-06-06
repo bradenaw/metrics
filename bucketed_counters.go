@@ -7,6 +7,15 @@ import (
 	"github.com/bradenaw/juniper/xsort"
 )
 
+// BucketedCounter is a counter sectioned into buckets.
+//
+// For example, with boundaries []float64{100, 200, 400}, BucketedCounter will produce four counters
+// with the following tag values:
+//
+//	lt_100             which counts Observe()s with v < 100
+//	gte_100_lt_200     which counts Observe()s with 100 <= v < 200
+//	gte_200_lt_400     which counts Observe()s with 200 <= v < 400
+//	gte_400            which counts Observe()s with 400 <= v
 type BucketedCounter struct {
 	boundaries []float64
 	counters   []*Counter
@@ -40,18 +49,18 @@ func NewBucketedCounter(
 
 	counters := make([]*Counter, len(boundaries)+1)
 	counters[0] = d.Bind(m, fmt.Sprintf(
-		"bucket:lt_%f",
+		"lt_%f",
 		boundaries[0],
 	))
 	for i := 1; i < len(boundaries); i++ {
 		counters[i] = d.Bind(m, fmt.Sprintf(
-			"bucket:in_%f_%f",
+			"gte_%f_lt_%f",
 			boundaries[i-1],
 			boundaries[i],
 		))
 	}
 	counters[len(boundaries)] = d.Bind(m, fmt.Sprintf(
-		"bucket:gt_%f",
+		"gte_%f",
 		boundaries[len(boundaries)-1],
 	))
 
