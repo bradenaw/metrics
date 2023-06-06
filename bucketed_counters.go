@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/bradenaw/juniper/xsort"
 )
@@ -63,4 +64,12 @@ func NewBucketedCounter(
 func (b *BucketedCounter) Observe(v float64) {
 	idx := xsort.Search(b.boundaries, xsort.OrderedLess[float64], v)
 	b.counters[idx].Add(1)
+}
+
+func ExponentialBuckets(start float64, base float64, n int) []float64 {
+	buckets := make([]float64, n)
+	for i := range buckets {
+		buckets[i] = start * math.Pow(base, float64(i))
+	}
+	return buckets
 }
