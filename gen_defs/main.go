@@ -86,9 +86,9 @@ type {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}] struct {
 
 func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	name string,
+	description string,
 	unit Unit,
 	keys [{{.N}}]string,
-	description string,
 ) *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}] {
 	registerDef({{.MetricLower}}Type, name, unit, description)
 	return &{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]{
@@ -115,9 +115,9 @@ type {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}] struct {
 
 func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	name string,
+	description string,
 	unit Unit,
 	keys [{{.N}}]string,
-	description string,
 	sampleRate float64,
 ) *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}] {
 	registerDef({{.MetricLower}}Type, name, unit, description)
@@ -151,9 +151,9 @@ type {{.Metric}}Def{{.N}}[K any, {{range .Ns}} V{{.}} TagValue, {{end}}] struct 
 
 func New{{.Metric}}Def{{.N}}[K any, {{range .Ns}} V{{.}} TagValue, {{end}}](
 	name string,
+	description string,
 	unit Unit,
 	keys [{{.N}}]string,
-	description string,
 	sampleRate float64,
 ) *{{.Metric}}Def{{.N}}[K, {{range .Ns}} V{{.}}, {{end}}] {
 	registerDef({{.MetricLower}}Type, name, unit, description)

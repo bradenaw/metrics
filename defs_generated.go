@@ -10,9 +10,9 @@ type CounterDef2[V0 TagValue, V1 TagValue] struct {
 
 func NewCounterDef2[V0 TagValue, V1 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [2]string,
-	description string,
 ) *CounterDef2[V0, V1] {
 	registerDef(counterType, name, unit, description)
 	return &CounterDef2[V0, V1]{
@@ -49,9 +49,9 @@ type CounterDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
 
 func NewCounterDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [3]string,
-	description string,
 ) *CounterDef3[V0, V1, V2] {
 	registerDef(counterType, name, unit, description)
 	return &CounterDef3[V0, V1, V2]{
@@ -103,9 +103,9 @@ type CounterDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
 
 func NewCounterDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [4]string,
-	description string,
 ) *CounterDef4[V0, V1, V2, V3] {
 	registerDef(counterType, name, unit, description)
 	return &CounterDef4[V0, V1, V2, V3]{
@@ -174,9 +174,9 @@ type CounterDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue
 
 func NewCounterDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [5]string,
-	description string,
 ) *CounterDef5[V0, V1, V2, V3, V4] {
 	registerDef(counterType, name, unit, description)
 	return &CounterDef5[V0, V1, V2, V3, V4]{
@@ -264,9 +264,9 @@ type GaugeDef2[V0 TagValue, V1 TagValue] struct {
 
 func NewGaugeDef2[V0 TagValue, V1 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [2]string,
-	description string,
 ) *GaugeDef2[V0, V1] {
 	registerDef(gaugeType, name, unit, description)
 	return &GaugeDef2[V0, V1]{
@@ -303,9 +303,9 @@ type GaugeDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
 
 func NewGaugeDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [3]string,
-	description string,
 ) *GaugeDef3[V0, V1, V2] {
 	registerDef(gaugeType, name, unit, description)
 	return &GaugeDef3[V0, V1, V2]{
@@ -357,9 +357,9 @@ type GaugeDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
 
 func NewGaugeDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [4]string,
-	description string,
 ) *GaugeDef4[V0, V1, V2, V3] {
 	registerDef(gaugeType, name, unit, description)
 	return &GaugeDef4[V0, V1, V2, V3]{
@@ -428,9 +428,9 @@ type GaugeDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue] 
 
 func NewGaugeDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [5]string,
-	description string,
 ) *GaugeDef5[V0, V1, V2, V3, V4] {
 	registerDef(gaugeType, name, unit, description)
 	return &GaugeDef5[V0, V1, V2, V3, V4]{
@@ -518,9 +518,9 @@ type HistogramDef2[V0 TagValue, V1 TagValue] struct {
 
 func NewHistogramDef2[V0 TagValue, V1 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [2]string,
-	description string,
 	sampleRate float64,
 ) *HistogramDef2[V0, V1] {
 	registerDef(histogramType, name, unit, description)
@@ -553,9 +553,9 @@ type HistogramDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
 
 func NewHistogramDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [3]string,
-	description string,
 	sampleRate float64,
 ) *HistogramDef3[V0, V1, V2] {
 	registerDef(histogramType, name, unit, description)
@@ -590,9 +590,9 @@ type HistogramDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
 
 func NewHistogramDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [4]string,
-	description string,
 	sampleRate float64,
 ) *HistogramDef4[V0, V1, V2, V3] {
 	registerDef(histogramType, name, unit, description)
@@ -629,9 +629,9 @@ type HistogramDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagVal
 
 func NewHistogramDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [5]string,
-	description string,
 	sampleRate float64,
 ) *HistogramDef5[V0, V1, V2, V3, V4] {
 	registerDef(histogramType, name, unit, description)
@@ -670,9 +670,9 @@ type DistributionDef2[V0 TagValue, V1 TagValue] struct {
 
 func NewDistributionDef2[V0 TagValue, V1 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [2]string,
-	description string,
 	sampleRate float64,
 ) *DistributionDef2[V0, V1] {
 	registerDef(distributionType, name, unit, description)
@@ -705,9 +705,9 @@ type DistributionDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
 
 func NewDistributionDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [3]string,
-	description string,
 	sampleRate float64,
 ) *DistributionDef3[V0, V1, V2] {
 	registerDef(distributionType, name, unit, description)
@@ -742,9 +742,9 @@ type DistributionDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct
 
 func NewDistributionDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [4]string,
-	description string,
 	sampleRate float64,
 ) *DistributionDef4[V0, V1, V2, V3] {
 	registerDef(distributionType, name, unit, description)
@@ -781,9 +781,9 @@ type DistributionDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 Tag
 
 func NewDistributionDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [5]string,
-	description string,
 	sampleRate float64,
 ) *DistributionDef5[V0, V1, V2, V3, V4] {
 	registerDef(distributionType, name, unit, description)
@@ -822,9 +822,9 @@ type SetDef2[K any, V0 TagValue, V1 TagValue] struct {
 
 func NewSetDef2[K any, V0 TagValue, V1 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [2]string,
-	description string,
 	sampleRate float64,
 ) *SetDef2[K, V0, V1] {
 	registerDef(setType, name, unit, description)
@@ -857,9 +857,9 @@ type SetDef3[K any, V0 TagValue, V1 TagValue, V2 TagValue] struct {
 
 func NewSetDef3[K any, V0 TagValue, V1 TagValue, V2 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [3]string,
-	description string,
 	sampleRate float64,
 ) *SetDef3[K, V0, V1, V2] {
 	registerDef(setType, name, unit, description)
@@ -894,9 +894,9 @@ type SetDef4[K any, V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
 
 func NewSetDef4[K any, V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [4]string,
-	description string,
 	sampleRate float64,
 ) *SetDef4[K, V0, V1, V2, V3] {
 	registerDef(setType, name, unit, description)
@@ -933,9 +933,9 @@ type SetDef5[K any, V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagVa
 
 func NewSetDef5[K any, V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue](
 	name string,
+	description string,
 	unit Unit,
 	keys [5]string,
-	description string,
 	sampleRate float64,
 ) *SetDef5[K, V0, V1, V2, V3, V4] {
 	registerDef(setType, name, unit, description)
