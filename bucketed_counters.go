@@ -21,6 +21,10 @@ type BucketedCounter struct {
 	counters   []*Counter
 }
 
+// NewBucketedCounter returns a counter that keeps track of observed values between the given
+// boundaries.
+//
+// By convention, the key for d is "bucket."
 func NewBucketedCounter(
 	m *Metrics,
 	d *CounterDef1[string],
