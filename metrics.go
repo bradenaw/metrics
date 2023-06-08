@@ -85,6 +85,7 @@ var (
 		p:       noOpPublisher{},
 		bg:      xsync.NewGroup(context.Background()),
 		flushed: make(chan struct{}),
+		polls:   make(map[int]func()),
 	}
 )
 
@@ -93,6 +94,7 @@ func New(p Publisher) *Metrics {
 		p:       p,
 		bg:      xsync.NewGroup(context.Background()),
 		flushed: make(chan struct{}),
+		polls:   make(map[int]func()),
 	}
 
 	m.flushNow = m.bg.PeriodicOrTrigger(flushInterval, 0 /*jitter*/, func(ctx context.Context) {
