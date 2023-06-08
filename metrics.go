@@ -199,10 +199,7 @@ type Gauge struct {
 }
 
 func (g *Gauge) Set(v float64) {
-	old := math.Float64frombits(g.v.Swap(math.Float64bits(v)))
-	if math.IsNaN(old) && !math.IsNaN(v) {
-		g.publishValue(v)
-	}
+	g.v.Store(math.Float64bits(v))
 }
 
 func (g *Gauge) Unset() {
@@ -214,10 +211,6 @@ func (g *Gauge) publish() {
 	if math.IsNaN(v) {
 		return
 	}
-	g.publishValue(v)
-}
-
-func (g *Gauge) publishValue(v float64) {
 	g.m.p.Gauge(g.name, v, g.tags, 1 /*samplingRate*/)
 }
 
