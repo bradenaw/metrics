@@ -200,8 +200,8 @@ type Gauge struct {
 
 func (g *Gauge) Set(v float64) {
 	old := math.Float64frombits(g.v.Swap(math.Float64bits(v)))
-	if math.IsNaN(old) {
-		g.publish()
+	if math.IsNaN(old) && !math.IsNaN(v) {
+		g.publishValue(v)
 	}
 }
 
@@ -210,7 +210,15 @@ func (g *Gauge) Unset() {
 }
 
 func (g *Gauge) publish() {
-	g.m.p.Gauge(g.name, math.Float64frombits(g.v.Load()), g.tags, 1 /*samplingRate*/)
+	v := math.Float64frombits(g.v.Load())
+	if math.IsNaN(v) {
+		return
+	}
+	g.publishValue(v)
+}
+
+func (g *Gauge) publishValue(v float64) {
+	g.m.p.Gauge(g.name, v, g.tags, 1 /*samplingRate*/)
 }
 
 // Counter is a metric that keeps track of the number of events that happen per time interval.
