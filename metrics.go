@@ -64,6 +64,30 @@ type Metrics struct {
 	polls   map[int]func()
 }
 
+type noOpPublisher struct{}
+
+func (p noOpPublisher) Gauge(name string, value float64, tags []string, rate float64) error {
+	return nil
+}
+func (p noOpPublisher) Count(name string, value int64, tags []string, rate float64) error {
+	return nil
+}
+func (p noOpPublisher) Histogram(name string, value float64, tags []string, rate float64) error {
+	return nil
+}
+func (p noOpPublisher) Distribution(name string, value float64, tags []string, rate float64) error {
+	return nil
+}
+func (p noOpPublisher) Set(name string, value string, tags []string, rate float64) error { return nil }
+
+var (
+	NoOpMetrics = &Metrics{
+		p:       noOpPublisher{},
+		bg:      xsync.NewGroup(context.Background()),
+		flushed: make(chan struct{}),
+	}
+)
+
 func New(p Publisher) *Metrics {
 	m := &Metrics{
 		p:       p,
@@ -147,6 +171,9 @@ func (m *Metrics) EveryFlush(f func()) func() {
 }
 
 func (m *Metrics) Flush() {
+	if m.flushNow == nil {
+		return
+	}
 	m.m.Lock()
 	flushed := m.flushed
 	m.m.Unlock()
