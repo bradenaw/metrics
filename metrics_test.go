@@ -14,5 +14,5 @@ var (
 )
 
 func TestNothing(t *testing.T) {
-	testGauge.Bind(NoOpMetrics, "baz", "qux").Set(1)
+	testGauge.Values("baz", "qux").Bind(NoOpMetrics).Set(1)
 }

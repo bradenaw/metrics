@@ -33,7 +33,7 @@ func NewBucketedCounter(
 	if len(boundaries) == 0 {
 		return &BucketedCounter{
 			boundaries: nil,
-			counters:   []*Counter{d.Bind(m, "")},
+			counters:   []*Counter{d.Values("").Bind(m)},
 		}
 	}
 
@@ -52,21 +52,21 @@ func NewBucketedCounter(
 	// alphanum and _
 
 	counters := make([]*Counter, len(boundaries)+1)
-	counters[0] = d.Bind(m, fmt.Sprintf(
+	counters[0] = d.Values(fmt.Sprintf(
 		"lt_%f",
 		boundaries[0],
-	))
+	)).Bind(m)
 	for i := 1; i < len(boundaries); i++ {
-		counters[i] = d.Bind(m, fmt.Sprintf(
+		counters[i] = d.Values(fmt.Sprintf(
 			"gte_%f_lt_%f",
 			boundaries[i-1],
 			boundaries[i],
-		))
+		)).Bind(m)
 	}
-	counters[len(boundaries)] = d.Bind(m, fmt.Sprintf(
+	counters[len(boundaries)] = d.Values(fmt.Sprintf(
 		"gte_%f",
 		boundaries[len(boundaries)-1],
-	))
+	)).Bind(m)
 
 	return &BucketedCounter{
 		boundaries: boundaries,
