@@ -97,12 +97,15 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	}
 }
 
-func (h *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Bind(m *Metrics {{range .Ns}}, v{{.}} V{{.}} {{end}}) *{{.Metric}} {
-	return m.{{.MetricLower}}(h.name,  joinStrings(h.prefix, []string{
-		{{range .Ns}}
-		makeTag(h.keys[{{.}}], tagValueString(v{{.}})),
-		{{ end }}
-	}))
+func (d *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}}v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def {
+	return &{{.Metric}}Def{
+		name: d.name,
+		tags: joinStrings(d.prefix, []string{
+			{{range .Ns}}
+			makeTag(d.keys[{{.}}], tagValueString(v{{.}})),
+			{{ end }}
+		}),
+	}
 }
 `))
 
@@ -128,16 +131,15 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	}
 }
 
-func (h *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Bind(m *Metrics {{range .Ns}}, v{{.}} V{{.}} {{end}}) *{{.Metric}} {
-	return &{{.Metric}}{
-		m:    m,
-		name: h.name,
+func (d *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}} v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def {
+	return &{{.Metric}}Def{
+		name: d.name,
 		tags: []string{
 			{{range .Ns}}
-			makeTag(h.keys[{{.}}], tagValueString(v{{.}})),
+			makeTag(d.keys[{{.}}], tagValueString(v{{.}})),
 			{{ end }}
 		},
-		sampleRate: h.sampleRate,
+		sampleRate: d.sampleRate,
 	}
 }
 `))
@@ -164,9 +166,8 @@ func New{{.Metric}}Def{{.N}}[K any, {{range .Ns}} V{{.}} TagValue, {{end}}](
 	}
 }
 
-func (h *{{.Metric}}Def{{.N}}[K, {{range .Ns}} V{{.}}, {{end}}]) Bind(m *Metrics {{range .Ns}}, v{{.}} V{{.}} {{end}}) *{{.Metric}}[K] {
-	return &{{.Metric}}[K]{
-		m:    m,
+func (h *{{.Metric}}Def{{.N}}[K, {{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}} v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def[K] {
+	return &{{.Metric}}Def[K]{
 		name: h.name,
 		tags: []string{
 			{{range .Ns}}
@@ -179,7 +180,9 @@ func (h *{{.Metric}}Def{{.N}}[K, {{range .Ns}} V{{.}}, {{end}}]) Bind(m *Metrics
 `))
 
 var bindPrefixTmpl = template.Must(template.New("name").Parse(`
-func (h *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) BindPrefix{{.K}}({{range .Ks}} v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}] {
+// Prefix{{.K}} sets the value of the first {{.K}} tags, returning a {{.Metric}}Def{{.NMinusK}} that
+// can be used to set the rest.
+func (h *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Prefix{{.K}}({{range .Ks}} v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}] {
 	return &{{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}]{
 		name: h.name,
 		prefix: []string{

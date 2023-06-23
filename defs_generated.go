@@ -21,16 +21,21 @@ func NewCounterDef2[V0 TagValue, V1 TagValue](
 	}
 }
 
-func (h *CounterDef2[V0, V1]) Bind(m *Metrics, v0 V0, v1 V1) *Counter {
-	return m.counter(h.name, joinStrings(h.prefix, []string{
+func (d *CounterDef2[V0, V1]) Values(v0 V0, v1 V1) *CounterDef {
+	return &CounterDef{
+		name: d.name,
+		tags: joinStrings(d.prefix, []string{
 
-		makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-		makeTag(h.keys[1], tagValueString(v1)),
-	}))
+			makeTag(d.keys[1], tagValueString(v1)),
+		}),
+	}
 }
 
-func (h *CounterDef2[V0, V1]) BindPrefix1(v0 V0) *CounterDef1[V1] {
+// Prefix1 sets the value of the first 1 tags, returning a CounterDef1 that
+// can be used to set the rest.
+func (h *CounterDef2[V0, V1]) Prefix1(v0 V0) *CounterDef1[V1] {
 	return &CounterDef1[V1]{
 		name: h.name,
 		prefix: []string{
@@ -60,18 +65,23 @@ func NewCounterDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	}
 }
 
-func (h *CounterDef3[V0, V1, V2]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2) *Counter {
-	return m.counter(h.name, joinStrings(h.prefix, []string{
+func (d *CounterDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *CounterDef {
+	return &CounterDef{
+		name: d.name,
+		tags: joinStrings(d.prefix, []string{
 
-		makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-		makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-		makeTag(h.keys[2], tagValueString(v2)),
-	}))
+			makeTag(d.keys[2], tagValueString(v2)),
+		}),
+	}
 }
 
-func (h *CounterDef3[V0, V1, V2]) BindPrefix1(v0 V0) *CounterDef2[V1, V2] {
+// Prefix1 sets the value of the first 1 tags, returning a CounterDef2 that
+// can be used to set the rest.
+func (h *CounterDef3[V0, V1, V2]) Prefix1(v0 V0) *CounterDef2[V1, V2] {
 	return &CounterDef2[V1, V2]{
 		name: h.name,
 		prefix: []string{
@@ -82,7 +92,9 @@ func (h *CounterDef3[V0, V1, V2]) BindPrefix1(v0 V0) *CounterDef2[V1, V2] {
 	}
 }
 
-func (h *CounterDef3[V0, V1, V2]) BindPrefix2(v0 V0, v1 V1) *CounterDef1[V2] {
+// Prefix2 sets the value of the first 2 tags, returning a CounterDef1 that
+// can be used to set the rest.
+func (h *CounterDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) *CounterDef1[V2] {
 	return &CounterDef1[V2]{
 		name: h.name,
 		prefix: []string{
@@ -114,20 +126,25 @@ func NewCounterDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	}
 }
 
-func (h *CounterDef4[V0, V1, V2, V3]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2, v3 V3) *Counter {
-	return m.counter(h.name, joinStrings(h.prefix, []string{
+func (d *CounterDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *CounterDef {
+	return &CounterDef{
+		name: d.name,
+		tags: joinStrings(d.prefix, []string{
 
-		makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-		makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-		makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 
-		makeTag(h.keys[3], tagValueString(v3)),
-	}))
+			makeTag(d.keys[3], tagValueString(v3)),
+		}),
+	}
 }
 
-func (h *CounterDef4[V0, V1, V2, V3]) BindPrefix1(v0 V0) *CounterDef3[V1, V2, V3] {
+// Prefix1 sets the value of the first 1 tags, returning a CounterDef3 that
+// can be used to set the rest.
+func (h *CounterDef4[V0, V1, V2, V3]) Prefix1(v0 V0) *CounterDef3[V1, V2, V3] {
 	return &CounterDef3[V1, V2, V3]{
 		name: h.name,
 		prefix: []string{
@@ -138,7 +155,9 @@ func (h *CounterDef4[V0, V1, V2, V3]) BindPrefix1(v0 V0) *CounterDef3[V1, V2, V3
 	}
 }
 
-func (h *CounterDef4[V0, V1, V2, V3]) BindPrefix2(v0 V0, v1 V1) *CounterDef2[V2, V3] {
+// Prefix2 sets the value of the first 2 tags, returning a CounterDef2 that
+// can be used to set the rest.
+func (h *CounterDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) *CounterDef2[V2, V3] {
 	return &CounterDef2[V2, V3]{
 		name: h.name,
 		prefix: []string{
@@ -151,7 +170,9 @@ func (h *CounterDef4[V0, V1, V2, V3]) BindPrefix2(v0 V0, v1 V1) *CounterDef2[V2,
 	}
 }
 
-func (h *CounterDef4[V0, V1, V2, V3]) BindPrefix3(v0 V0, v1 V1, v2 V2) *CounterDef1[V3] {
+// Prefix3 sets the value of the first 3 tags, returning a CounterDef1 that
+// can be used to set the rest.
+func (h *CounterDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) *CounterDef1[V3] {
 	return &CounterDef1[V3]{
 		name: h.name,
 		prefix: []string{
@@ -185,22 +206,27 @@ func NewCounterDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagVa
 	}
 }
 
-func (h *CounterDef5[V0, V1, V2, V3, V4]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *Counter {
-	return m.counter(h.name, joinStrings(h.prefix, []string{
+func (d *CounterDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *CounterDef {
+	return &CounterDef{
+		name: d.name,
+		tags: joinStrings(d.prefix, []string{
 
-		makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-		makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-		makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 
-		makeTag(h.keys[3], tagValueString(v3)),
+			makeTag(d.keys[3], tagValueString(v3)),
 
-		makeTag(h.keys[4], tagValueString(v4)),
-	}))
+			makeTag(d.keys[4], tagValueString(v4)),
+		}),
+	}
 }
 
-func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix1(v0 V0) *CounterDef4[V1, V2, V3, V4] {
+// Prefix1 sets the value of the first 1 tags, returning a CounterDef4 that
+// can be used to set the rest.
+func (h *CounterDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) *CounterDef4[V1, V2, V3, V4] {
 	return &CounterDef4[V1, V2, V3, V4]{
 		name: h.name,
 		prefix: []string{
@@ -211,7 +237,9 @@ func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix1(v0 V0) *CounterDef4[V1, V2
 	}
 }
 
-func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix2(v0 V0, v1 V1) *CounterDef3[V2, V3, V4] {
+// Prefix2 sets the value of the first 2 tags, returning a CounterDef3 that
+// can be used to set the rest.
+func (h *CounterDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) *CounterDef3[V2, V3, V4] {
 	return &CounterDef3[V2, V3, V4]{
 		name: h.name,
 		prefix: []string{
@@ -224,7 +252,9 @@ func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix2(v0 V0, v1 V1) *CounterDef3
 	}
 }
 
-func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix3(v0 V0, v1 V1, v2 V2) *CounterDef2[V3, V4] {
+// Prefix3 sets the value of the first 3 tags, returning a CounterDef2 that
+// can be used to set the rest.
+func (h *CounterDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) *CounterDef2[V3, V4] {
 	return &CounterDef2[V3, V4]{
 		name: h.name,
 		prefix: []string{
@@ -239,7 +269,9 @@ func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix3(v0 V0, v1 V1, v2 V2) *Coun
 	}
 }
 
-func (h *CounterDef5[V0, V1, V2, V3, V4]) BindPrefix4(v0 V0, v1 V1, v2 V2, v3 V3) *CounterDef1[V4] {
+// Prefix4 sets the value of the first 4 tags, returning a CounterDef1 that
+// can be used to set the rest.
+func (h *CounterDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3) *CounterDef1[V4] {
 	return &CounterDef1[V4]{
 		name: h.name,
 		prefix: []string{
@@ -275,16 +307,21 @@ func NewGaugeDef2[V0 TagValue, V1 TagValue](
 	}
 }
 
-func (h *GaugeDef2[V0, V1]) Bind(m *Metrics, v0 V0, v1 V1) *Gauge {
-	return m.gauge(h.name, joinStrings(h.prefix, []string{
+func (d *GaugeDef2[V0, V1]) Values(v0 V0, v1 V1) *GaugeDef {
+	return &GaugeDef{
+		name: d.name,
+		tags: joinStrings(d.prefix, []string{
 
-		makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-		makeTag(h.keys[1], tagValueString(v1)),
-	}))
+			makeTag(d.keys[1], tagValueString(v1)),
+		}),
+	}
 }
 
-func (h *GaugeDef2[V0, V1]) BindPrefix1(v0 V0) *GaugeDef1[V1] {
+// Prefix1 sets the value of the first 1 tags, returning a GaugeDef1 that
+// can be used to set the rest.
+func (h *GaugeDef2[V0, V1]) Prefix1(v0 V0) *GaugeDef1[V1] {
 	return &GaugeDef1[V1]{
 		name: h.name,
 		prefix: []string{
@@ -314,18 +351,23 @@ func NewGaugeDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	}
 }
 
-func (h *GaugeDef3[V0, V1, V2]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2) *Gauge {
-	return m.gauge(h.name, joinStrings(h.prefix, []string{
+func (d *GaugeDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *GaugeDef {
+	return &GaugeDef{
+		name: d.name,
+		tags: joinStrings(d.prefix, []string{
 
-		makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-		makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-		makeTag(h.keys[2], tagValueString(v2)),
-	}))
+			makeTag(d.keys[2], tagValueString(v2)),
+		}),
+	}
 }
 
-func (h *GaugeDef3[V0, V1, V2]) BindPrefix1(v0 V0) *GaugeDef2[V1, V2] {
+// Prefix1 sets the value of the first 1 tags, returning a GaugeDef2 that
+// can be used to set the rest.
+func (h *GaugeDef3[V0, V1, V2]) Prefix1(v0 V0) *GaugeDef2[V1, V2] {
 	return &GaugeDef2[V1, V2]{
 		name: h.name,
 		prefix: []string{
@@ -336,7 +378,9 @@ func (h *GaugeDef3[V0, V1, V2]) BindPrefix1(v0 V0) *GaugeDef2[V1, V2] {
 	}
 }
 
-func (h *GaugeDef3[V0, V1, V2]) BindPrefix2(v0 V0, v1 V1) *GaugeDef1[V2] {
+// Prefix2 sets the value of the first 2 tags, returning a GaugeDef1 that
+// can be used to set the rest.
+func (h *GaugeDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) *GaugeDef1[V2] {
 	return &GaugeDef1[V2]{
 		name: h.name,
 		prefix: []string{
@@ -368,20 +412,25 @@ func NewGaugeDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	}
 }
 
-func (h *GaugeDef4[V0, V1, V2, V3]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2, v3 V3) *Gauge {
-	return m.gauge(h.name, joinStrings(h.prefix, []string{
+func (d *GaugeDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *GaugeDef {
+	return &GaugeDef{
+		name: d.name,
+		tags: joinStrings(d.prefix, []string{
 
-		makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-		makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-		makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 
-		makeTag(h.keys[3], tagValueString(v3)),
-	}))
+			makeTag(d.keys[3], tagValueString(v3)),
+		}),
+	}
 }
 
-func (h *GaugeDef4[V0, V1, V2, V3]) BindPrefix1(v0 V0) *GaugeDef3[V1, V2, V3] {
+// Prefix1 sets the value of the first 1 tags, returning a GaugeDef3 that
+// can be used to set the rest.
+func (h *GaugeDef4[V0, V1, V2, V3]) Prefix1(v0 V0) *GaugeDef3[V1, V2, V3] {
 	return &GaugeDef3[V1, V2, V3]{
 		name: h.name,
 		prefix: []string{
@@ -392,7 +441,9 @@ func (h *GaugeDef4[V0, V1, V2, V3]) BindPrefix1(v0 V0) *GaugeDef3[V1, V2, V3] {
 	}
 }
 
-func (h *GaugeDef4[V0, V1, V2, V3]) BindPrefix2(v0 V0, v1 V1) *GaugeDef2[V2, V3] {
+// Prefix2 sets the value of the first 2 tags, returning a GaugeDef2 that
+// can be used to set the rest.
+func (h *GaugeDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) *GaugeDef2[V2, V3] {
 	return &GaugeDef2[V2, V3]{
 		name: h.name,
 		prefix: []string{
@@ -405,7 +456,9 @@ func (h *GaugeDef4[V0, V1, V2, V3]) BindPrefix2(v0 V0, v1 V1) *GaugeDef2[V2, V3]
 	}
 }
 
-func (h *GaugeDef4[V0, V1, V2, V3]) BindPrefix3(v0 V0, v1 V1, v2 V2) *GaugeDef1[V3] {
+// Prefix3 sets the value of the first 3 tags, returning a GaugeDef1 that
+// can be used to set the rest.
+func (h *GaugeDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) *GaugeDef1[V3] {
 	return &GaugeDef1[V3]{
 		name: h.name,
 		prefix: []string{
@@ -439,22 +492,27 @@ func NewGaugeDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValu
 	}
 }
 
-func (h *GaugeDef5[V0, V1, V2, V3, V4]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *Gauge {
-	return m.gauge(h.name, joinStrings(h.prefix, []string{
+func (d *GaugeDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *GaugeDef {
+	return &GaugeDef{
+		name: d.name,
+		tags: joinStrings(d.prefix, []string{
 
-		makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-		makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-		makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 
-		makeTag(h.keys[3], tagValueString(v3)),
+			makeTag(d.keys[3], tagValueString(v3)),
 
-		makeTag(h.keys[4], tagValueString(v4)),
-	}))
+			makeTag(d.keys[4], tagValueString(v4)),
+		}),
+	}
 }
 
-func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix1(v0 V0) *GaugeDef4[V1, V2, V3, V4] {
+// Prefix1 sets the value of the first 1 tags, returning a GaugeDef4 that
+// can be used to set the rest.
+func (h *GaugeDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) *GaugeDef4[V1, V2, V3, V4] {
 	return &GaugeDef4[V1, V2, V3, V4]{
 		name: h.name,
 		prefix: []string{
@@ -465,7 +523,9 @@ func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix1(v0 V0) *GaugeDef4[V1, V2, V3
 	}
 }
 
-func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix2(v0 V0, v1 V1) *GaugeDef3[V2, V3, V4] {
+// Prefix2 sets the value of the first 2 tags, returning a GaugeDef3 that
+// can be used to set the rest.
+func (h *GaugeDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) *GaugeDef3[V2, V3, V4] {
 	return &GaugeDef3[V2, V3, V4]{
 		name: h.name,
 		prefix: []string{
@@ -478,7 +538,9 @@ func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix2(v0 V0, v1 V1) *GaugeDef3[V2,
 	}
 }
 
-func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix3(v0 V0, v1 V1, v2 V2) *GaugeDef2[V3, V4] {
+// Prefix3 sets the value of the first 3 tags, returning a GaugeDef2 that
+// can be used to set the rest.
+func (h *GaugeDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) *GaugeDef2[V3, V4] {
 	return &GaugeDef2[V3, V4]{
 		name: h.name,
 		prefix: []string{
@@ -493,7 +555,9 @@ func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix3(v0 V0, v1 V1, v2 V2) *GaugeD
 	}
 }
 
-func (h *GaugeDef5[V0, V1, V2, V3, V4]) BindPrefix4(v0 V0, v1 V1, v2 V2, v3 V3) *GaugeDef1[V4] {
+// Prefix4 sets the value of the first 4 tags, returning a GaugeDef1 that
+// can be used to set the rest.
+func (h *GaugeDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3) *GaugeDef1[V4] {
 	return &GaugeDef1[V4]{
 		name: h.name,
 		prefix: []string{
@@ -531,17 +595,16 @@ func NewHistogramDef2[V0 TagValue, V1 TagValue](
 	}
 }
 
-func (h *HistogramDef2[V0, V1]) Bind(m *Metrics, v0 V0, v1 V1) *Histogram {
-	return &Histogram{
-		m:    m,
-		name: h.name,
+func (d *HistogramDef2[V0, V1]) Values(v0 V0, v1 V1) *HistogramDef {
+	return &HistogramDef{
+		name: d.name,
 		tags: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 		},
-		sampleRate: h.sampleRate,
+		sampleRate: d.sampleRate,
 	}
 }
 
@@ -566,19 +629,18 @@ func NewHistogramDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	}
 }
 
-func (h *HistogramDef3[V0, V1, V2]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2) *Histogram {
-	return &Histogram{
-		m:    m,
-		name: h.name,
+func (d *HistogramDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *HistogramDef {
+	return &HistogramDef{
+		name: d.name,
 		tags: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-			makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 		},
-		sampleRate: h.sampleRate,
+		sampleRate: d.sampleRate,
 	}
 }
 
@@ -603,21 +665,20 @@ func NewHistogramDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	}
 }
 
-func (h *HistogramDef4[V0, V1, V2, V3]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2, v3 V3) *Histogram {
-	return &Histogram{
-		m:    m,
-		name: h.name,
+func (d *HistogramDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *HistogramDef {
+	return &HistogramDef{
+		name: d.name,
 		tags: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-			makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 
-			makeTag(h.keys[3], tagValueString(v3)),
+			makeTag(d.keys[3], tagValueString(v3)),
 		},
-		sampleRate: h.sampleRate,
+		sampleRate: d.sampleRate,
 	}
 }
 
@@ -642,23 +703,22 @@ func NewHistogramDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 Tag
 	}
 }
 
-func (h *HistogramDef5[V0, V1, V2, V3, V4]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *Histogram {
-	return &Histogram{
-		m:    m,
-		name: h.name,
+func (d *HistogramDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *HistogramDef {
+	return &HistogramDef{
+		name: d.name,
 		tags: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-			makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 
-			makeTag(h.keys[3], tagValueString(v3)),
+			makeTag(d.keys[3], tagValueString(v3)),
 
-			makeTag(h.keys[4], tagValueString(v4)),
+			makeTag(d.keys[4], tagValueString(v4)),
 		},
-		sampleRate: h.sampleRate,
+		sampleRate: d.sampleRate,
 	}
 }
 
@@ -683,17 +743,16 @@ func NewDistributionDef2[V0 TagValue, V1 TagValue](
 	}
 }
 
-func (h *DistributionDef2[V0, V1]) Bind(m *Metrics, v0 V0, v1 V1) *Distribution {
-	return &Distribution{
-		m:    m,
-		name: h.name,
+func (d *DistributionDef2[V0, V1]) Values(v0 V0, v1 V1) *DistributionDef {
+	return &DistributionDef{
+		name: d.name,
 		tags: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 		},
-		sampleRate: h.sampleRate,
+		sampleRate: d.sampleRate,
 	}
 }
 
@@ -718,19 +777,18 @@ func NewDistributionDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	}
 }
 
-func (h *DistributionDef3[V0, V1, V2]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2) *Distribution {
-	return &Distribution{
-		m:    m,
-		name: h.name,
+func (d *DistributionDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *DistributionDef {
+	return &DistributionDef{
+		name: d.name,
 		tags: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-			makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 		},
-		sampleRate: h.sampleRate,
+		sampleRate: d.sampleRate,
 	}
 }
 
@@ -755,21 +813,20 @@ func NewDistributionDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	}
 }
 
-func (h *DistributionDef4[V0, V1, V2, V3]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2, v3 V3) *Distribution {
-	return &Distribution{
-		m:    m,
-		name: h.name,
+func (d *DistributionDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *DistributionDef {
+	return &DistributionDef{
+		name: d.name,
 		tags: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-			makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 
-			makeTag(h.keys[3], tagValueString(v3)),
+			makeTag(d.keys[3], tagValueString(v3)),
 		},
-		sampleRate: h.sampleRate,
+		sampleRate: d.sampleRate,
 	}
 }
 
@@ -794,23 +851,22 @@ func NewDistributionDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 
 	}
 }
 
-func (h *DistributionDef5[V0, V1, V2, V3, V4]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *Distribution {
-	return &Distribution{
-		m:    m,
-		name: h.name,
+func (d *DistributionDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *DistributionDef {
+	return &DistributionDef{
+		name: d.name,
 		tags: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-			makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 
-			makeTag(h.keys[3], tagValueString(v3)),
+			makeTag(d.keys[3], tagValueString(v3)),
 
-			makeTag(h.keys[4], tagValueString(v4)),
+			makeTag(d.keys[4], tagValueString(v4)),
 		},
-		sampleRate: h.sampleRate,
+		sampleRate: d.sampleRate,
 	}
 }
 
@@ -835,9 +891,8 @@ func NewSetDef2[K any, V0 TagValue, V1 TagValue](
 	}
 }
 
-func (h *SetDef2[K, V0, V1]) Bind(m *Metrics, v0 V0, v1 V1) *Set[K] {
-	return &Set[K]{
-		m:    m,
+func (h *SetDef2[K, V0, V1]) Values(v0 V0, v1 V1) *SetDef[K] {
+	return &SetDef[K]{
 		name: h.name,
 		tags: []string{
 
@@ -870,9 +925,8 @@ func NewSetDef3[K any, V0 TagValue, V1 TagValue, V2 TagValue](
 	}
 }
 
-func (h *SetDef3[K, V0, V1, V2]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2) *Set[K] {
-	return &Set[K]{
-		m:    m,
+func (h *SetDef3[K, V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *SetDef[K] {
+	return &SetDef[K]{
 		name: h.name,
 		tags: []string{
 
@@ -907,9 +961,8 @@ func NewSetDef4[K any, V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	}
 }
 
-func (h *SetDef4[K, V0, V1, V2, V3]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2, v3 V3) *Set[K] {
-	return &Set[K]{
-		m:    m,
+func (h *SetDef4[K, V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *SetDef[K] {
+	return &SetDef[K]{
 		name: h.name,
 		tags: []string{
 
@@ -946,9 +999,8 @@ func NewSetDef5[K any, V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 Ta
 	}
 }
 
-func (h *SetDef5[K, V0, V1, V2, V3, V4]) Bind(m *Metrics, v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *Set[K] {
-	return &Set[K]{
-		m:    m,
+func (h *SetDef5[K, V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *SetDef[K] {
+	return &SetDef[K]{
 		name: h.name,
 		tags: []string{
 

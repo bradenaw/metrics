@@ -2,6 +2,7 @@ package metrics
 
 type CounterDef struct {
 	name string
+	tags []string
 }
 
 func NewCounterDef(
@@ -15,9 +16,9 @@ func NewCounterDef(
 	}
 }
 
-// Bind binds a set of tag values to this definition and returns the resulting Counter.
+// Bind binds the metric definition to a *Metrics used to output, returning the metric.
 func (d *CounterDef) Bind(m *Metrics) *Counter {
-	return m.counter(d.name, nil)
+	return m.counter(d.name, d.tags)
 }
 
 type CounterDef1[V0 TagValue] struct {
@@ -39,15 +40,18 @@ func NewCounterDef1[V0 TagValue](
 	}
 }
 
-// Bind binds a set of tag values to this definition and returns the resulting Counter.
-func (d *CounterDef1[V0]) Bind(m *Metrics, v0 V0) *Counter {
-	return m.counter(d.name, joinStrings(d.prefix, []string{
-		makeTag(d.keys[0], tagValueString(v0)),
-	}))
+func (d *CounterDef1[V0]) Values(v0 V0) *CounterDef {
+	return &CounterDef{
+		name: d.name,
+		tags: joinStrings(d.prefix, []string{
+			makeTag(d.keys[0], tagValueString(v0)),
+		}),
+	}
 }
 
 type GaugeDef struct {
 	name string
+	tags []string
 }
 
 func NewGaugeDef(
@@ -61,8 +65,9 @@ func NewGaugeDef(
 	}
 }
 
+// Bind binds the metric definition to a *Metrics used to output, returning the metric.
 func (d *GaugeDef) Bind(m *Metrics) *Gauge {
-	return m.gauge(d.name, nil)
+	return m.gauge(d.name, d.tags)
 }
 
 type GaugeDef1[V0 TagValue] struct {
@@ -84,15 +89,18 @@ func NewGaugeDef1[V0 TagValue](
 	}
 }
 
-func (d *GaugeDef1[V0]) Bind(m *Metrics, v0 V0) *Gauge {
-	return m.gauge(d.name, joinStrings(d.prefix, []string{
-		makeTag(d.keys[0], tagValueString(v0)),
-	}))
+func (d *GaugeDef1[V0]) Values(v0 V0) *GaugeDef {
+	return &GaugeDef{
+		name: d.name,
+		tags: joinStrings(d.prefix, []string{
+			makeTag(d.keys[0], tagValueString(v0)),
+		}),
+	}
 }
 
 type HistogramDef struct {
 	name       string
-	key        string
+	tags       []string
 	sampleRate float64
 }
 
@@ -100,22 +108,21 @@ func NewHistogramDef(
 	name string,
 	description string,
 	unit Unit,
-	key string,
 	sampleRate float64,
 ) *HistogramDef {
 	registerDef(histogramType, name, unit, description)
 	return &HistogramDef{
 		name:       name,
-		key:        key,
 		sampleRate: sampleRate,
 	}
 }
 
+// Bind binds the metric definition to a *Metrics used to output, returning the metric.
 func (h *HistogramDef) Bind(m *Metrics) *Histogram {
 	return &Histogram{
 		m:          m,
 		name:       h.name,
-		tags:       nil,
+		tags:       h.tags,
 		sampleRate: h.sampleRate,
 	}
 }
@@ -141,9 +148,8 @@ func NewHistogramDef1[V0 TagValue](
 	}
 }
 
-func (h *HistogramDef1[V0]) Bind(m *Metrics, v0 V0) *Histogram {
-	return &Histogram{
-		m:    m,
+func (h *HistogramDef1[V0]) Values(v0 V0) *HistogramDef {
+	return &HistogramDef{
 		name: h.name,
 		tags: []string{
 			makeTag(h.key, tagValueString(v0)),
@@ -154,7 +160,7 @@ func (h *HistogramDef1[V0]) Bind(m *Metrics, v0 V0) *Histogram {
 
 type DistributionDef struct {
 	name       string
-	key        string
+	tags       []string
 	sampleRate float64
 }
 
@@ -162,22 +168,21 @@ func NewDistributionDef(
 	name string,
 	description string,
 	unit Unit,
-	key string,
 	sampleRate float64,
 ) *DistributionDef {
 	registerDef(distributionType, name, unit, description)
 	return &DistributionDef{
 		name:       name,
-		key:        key,
 		sampleRate: sampleRate,
 	}
 }
 
+// Bind binds the metric definition to a *Metrics used to output, returning the metric.
 func (h *DistributionDef) Bind(m *Metrics) *Distribution {
 	return &Distribution{
 		m:          m,
 		name:       h.name,
-		tags:       nil,
+		tags:       h.tags,
 		sampleRate: h.sampleRate,
 	}
 }
@@ -203,9 +208,8 @@ func NewDistributionDef1[V0 TagValue](
 	}
 }
 
-func (h *DistributionDef1[V0]) Bind(m *Metrics, v0 V0) *Distribution {
-	return &Distribution{
-		m:    m,
+func (h *DistributionDef1[V0]) Values(v0 V0) *DistributionDef {
+	return &DistributionDef{
 		name: h.name,
 		tags: []string{
 			makeTag(h.key, tagValueString(v0)),
@@ -217,6 +221,7 @@ func (h *DistributionDef1[V0]) Bind(m *Metrics, v0 V0) *Distribution {
 type SetDef[K any] struct {
 	name       string
 	key        string
+	tags       []string
 	sampleRate float64
 }
 
@@ -224,22 +229,21 @@ func NewSetDef[K any](
 	name string,
 	description string,
 	unit Unit,
-	key string,
 	sampleRate float64,
 ) *SetDef[K] {
 	registerDef(setType, name, unit, description)
 	return &SetDef[K]{
 		name:       name,
-		key:        key,
 		sampleRate: sampleRate,
 	}
 }
 
+// Bind binds the metric definition to a *Metrics used to output, returning the metric.
 func (h *SetDef[K]) Bind(m *Metrics) *Set[K] {
 	return &Set[K]{
 		m:          m,
 		name:       h.name,
-		tags:       nil,
+		tags:       h.tags,
 		sampleRate: h.sampleRate,
 	}
 }
@@ -265,9 +269,8 @@ func NewSetDef1[K any, V0 TagValue](
 	}
 }
 
-func (h *SetDef1[K, V0]) Bind(m *Metrics, v0 V0) *Set[K] {
-	return &Set[K]{
-		m:    m,
+func (h *SetDef1[K, V0]) Values(v0 V0) *SetDef[K] {
+	return &SetDef[K]{
 		name: h.name,
 		tags: []string{
 			makeTag(h.key, tagValueString(v0)),
