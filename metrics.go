@@ -6,10 +6,10 @@
 //
 // For each metric type of Gauge, Count, Histogram, Distribution, and Set, there are a set of
 // NewMDefY methods where M is the metric type and Y is the number of tags. A Def can be bound to a
-// set of tags with Bind(), producing a metric that can be logged to. It's intended for high
-// throughput metrics to hold onto the metric produced by Bind(). By convention, calls to NewMDefY
-// should be done at init time, ideally in a var block of a metrics.go file with names as full
-// literals so that metrics are easily greppable.
+// set of tags with Values() and then bound to a Metrics with Bind(), producing a metric that can be
+// logged to. It's intended for high throughput metrics to hold onto the metric produced by Bind().
+// By convention, calls to NewMDefY should be done at init time, ideally in a var block of a
+// metrics.go file with names as full literals so that metrics are easily greppable.
 package metrics
 
 import (
@@ -38,6 +38,10 @@ const (
 
 // Publisher is the subset of github.com/DataDog/datadog-go/v5/statsd.ClientInterface used by this
 // package.
+//
+// Publisher should _not_ have client-side aggregation enabled because this package also does
+// aggregation. It is enabled by default in datadog-go/v5, so should be disabled with
+// statsd.WithoutClientSideAggregation().
 type Publisher interface {
 	Gauge(name string, value float64, tags []string, rate float64) error
 	Count(name string, value int64, tags []string, rate float64) error

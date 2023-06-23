@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/DataDog/datadog-go/v5/statsd"
 	"github.com/bradenaw/metrics"
 )
 
@@ -39,7 +38,9 @@ func main() {
 		os.Exit(0)
 	}
 
-	m := metrics.New(&statsd.NoOpClient{})
+	// In reality, would be
+	//   metrics.New(statsd.New("addr-here", statsd.WithoutClientSideAggregation()))
+	m := metrics.NoOpMetrics
 	defer m.Flush()
 
 	runCount.Bind(m).Add(1)
