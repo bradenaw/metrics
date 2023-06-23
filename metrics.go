@@ -7,7 +7,10 @@
 // For each metric type of Gauge, Count, Histogram, Distribution, and Set, there are a set of
 // NewMDefY methods where M is the metric type and Y is the number of tags. A Def can be bound to a
 // set of tags with Values() and then bound to a Metrics with Bind(), producing a metric that can be
-// logged to. It's intended for high throughput metrics to hold onto the metric produced by Bind().
+// logged to. It's intended for high throughput metrics to hold onto the metric produced by Bind(),
+// because then they can avoid allocation and contention reconstructing the tagset and finding the
+// aggregated value in a map.
+//
 // By convention, calls to NewMDefY should be done at init time, ideally in a var block of a
 // metrics.go file with names as full literals so that metrics are easily greppable.
 package metrics

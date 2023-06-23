@@ -48,9 +48,9 @@ func main() {
 
 	f := &frobber{
 		// logs as function_calls with tag name:Foo
-		fooCalls: functionCallCount.Bind(m, "Foo"),
+		fooCalls: functionCallCount.Values("Foo").Bind(m),
 		// logs as function_calls with tag name:Bar
-		barCalls: functionCallCount.Bind(m, "Bar"),
+		barCalls: functionCallCount.Values("Bar").Bind(m),
 	}
 	f.Foo()
 	f.Bar()
