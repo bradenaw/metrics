@@ -20,6 +20,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"regexp"
+	"runtime"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -327,17 +329,59 @@ type metadata struct {
 	unit         Unit
 	description  string
 	multipleDefs atomic.Bool
+	file         string
+	line         int
 }
 
 var defs xsync.Map[string, *metadata]
 
+var nameRegexp = regexp.MustCompile("^[a-z][a-zA-Z0-9_.]{0,199}")
+
 func registerDef(metricType metricType, name string, unit Unit, description string) {
+	pc, file, line, ok := runtime.Caller(2)
+
+	if !nameRegexp.MatchString(name) {
+		panic(fmt.Sprintf(
+			"metric names must follow https://docs.datadoghq.com/metrics/custom_metrics/#naming-custom-metrics:\n"+
+				"%s defined at %s:%d",
+			name, file, line,
+		))
+	}
+
 	d, loaded := defs.LoadOrStore(name, &metadata{
 		metricType:  metricType,
 		name:        name,
 		unit:        unit,
 		description: description,
+		file:        file,
+		line:        line,
 	})
+
+	if ok {
+		fn := runtime.FuncForPC(pc)
+		if strings.HasSuffix(fn.Name(), ".init") {
+			if !strings.HasSuffix(file, "/metrics.go") {
+				panic(fmt.Sprintf(
+					"metric definitions must be defined in init() or a top-level var block of a "+
+						"file named metrics.go\n\n"+
+						"metric %s defined at %s:%d",
+					name, file, line,
+				))
+			}
+			if loaded {
+				panic(fmt.Sprintf(
+					"multiple definitions for metric %s:\n"+
+						"\t%s:%d\n"+
+						"\t%s:%d",
+					name,
+					d.file, d.line,
+					file, line,
+				))
+			}
+		}
+	}
+	// Would be nice to disallow this but also probably shouldn't crash the process on purpose past
+	// init time.
 	if loaded {
 		d.multipleDefs.Store(true)
 	}
