@@ -145,29 +145,29 @@ func (d *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns
 `))
 
 var setTmpl = template.Must(template.New("name").Parse(`
-type {{.Metric}}Def{{.N}}[K any, {{range .Ns}} V{{.}} TagValue, {{end}}] struct {
+type {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}] struct {
 	name       string
 	keys       [{{.N}}]string
 	sampleRate float64
 }
 
-func New{{.Metric}}Def{{.N}}[K any, {{range .Ns}} V{{.}} TagValue, {{end}}](
+func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	name string,
 	description string,
 	unit Unit,
 	keys [{{.N}}]string,
 	sampleRate float64,
-) *{{.Metric}}Def{{.N}}[K, {{range .Ns}} V{{.}}, {{end}}] {
+) *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}] {
 	registerDef({{.MetricLower}}Type, name, unit, description)
-	return &{{.Metric}}Def{{.N}}[K, {{range .Ns}} V{{.}}, {{end}}]{
+	return &{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
 	}
 }
 
-func (h *{{.Metric}}Def{{.N}}[K, {{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}} v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def[K] {
-	return &{{.Metric}}Def[K]{
+func (h *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}} v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def {
+	return &{{.Metric}}Def{
 		name: h.name,
 		tags: []string{
 			{{range .Ns}}

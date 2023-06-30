@@ -5,13 +5,13 @@ import (
 )
 
 var (
-	runCount = metrics.NewCounterDef(
+	runCounterDef = metrics.NewCounterDef(
 		"runs",
 		"logged every time this process is started",
 		metrics.UnitRun,
 	)
 
-	runningGauge = metrics.NewGaugeDef(
+	runningGaugeDef = metrics.NewGaugeDef(
 		"running",
 		"a gauge set to 1 while this process is running, in aggregate shows the total number that "+
 			"are running",
@@ -19,7 +19,7 @@ var (
 	)
 
 	// Defines a counter with one tag, whose key is "name" and whose value is a string.
-	functionCallCount = metrics.NewCounterDef1[string](
+	functionCallCounterDef = metrics.NewCounterDef1[string](
 		"function_calls",
 		"counts the number of time each function is called",
 		metrics.UnitEvent,

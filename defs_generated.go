@@ -870,29 +870,29 @@ func (d *DistributionDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3
 	}
 }
 
-type SetDef2[K any, V0 TagValue, V1 TagValue] struct {
+type SetDef2[V0 TagValue, V1 TagValue] struct {
 	name       string
 	keys       [2]string
 	sampleRate float64
 }
 
-func NewSetDef2[K any, V0 TagValue, V1 TagValue](
+func NewSetDef2[V0 TagValue, V1 TagValue](
 	name string,
 	description string,
 	unit Unit,
 	keys [2]string,
 	sampleRate float64,
-) *SetDef2[K, V0, V1] {
+) *SetDef2[V0, V1] {
 	registerDef(setType, name, unit, description)
-	return &SetDef2[K, V0, V1]{
+	return &SetDef2[V0, V1]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
 	}
 }
 
-func (h *SetDef2[K, V0, V1]) Values(v0 V0, v1 V1) *SetDef[K] {
-	return &SetDef[K]{
+func (h *SetDef2[V0, V1]) Values(v0 V0, v1 V1) *SetDef {
+	return &SetDef{
 		name: h.name,
 		tags: []string{
 
@@ -904,29 +904,29 @@ func (h *SetDef2[K, V0, V1]) Values(v0 V0, v1 V1) *SetDef[K] {
 	}
 }
 
-type SetDef3[K any, V0 TagValue, V1 TagValue, V2 TagValue] struct {
+type SetDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
 	name       string
 	keys       [3]string
 	sampleRate float64
 }
 
-func NewSetDef3[K any, V0 TagValue, V1 TagValue, V2 TagValue](
+func NewSetDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	name string,
 	description string,
 	unit Unit,
 	keys [3]string,
 	sampleRate float64,
-) *SetDef3[K, V0, V1, V2] {
+) *SetDef3[V0, V1, V2] {
 	registerDef(setType, name, unit, description)
-	return &SetDef3[K, V0, V1, V2]{
+	return &SetDef3[V0, V1, V2]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
 	}
 }
 
-func (h *SetDef3[K, V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *SetDef[K] {
-	return &SetDef[K]{
+func (h *SetDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *SetDef {
+	return &SetDef{
 		name: h.name,
 		tags: []string{
 
@@ -940,29 +940,29 @@ func (h *SetDef3[K, V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *SetDef[K] {
 	}
 }
 
-type SetDef4[K any, V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
+type SetDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
 	name       string
 	keys       [4]string
 	sampleRate float64
 }
 
-func NewSetDef4[K any, V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
+func NewSetDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	name string,
 	description string,
 	unit Unit,
 	keys [4]string,
 	sampleRate float64,
-) *SetDef4[K, V0, V1, V2, V3] {
+) *SetDef4[V0, V1, V2, V3] {
 	registerDef(setType, name, unit, description)
-	return &SetDef4[K, V0, V1, V2, V3]{
+	return &SetDef4[V0, V1, V2, V3]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
 	}
 }
 
-func (h *SetDef4[K, V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *SetDef[K] {
-	return &SetDef[K]{
+func (h *SetDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *SetDef {
+	return &SetDef{
 		name: h.name,
 		tags: []string{
 
@@ -978,29 +978,29 @@ func (h *SetDef4[K, V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *SetDef[
 	}
 }
 
-type SetDef5[K any, V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue] struct {
+type SetDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue] struct {
 	name       string
 	keys       [5]string
 	sampleRate float64
 }
 
-func NewSetDef5[K any, V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue](
+func NewSetDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue](
 	name string,
 	description string,
 	unit Unit,
 	keys [5]string,
 	sampleRate float64,
-) *SetDef5[K, V0, V1, V2, V3, V4] {
+) *SetDef5[V0, V1, V2, V3, V4] {
 	registerDef(setType, name, unit, description)
-	return &SetDef5[K, V0, V1, V2, V3, V4]{
+	return &SetDef5[V0, V1, V2, V3, V4]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
 	}
 }
 
-func (h *SetDef5[K, V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *SetDef[K] {
-	return &SetDef[K]{
+func (h *SetDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *SetDef {
+	return &SetDef{
 		name: h.name,
 		tags: []string{
 

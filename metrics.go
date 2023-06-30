@@ -62,8 +62,11 @@ type Metrics struct {
 	bg       *xsync.Group
 	flushNow func()
 
-	gauges   xsync.Map[metricKey, *Gauge]
-	counters xsync.Map[metricKey, *Counter]
+	gauges        xsync.Map[metricKey, *Gauge]
+	counters      xsync.Map[metricKey, *Counter]
+	histograms    xsync.Map[metricKey, *Histogram]
+	distributions xsync.Map[metricKey, *Distribution]
+	sets          xsync.Map[metricKey, *Set]
 
 	m       sync.Mutex
 	flushed chan struct{}
@@ -130,14 +133,14 @@ func New(p Publisher) *Metrics {
 	return m
 }
 
-func (m *Metrics) gauge(name string, tags []string) *Gauge {
-	k := newMetricKey(name, tags)
+func (m *Metrics) Gauge(d *GaugeDef) *Gauge {
+	k := newMetricKey(d.name, d.tags)
 	g, ok := m.gauges.Load(k)
 	if !ok {
 		g = &Gauge{
 			m:    m,
-			name: name,
-			tags: tags,
+			name: d.name,
+			tags: d.tags,
 		}
 		g.v.Store(math.Float64bits(math.NaN()))
 		g, _ = m.gauges.LoadOrStore(k, g)
@@ -145,16 +148,61 @@ func (m *Metrics) gauge(name string, tags []string) *Gauge {
 	return g
 }
 
-func (m *Metrics) counter(name string, tags []string) *Counter {
-	k := newMetricKey(name, tags)
+func (m *Metrics) Counter(d *CounterDef) *Counter {
+	k := newMetricKey(d.name, d.tags)
 	c, ok := m.counters.Load(k)
 	if !ok {
 		c = &Counter{
 			m:    m,
-			name: name,
-			tags: tags,
+			name: d.name,
+			tags: d.tags,
 		}
 		c, _ = m.counters.LoadOrStore(k, c)
+	}
+	return c
+}
+
+func (m *Metrics) Histogram(d *HistogramDef) *Histogram {
+	k := newMetricKey(d.name, d.tags)
+	c, ok := m.histograms.Load(k)
+	if !ok {
+		c = &Histogram{
+			m:          m,
+			name:       d.name,
+			tags:       d.tags,
+			sampleRate: d.sampleRate,
+		}
+		c, _ = m.histograms.LoadOrStore(k, c)
+	}
+	return c
+}
+
+func (m *Metrics) Distribution(d *DistributionDef) *Distribution {
+	k := newMetricKey(d.name, d.tags)
+	c, ok := m.distributions.Load(k)
+	if !ok {
+		c = &Distribution{
+			m:          m,
+			name:       d.name,
+			tags:       d.tags,
+			sampleRate: d.sampleRate,
+		}
+		c, _ = m.distributions.LoadOrStore(k, c)
+	}
+	return c
+}
+
+func (m *Metrics) Set(d *SetDef) *Set {
+	k := newMetricKey(d.name, d.tags)
+	c, ok := m.sets.Load(k)
+	if !ok {
+		c = &Set{
+			m:          m,
+			name:       d.name,
+			tags:       d.tags,
+			sampleRate: d.sampleRate,
+		}
+		c, _ = m.sets.LoadOrStore(k, c)
 	}
 	return c
 }
@@ -262,15 +310,15 @@ func (h *Distribution) Observe(value float64) {
 	h.m.p.Distribution(h.name, value, h.tags, h.sampleRate)
 }
 
-type Set[K any] struct {
+type Set struct {
 	m          *Metrics
 	name       string
 	tags       []string
 	sampleRate float64
 }
 
-func (s *Set[K]) Observe(value K) {
-	s.m.p.Set(s.name, fmt.Sprint(value), s.tags, s.sampleRate)
+func (s *Set) Observe(value string) {
+	s.m.p.Set(s.name, value, s.tags, s.sampleRate)
 }
 
 // metricKey is used to dedupe metrics so that multiple Bind() calls on a def result in the same

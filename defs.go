@@ -16,11 +16,6 @@ func NewCounterDef(
 	}
 }
 
-// Bind binds the metric definition to a *Metrics used to output, returning the metric.
-func (d *CounterDef) Bind(m *Metrics) *Counter {
-	return m.counter(d.name, d.tags)
-}
-
 type CounterDef1[V0 TagValue] struct {
 	name   string
 	prefix []string
@@ -63,11 +58,6 @@ func NewGaugeDef(
 	return &GaugeDef{
 		name: name,
 	}
-}
-
-// Bind binds the metric definition to a *Metrics used to output, returning the metric.
-func (d *GaugeDef) Bind(m *Metrics) *Gauge {
-	return m.gauge(d.name, d.tags)
 }
 
 type GaugeDef1[V0 TagValue] struct {
@@ -114,16 +104,6 @@ func NewHistogramDef(
 	return &HistogramDef{
 		name:       name,
 		sampleRate: sampleRate,
-	}
-}
-
-// Bind binds the metric definition to a *Metrics used to output, returning the metric.
-func (h *HistogramDef) Bind(m *Metrics) *Histogram {
-	return &Histogram{
-		m:          m,
-		name:       h.name,
-		tags:       h.tags,
-		sampleRate: h.sampleRate,
 	}
 }
 
@@ -177,16 +157,6 @@ func NewDistributionDef(
 	}
 }
 
-// Bind binds the metric definition to a *Metrics used to output, returning the metric.
-func (h *DistributionDef) Bind(m *Metrics) *Distribution {
-	return &Distribution{
-		m:          m,
-		name:       h.name,
-		tags:       h.tags,
-		sampleRate: h.sampleRate,
-	}
-}
-
 type DistributionDef1[V0 TagValue] struct {
 	name       string
 	key        string
@@ -218,29 +188,29 @@ func (h *DistributionDef1[V0]) Values(v0 V0) *DistributionDef {
 	}
 }
 
-type SetDef[K any] struct {
+type SetDef struct {
 	name       string
 	key        string
 	tags       []string
 	sampleRate float64
 }
 
-func NewSetDef[K any](
+func NewSetDef(
 	name string,
 	description string,
 	unit Unit,
 	sampleRate float64,
-) *SetDef[K] {
+) *SetDef {
 	registerDef(setType, name, unit, description)
-	return &SetDef[K]{
+	return &SetDef{
 		name:       name,
 		sampleRate: sampleRate,
 	}
 }
 
 // Bind binds the metric definition to a *Metrics used to output, returning the metric.
-func (h *SetDef[K]) Bind(m *Metrics) *Set[K] {
-	return &Set[K]{
+func (h *SetDef) Bind(m *Metrics) *Set {
+	return &Set{
 		m:          m,
 		name:       h.name,
 		tags:       h.tags,
@@ -248,29 +218,29 @@ func (h *SetDef[K]) Bind(m *Metrics) *Set[K] {
 	}
 }
 
-type SetDef1[K any, V0 TagValue] struct {
+type SetDef1[V0 TagValue] struct {
 	name       string
 	key        string
 	sampleRate float64
 }
 
-func NewSetDef1[K any, V0 TagValue](
+func NewSetDef1[V0 TagValue](
 	name string,
 	description string,
 	unit Unit,
 	key string,
 	sampleRate float64,
-) *SetDef1[K, V0] {
+) *SetDef1[V0] {
 	registerDef(setType, name, unit, description)
-	return &SetDef1[K, V0]{
+	return &SetDef1[V0]{
 		name:       name,
 		key:        key,
 		sampleRate: sampleRate,
 	}
 }
 
-func (h *SetDef1[K, V0]) Values(v0 V0) *SetDef[K] {
-	return &SetDef[K]{
+func (h *SetDef1[V0]) Values(v0 V0) *SetDef {
+	return &SetDef{
 		name: h.name,
 		tags: []string{
 			makeTag(h.key, tagValueString(v0)),

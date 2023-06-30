@@ -43,14 +43,14 @@ func main() {
 	m := metrics.NoOpMetrics
 	defer m.Flush()
 
-	runCount.Bind(m).Add(1)
-	runningGauge.Bind(m).Set(1)
+	m.Counter(runCounterDef).Add(1)
+	m.Gauge(runningGaugeDef).Set(1)
 
 	f := &frobber{
 		// logs as function_calls with tag name:Foo
-		fooCalls: functionCallCount.Values("Foo").Bind(m),
+		fooCalls: m.Counter(functionCallCounterDef.Values("Foo")),
 		// logs as function_calls with tag name:Bar
-		barCalls: functionCallCount.Values("Bar").Bind(m),
+		barCalls: m.Counter(functionCallCounterDef.Values("Bar")),
 	}
 	f.Foo()
 	f.Bar()
