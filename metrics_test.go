@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	testGauge = NewGaugeDef2[string, string](
+	testDef = NewGaugeDef2[string, string](
 		"my.metric.name",
 		"this is my description",
 		UnitByte,
@@ -14,5 +14,5 @@ var (
 )
 
 func TestNothing(t *testing.T) {
-	testGauge.Values("baz", "qux").Bind(NoOpMetrics).Set(1)
+	NoOpMetrics.Gauge(testDef.Values("baz", "qux")).Set(1)
 }

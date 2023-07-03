@@ -208,16 +208,6 @@ func NewSetDef(
 	}
 }
 
-// Bind binds the metric definition to a *Metrics used to output, returning the metric.
-func (h *SetDef) Bind(m *Metrics) *Set {
-	return &Set{
-		m:          m,
-		name:       h.name,
-		tags:       h.tags,
-		sampleRate: h.sampleRate,
-	}
-}
-
 type SetDef1[V0 TagValue] struct {
 	name       string
 	key        string
