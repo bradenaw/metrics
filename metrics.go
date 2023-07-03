@@ -154,7 +154,7 @@ func New(p Publisher) *Metrics {
 	return m
 }
 
-func (m *Metrics) Gauge(d *GaugeDef) *Gauge {
+func (m *Metrics) Gauge(d GaugeDef) *Gauge {
 	if !d.ok {
 		return noOpGauge
 	}
@@ -173,7 +173,7 @@ func (m *Metrics) Gauge(d *GaugeDef) *Gauge {
 	return g
 }
 
-func (m *Metrics) Counter(d *CounterDef) *Counter {
+func (m *Metrics) Counter(d CounterDef) *Counter {
 	if !d.ok {
 		return noOpCounter
 	}
@@ -191,7 +191,7 @@ func (m *Metrics) Counter(d *CounterDef) *Counter {
 	return c
 }
 
-func (m *Metrics) Histogram(d *HistogramDef) *Histogram {
+func (m *Metrics) Histogram(d HistogramDef) *Histogram {
 	if !d.ok {
 		return noOpHistogram
 	}
@@ -210,7 +210,7 @@ func (m *Metrics) Histogram(d *HistogramDef) *Histogram {
 	return c
 }
 
-func (m *Metrics) Distribution(d *DistributionDef) *Distribution {
+func (m *Metrics) Distribution(d DistributionDef) *Distribution {
 	if !d.ok {
 		return noOpDistribution
 	}

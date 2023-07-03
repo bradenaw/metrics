@@ -90,17 +90,17 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	description string,
 	unit Unit,
 	keys [{{.N}}]string,
-) *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}] {
+) {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}] {
 	ok := registerDef({{.MetricLower}}Type, name, unit, description)
-	return &{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]{
+	return {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]{
 		name: name,
 		keys: keys,
 		ok:   ok,
 	}
 }
 
-func (d *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}}v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def {
-	return &{{.Metric}}Def{
+func (d {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}}v{{.}} V{{.}}, {{end}}) {{.Metric}}Def {
+	return {{.Metric}}Def{
 		name: d.name,
 		tags: joinStrings(d.prefix, []string{
 			{{range .Ns}}
@@ -126,9 +126,9 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	unit Unit,
 	keys [{{.N}}]string,
 	sampleRate float64,
-) *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}] {
+) {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}] {
 	ok := registerDef({{.MetricLower}}Type, name, unit, description)
-	return &{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]{
+	return {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
@@ -136,8 +136,8 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	}
 }
 
-func (d *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}} v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def {
-	return &{{.Metric}}Def{
+func (d {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}} v{{.}} V{{.}}, {{end}}) {{.Metric}}Def {
+	return {{.Metric}}Def{
 		name: d.name,
 		tags: []string{
 			{{range .Ns}}
@@ -164,9 +164,9 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	unit Unit,
 	keys [{{.N}}]string,
 	sampleRate float64,
-) *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}] {
+) {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}] {
 	ok := registerDef({{.MetricLower}}Type, name, unit, description)
-	return &{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]{
+	return {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
@@ -174,8 +174,8 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	}
 }
 
-func (d *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}} v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def {
-	return &{{.Metric}}Def{
+func (d {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}} v{{.}} V{{.}}, {{end}}) {{.Metric}}Def {
+	return {{.Metric}}Def{
 		name: d.name,
 		tags: []string{
 			{{range .Ns}}
@@ -191,8 +191,8 @@ func (d *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns
 var bindPrefixTmpl = template.Must(template.New("name").Parse(`
 // Prefix{{.K}} sets the value of the first {{.K}} tags, returning a {{.Metric}}Def{{.NMinusK}} that
 // can be used to set the rest.
-func (d *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Prefix{{.K}}({{range .Ks}} v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}] {
-	return &{{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}]{
+func (d {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Prefix{{.K}}({{range .Ks}} v{{.}} V{{.}}, {{end}}) {{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}] {
+	return {{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}]{
 		name: d.name,
 		prefix: []string{
 			{{range .Ks}}

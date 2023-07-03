@@ -10,9 +10,9 @@ func NewCounterDef(
 	name string,
 	description string,
 	unit Unit,
-) *CounterDef {
+) CounterDef {
 	ok := registerDef(counterType, name, unit, description)
-	return &CounterDef{
+	return CounterDef{
 		name: name,
 		ok:   ok,
 	}
@@ -30,17 +30,17 @@ func NewCounterDef1[V0 TagValue](
 	description string,
 	unit Unit,
 	key string,
-) *CounterDef1[V0] {
+) CounterDef1[V0] {
 	ok := registerDef(counterType, name, unit, description)
-	return &CounterDef1[V0]{
+	return CounterDef1[V0]{
 		name: name,
 		keys: [1]string{key},
 		ok:   ok,
 	}
 }
 
-func (d *CounterDef1[V0]) Values(v0 V0) *CounterDef {
-	return &CounterDef{
+func (d CounterDef1[V0]) Values(v0 V0) CounterDef {
+	return CounterDef{
 		name: d.name,
 		tags: joinStrings(d.prefix, []string{
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -59,9 +59,9 @@ func NewGaugeDef(
 	name string,
 	description string,
 	unit Unit,
-) *GaugeDef {
+) GaugeDef {
 	ok := registerDef(gaugeType, name, unit, description)
-	return &GaugeDef{
+	return GaugeDef{
 		name: name,
 		ok:   ok,
 	}
@@ -79,17 +79,17 @@ func NewGaugeDef1[V0 TagValue](
 	description string,
 	unit Unit,
 	key string,
-) *GaugeDef1[V0] {
+) GaugeDef1[V0] {
 	ok := registerDef(gaugeType, name, unit, description)
-	return &GaugeDef1[V0]{
+	return GaugeDef1[V0]{
 		name: name,
 		keys: [1]string{key},
 		ok:   ok,
 	}
 }
 
-func (d *GaugeDef1[V0]) Values(v0 V0) *GaugeDef {
-	return &GaugeDef{
+func (d GaugeDef1[V0]) Values(v0 V0) GaugeDef {
+	return GaugeDef{
 		name: d.name,
 		tags: joinStrings(d.prefix, []string{
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -110,9 +110,9 @@ func NewHistogramDef(
 	description string,
 	unit Unit,
 	sampleRate float64,
-) *HistogramDef {
+) HistogramDef {
 	ok := registerDef(histogramType, name, unit, description)
-	return &HistogramDef{
+	return HistogramDef{
 		name:       name,
 		sampleRate: sampleRate,
 		ok:         ok,
@@ -132,9 +132,9 @@ func NewHistogramDef1[V0 TagValue](
 	unit Unit,
 	key string,
 	sampleRate float64,
-) *HistogramDef1[V0] {
+) HistogramDef1[V0] {
 	ok := registerDef(histogramType, name, unit, description)
-	return &HistogramDef1[V0]{
+	return HistogramDef1[V0]{
 		name:       name,
 		key:        key,
 		sampleRate: sampleRate,
@@ -142,8 +142,8 @@ func NewHistogramDef1[V0 TagValue](
 	}
 }
 
-func (d *HistogramDef1[V0]) Values(v0 V0) *HistogramDef {
-	return &HistogramDef{
+func (d HistogramDef1[V0]) Values(v0 V0) HistogramDef {
+	return HistogramDef{
 		name: d.name,
 		tags: []string{
 			makeTag(d.key, tagValueString(v0)),
@@ -165,9 +165,9 @@ func NewDistributionDef(
 	description string,
 	unit Unit,
 	sampleRate float64,
-) *DistributionDef {
+) DistributionDef {
 	ok := registerDef(distributionType, name, unit, description)
-	return &DistributionDef{
+	return DistributionDef{
 		name:       name,
 		sampleRate: sampleRate,
 		ok:         ok,
@@ -187,9 +187,9 @@ func NewDistributionDef1[V0 TagValue](
 	unit Unit,
 	key string,
 	sampleRate float64,
-) *DistributionDef1[V0] {
+) DistributionDef1[V0] {
 	ok := registerDef(distributionType, name, unit, description)
-	return &DistributionDef1[V0]{
+	return DistributionDef1[V0]{
 		name:       name,
 		key:        key,
 		sampleRate: sampleRate,
@@ -197,8 +197,8 @@ func NewDistributionDef1[V0 TagValue](
 	}
 }
 
-func (d *DistributionDef1[V0]) Values(v0 V0) *DistributionDef {
-	return &DistributionDef{
+func (d DistributionDef1[V0]) Values(v0 V0) DistributionDef {
+	return DistributionDef{
 		name: d.name,
 		tags: []string{
 			makeTag(d.key, tagValueString(v0)),
@@ -221,9 +221,9 @@ func NewSetDef(
 	description string,
 	unit Unit,
 	sampleRate float64,
-) *SetDef {
+) SetDef {
 	ok := registerDef(setType, name, unit, description)
-	return &SetDef{
+	return SetDef{
 		name:       name,
 		sampleRate: sampleRate,
 		ok:         ok,
@@ -243,9 +243,9 @@ func NewSetDef1[V0 TagValue](
 	unit Unit,
 	key string,
 	sampleRate float64,
-) *SetDef1[V0] {
+) SetDef1[V0] {
 	ok := registerDef(setType, name, unit, description)
-	return &SetDef1[V0]{
+	return SetDef1[V0]{
 		name:       name,
 		key:        key,
 		sampleRate: sampleRate,
@@ -253,8 +253,8 @@ func NewSetDef1[V0 TagValue](
 	}
 }
 
-func (d *SetDef1[V0]) Values(v0 V0) *SetDef {
-	return &SetDef{
+func (d SetDef1[V0]) Values(v0 V0) SetDef {
+	return SetDef{
 		name: d.name,
 		tags: []string{
 			makeTag(d.key, tagValueString(v0)),
