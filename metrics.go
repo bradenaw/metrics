@@ -5,9 +5,11 @@
 // counters logging is just a single atomic operation.
 //
 // For each metric type of Gauge, Count, Histogram, Distribution, and Set, there are a set of
-// NewMDefY methods where M is the metric type and Y is the number of tags. By convention, calls to
-// NewMDefY should be done at init time, ideally in a var block of a metrics.go file with names as
-// full literals so that metrics are easily greppable.
+// NewMDefY methods where M is the metric type and Y is the number of tags. Calls to NewMDefY muts
+// be done at init time (ideally in a top-level var block) of a metrics.go file with names as full
+// literals so that metrics are easily greppable. Metrics not defined this way will cause the
+// process to panic if still at init-time, meaning before any code in main() has run, otherwise will
+// produce non-functional stats and produce to a gauge stat called metrics.bad_metric_definitions.
 package metrics
 
 import (
@@ -94,6 +96,22 @@ var (
 		flushed: make(chan struct{}),
 		polls:   make(map[int]func()),
 	}
+
+	// Used to return from Metrics.Metric() methods when the definition is invalid and the stat
+	// can't be logged.
+	noOpCounter      = &Counter{m: NoOpMetrics}
+	noOpGauge        = &Gauge{m: NoOpMetrics}
+	noOpHistogram    = &Histogram{m: NoOpMetrics}
+	noOpDistribution = &Distribution{m: NoOpMetrics}
+	noOpSet          = &Set{m: NoOpMetrics}
+
+	badDefsDef = NewGaugeDef1[string](
+		"metrics.bad_metric_definitions",
+		"The number of calls to NewMGaugeY that are invalid for some reason. These definitions "+
+			"will not be able to log metrics at all.",
+		UnitItem,
+		"reason",
+	)
 )
 
 func New(p Publisher) *Metrics {
@@ -104,6 +122,9 @@ func New(p Publisher) *Metrics {
 		polls:   make(map[int]func()),
 	}
 
+	badDefsCallersFramesGauge := m.Gauge(badDefsDef.Values("runtime_caller_failed"))
+	badDefsNotAtInitGauge := m.Gauge(badDefsDef.Values("not_at_init_time"))
+
 	m.flushNow = m.bg.PeriodicOrTrigger(flushInterval, 0 /*jitter*/, func(ctx context.Context) {
 		m.m.Lock()
 		polls := maps.Values(m.polls)
@@ -111,6 +132,9 @@ func New(p Publisher) *Metrics {
 		for _, poll := range polls {
 			poll()
 		}
+
+		badDefsCallersFramesGauge.Set(float64(badDefsCallersFrames.Load()))
+		badDefsNotAtInitGauge.Set(float64(badDefsNotAtInit.Load()))
 
 		m.gauges.Range(func(_ metricKey, g *Gauge) bool {
 			g.publish()
@@ -131,6 +155,10 @@ func New(p Publisher) *Metrics {
 }
 
 func (m *Metrics) Gauge(d *GaugeDef) *Gauge {
+	if !d.ok {
+		return noOpGauge
+	}
+
 	k := newMetricKey(d.name, d.tags)
 	g, ok := m.gauges.Load(k)
 	if !ok {
@@ -146,6 +174,10 @@ func (m *Metrics) Gauge(d *GaugeDef) *Gauge {
 }
 
 func (m *Metrics) Counter(d *CounterDef) *Counter {
+	if !d.ok {
+		return noOpCounter
+	}
+
 	k := newMetricKey(d.name, d.tags)
 	c, ok := m.counters.Load(k)
 	if !ok {
@@ -160,6 +192,10 @@ func (m *Metrics) Counter(d *CounterDef) *Counter {
 }
 
 func (m *Metrics) Histogram(d *HistogramDef) *Histogram {
+	if !d.ok {
+		return noOpHistogram
+	}
+
 	k := newMetricKey(d.name, d.tags)
 	c, ok := m.histograms.Load(k)
 	if !ok {
@@ -175,6 +211,10 @@ func (m *Metrics) Histogram(d *HistogramDef) *Histogram {
 }
 
 func (m *Metrics) Distribution(d *DistributionDef) *Distribution {
+	if !d.ok {
+		return noOpDistribution
+	}
+
 	k := newMetricKey(d.name, d.tags)
 	c, ok := m.distributions.Load(k)
 	if !ok {
@@ -190,6 +230,10 @@ func (m *Metrics) Distribution(d *DistributionDef) *Distribution {
 }
 
 func (m *Metrics) Set(d SetDef) *Set {
+	if !d.ok {
+		return noOpSet
+	}
+
 	k := newMetricKey(d.name, d.tags)
 	c, ok := m.sets.Load(k)
 	if !ok {
@@ -377,16 +421,39 @@ type metadata struct {
 }
 
 var defs xsync.Map[string, *metadata]
+var badDefsCallersFrames atomic.Int64
+var badDefsNotAtInit atomic.Int64
 
+// https://docs.datadoghq.com/metrics/custom_metrics/#naming-custom-metrics
 var nameRegexp = regexp.MustCompile("^[a-z][a-zA-Z0-9_.]{0,199}")
 
-func registerDef(metricType metricType, name string, unit Unit, description string) {
+// Returns false if the metric definition is invalid, and so should not emit.
+func registerDef(metricType metricType, name string, unit Unit, description string) bool {
 	pc, file, line, ok := runtime.Caller(2)
+	if !ok {
+		badDefsCallersFrames.Add(1)
+		return false
+	}
+	fn := runtime.FuncForPC(pc)
+	if !strings.HasSuffix(fn.Name(), ".init") {
+		badDefsNotAtInit.Add(1)
+		return false
+	}
+
+	// Now we know it's init-time, which means it's safe to panic.
 
 	if !nameRegexp.MatchString(name) {
 		panic(fmt.Sprintf(
-			"metric names must follow https://docs.datadoghq.com/metrics/custom_metrics/#naming-custom-metrics:\n"+
-				"%s defined at %s:%d",
+			"metric definition's name doesn't match required %s\n\n"+
+				"metric %s defined at %s:%d",
+			nameRegexp, name, file, line,
+		))
+	}
+	if !strings.HasSuffix(file, "/metrics.go") {
+		panic(fmt.Sprintf(
+			"metric definitions must be defined in init() or a top-level var block of a "+
+				"file named metrics.go\n\n"+
+				"metric %s defined at %s:%d",
 			name, file, line,
 		))
 	}
@@ -399,35 +466,18 @@ func registerDef(metricType metricType, name string, unit Unit, description stri
 		file:        file,
 		line:        line,
 	})
-
-	if ok {
-		fn := runtime.FuncForPC(pc)
-		if strings.HasSuffix(fn.Name(), ".init") {
-			if !strings.HasSuffix(file, "/metrics.go") {
-				panic(fmt.Sprintf(
-					"metric definitions must be defined in init() or a top-level var block of a "+
-						"file named metrics.go\n\n"+
-						"metric %s defined at %s:%d",
-					name, file, line,
-				))
-			}
-			if loaded {
-				panic(fmt.Sprintf(
-					"multiple definitions for metric %s:\n"+
-						"\t%s:%d\n"+
-						"\t%s:%d",
-					name,
-					d.file, d.line,
-					file, line,
-				))
-			}
-		}
-	}
-	// Would be nice to disallow this but also probably shouldn't crash the process on purpose past
-	// init time.
 	if loaded {
-		d.multipleDefs.Store(true)
+		panic(fmt.Sprintf(
+			"multiple definitions for metric %s:\n"+
+				"\t%s:%d\n"+
+				"\t%s:%d",
+			name,
+			d.file, d.line,
+			file, line,
+		))
 	}
+
+	return true
 }
 
 // Prints the metrics defined by this process in the format accepted by Datadog's API for metric
@@ -438,7 +488,7 @@ func FormatMetadataJSON() string {
 	ms := metadatasByName()
 	var sb strings.Builder
 
-	writeMetadataJSON := func(name string, unit Unit, description string, multipleDefs bool) {
+	writeMetadataJSON := func(name string, unit Unit, description string) {
 		type metadataJSON struct {
 			Unit        string `json:"unit"`
 			Description string `json:"description"`
@@ -446,9 +496,6 @@ func FormatMetadataJSON() string {
 
 		_, _ = sb.WriteString(name)
 		_, _ = sb.WriteString(" ")
-		if multipleDefs {
-			description += "\n\nWARNING: multiple defs in code, possibly conflicting"
-		}
 		b, err := json.Marshal(&metadataJSON{
 			Unit:        string(unit),
 			Description: description,
@@ -465,12 +512,12 @@ func FormatMetadataJSON() string {
 	for _, m := range ms {
 		switch m.metricType {
 		case counterType, gaugeType, setType:
-			writeMetadataJSON(m.name, m.unit, m.description, m.multipleDefs.Load())
+			writeMetadataJSON(m.name, m.unit, m.description)
 		case histogramType:
 			for _, suffix := range [...]string{"avg", "median", "95percentile", "max"} {
-				writeMetadataJSON(m.name+"."+suffix, m.unit, m.description, m.multipleDefs.Load())
+				writeMetadataJSON(m.name+"."+suffix, m.unit, m.description)
 			}
-			writeMetadataJSON(m.name+".count", UnitEvent, m.description, m.multipleDefs.Load())
+			writeMetadataJSON(m.name+".count", UnitEvent, m.description)
 		case distributionType:
 			for _, prefix := range [...]string{
 				"avg",
@@ -483,9 +530,9 @@ func FormatMetadataJSON() string {
 				"p95",
 				"p99",
 			} {
-				writeMetadataJSON(prefix+":"+m.name, m.unit, m.description, m.multipleDefs.Load())
+				writeMetadataJSON(prefix+":"+m.name, m.unit, m.description)
 			}
-			writeMetadataJSON("count:"+m.name, UnitEvent, m.description, m.multipleDefs.Load())
+			writeMetadataJSON("count:"+m.name, UnitEvent, m.description)
 		}
 	}
 

@@ -82,6 +82,7 @@ type {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}] struct {
 	name   string
 	prefix []string
 	keys   [{{.N}}]string
+	ok     bool
 }
 
 func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
@@ -90,10 +91,11 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	unit Unit,
 	keys [{{.N}}]string,
 ) *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}] {
-	registerDef({{.MetricLower}}Type, name, unit, description)
+	ok := registerDef({{.MetricLower}}Type, name, unit, description)
 	return &{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]{
-		name:       name,
-		keys:       keys,
+		name: name,
+		keys: keys,
+		ok:   ok,
 	}
 }
 
@@ -105,6 +107,7 @@ func (d *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns
 			makeTag(d.keys[{{.}}], tagValueString(v{{.}})),
 			{{ end }}
 		}),
+		ok: d.ok,
 	}
 }
 `))
@@ -114,6 +117,7 @@ type {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}] struct {
 	name       string
 	keys       [{{.N}}]string
 	sampleRate float64
+	ok         bool
 }
 
 func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
@@ -123,11 +127,12 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	keys [{{.N}}]string,
 	sampleRate float64,
 ) *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}] {
-	registerDef({{.MetricLower}}Type, name, unit, description)
+	ok := registerDef({{.MetricLower}}Type, name, unit, description)
 	return &{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
+		ok:         ok,
 	}
 }
 
@@ -140,6 +145,7 @@ func (d *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns
 			{{ end }}
 		},
 		sampleRate: d.sampleRate,
+		ok: d.ok,
 	}
 }
 `))
@@ -149,6 +155,7 @@ type {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}] struct {
 	name       string
 	keys       [{{.N}}]string
 	sampleRate float64
+	ok         bool
 }
 
 func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
@@ -158,23 +165,25 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	keys [{{.N}}]string,
 	sampleRate float64,
 ) *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}] {
-	registerDef({{.MetricLower}}Type, name, unit, description)
+	ok := registerDef({{.MetricLower}}Type, name, unit, description)
 	return &{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
+		ok:         ok,
 	}
 }
 
-func (h *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}} v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def {
+func (d *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}} v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def {
 	return &{{.Metric}}Def{
-		name: h.name,
+		name: d.name,
 		tags: []string{
 			{{range .Ns}}
-			makeTag(h.keys[{{.}}], tagValueString(v{{.}})),
+			makeTag(d.keys[{{.}}], tagValueString(v{{.}})),
 			{{ end }}
 		},
-		sampleRate: h.sampleRate,
+		sampleRate: d.sampleRate,
+		ok:         d.ok,
 	}
 }
 `))
@@ -182,15 +191,16 @@ func (h *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns
 var bindPrefixTmpl = template.Must(template.New("name").Parse(`
 // Prefix{{.K}} sets the value of the first {{.K}} tags, returning a {{.Metric}}Def{{.NMinusK}} that
 // can be used to set the rest.
-func (h *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Prefix{{.K}}({{range .Ks}} v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}] {
+func (d *{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Prefix{{.K}}({{range .Ks}} v{{.}} V{{.}}, {{end}}) *{{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}] {
 	return &{{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}]{
-		name: h.name,
+		name: d.name,
 		prefix: []string{
 			{{range .Ks}}
-			makeTag(h.keys[{{.}}], tagValueString(v{{.}})),
+			makeTag(d.keys[{{.}}], tagValueString(v{{.}})),
 			{{ end }}
 		},
-		keys: *((*[{{.NMinusK}}]string)(h.keys[{{.K}}:])),
+		keys: *((*[{{.NMinusK}}]string)(d.keys[{{.K}}:])),
+		ok:   d.ok,
 	}
 }
 `))
