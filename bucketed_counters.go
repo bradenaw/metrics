@@ -81,10 +81,36 @@ func bucketNames(boundaries []float64) []string {
 	return results
 }
 
+// ExponentialBuckets returns exponentially-increasing bucket boundaries for use with
+// NewBucketedCounter and NewBucketedGaugeGroup.
+//
+// start is the first value, base is the base of the exponent, and n is the number of boundaries.
+//
+// For example:
+//
+//	ExponentialBuckets(100, 10, 3) -> []float64{100, 1000, 10000}
+//	ExponentialBuckets(100, 2, 5) -> []float64{100, 200, 400, 800, 1600}
 func ExponentialBuckets(start float64, base float64, n int) []float64 {
-	buckets := make([]float64, n)
-	for i := range buckets {
-		buckets[i] = start * math.Pow(base, float64(i))
+	boundaries := make([]float64, n)
+	for i := range boundaries {
+		boundaries[i] = start * math.Pow(base, float64(i))
 	}
-	return buckets
+	return boundaries
+}
+
+// LinearBuckets returns linearly-increasing bucket boundaries for use with NewBucketedCounter and
+// NewBucketedGaugeGroup.
+//
+// start is the first value, step is the distance between values, and n is the number of boundaries.
+//
+// For example:
+//
+//	LinearBuckets(100, 50, 3) -> []float64{100, 150, 200}
+//	LinearBuckets(100, 75, 4) -> []float64{100, 175, 250, 325}
+func LinearBuckets(start float64, step float64, n int) []float64 {
+	boundaries := make([]float64, n)
+	for i := range boundaries {
+		boundaries[i] = start + step*float64(n)
+	}
+	return boundaries
 }
