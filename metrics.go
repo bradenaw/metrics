@@ -10,6 +10,8 @@
 // literals so that metrics are easily greppable. Metrics not defined this way will cause the
 // process to panic if still at init-time, meaning before any code in main() has run, otherwise will
 // produce non-functional stats and produce to a gauge stat called metrics.bad_metric_definitions.
+// It's a good idea to put an alert on this stat so that if it starts logging during a deploy, you
+// know your other metrics may not be trustworthy.
 package metrics
 
 import (
