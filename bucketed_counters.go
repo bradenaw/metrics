@@ -27,7 +27,7 @@ type BucketedCounter struct {
 // By convention, the key for d is "bucket."
 func NewBucketedCounter(
 	m *Metrics,
-	d *CounterDef1[string],
+	d CounterDef1[string],
 	boundaries []float64,
 ) *BucketedCounter {
 	if len(boundaries) == 0 {
