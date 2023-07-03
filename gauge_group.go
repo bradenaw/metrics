@@ -2,12 +2,12 @@ package metrics
 
 type GaugeGroup1[V0 TagValue] struct {
 	m    *Metrics
-	d    *GaugeDef1[V0]
+	d    GaugeDef1[V0]
 	curr map[*Gauge]float64
 	prev map[*Gauge]float64
 }
 
-func NewGaugeGroup1[V0 TagValue](m *Metrics, d *GaugeDef1[V0]) *GaugeGroup1[V0] {
+func NewGaugeGroup1[V0 TagValue](m *Metrics, d GaugeDef1[V0]) *GaugeGroup1[V0] {
 	return &GaugeGroup1[V0]{
 		m:    m,
 		d:    d,
@@ -17,7 +17,7 @@ func NewGaugeGroup1[V0 TagValue](m *Metrics, d *GaugeDef1[V0]) *GaugeGroup1[V0] 
 }
 
 func (g *GaugeGroup1[V0]) Set(v0 V0, value float64) {
-	gauge := g.d.Values(v0).Bind(g.m)
+	gauge := g.m.Gauge(g.d.Values(v0))
 	g.curr[gauge] = value
 }
 
@@ -54,7 +54,7 @@ func NewGaugeGroup2[V0 TagValue, V1 TagValue](m *Metrics, d *GaugeDef2[V0, V1]) 
 }
 
 func (g *GaugeGroup2[V0, V1]) Set(v0 V0, v1 V1, value float64) {
-	gauge := g.d.Values(v0, v1).Bind(g.m)
+	gauge := g.m.Gauge(g.d.Values(v0, v1))
 	g.curr[gauge] = value
 }
 

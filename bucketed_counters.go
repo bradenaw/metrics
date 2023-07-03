@@ -27,13 +27,13 @@ type BucketedCounter struct {
 // By convention, the key for d is "bucket."
 func NewBucketedCounter(
 	m *Metrics,
-	d *CounterDef1[string],
+	d CounterDef1[string],
 	boundaries []float64,
 ) *BucketedCounter {
 	names := bucketNames(boundaries)
 	counters := make([]*Counter, len(names))
 	for i, name := range names {
-		counters[i] = d.Values(name).Bind(m)
+		counters[i] = m.Counter(d.Values(name))
 	}
 	return &BucketedCounter{
 		boundaries: boundaries,

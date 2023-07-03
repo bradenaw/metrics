@@ -6,6 +6,7 @@ type CounterDef2[V0 TagValue, V1 TagValue] struct {
 	name   string
 	prefix []string
 	keys   [2]string
+	ok     bool
 }
 
 func NewCounterDef2[V0 TagValue, V1 TagValue](
@@ -13,16 +14,17 @@ func NewCounterDef2[V0 TagValue, V1 TagValue](
 	description string,
 	unit Unit,
 	keys [2]string,
-) *CounterDef2[V0, V1] {
-	registerDef(counterType, name, unit, description)
-	return &CounterDef2[V0, V1]{
+) CounterDef2[V0, V1] {
+	ok := registerDef(counterType, name, unit, description)
+	return CounterDef2[V0, V1]{
 		name: name,
 		keys: keys,
+		ok:   ok,
 	}
 }
 
-func (d *CounterDef2[V0, V1]) Values(v0 V0, v1 V1) *CounterDef {
-	return &CounterDef{
+func (d CounterDef2[V0, V1]) Values(v0 V0, v1 V1) CounterDef {
+	return CounterDef{
 		name: d.name,
 		tags: joinStrings(d.prefix, []string{
 
@@ -30,19 +32,21 @@ func (d *CounterDef2[V0, V1]) Values(v0 V0, v1 V1) *CounterDef {
 
 			makeTag(d.keys[1], tagValueString(v1)),
 		}),
+		ok: d.ok,
 	}
 }
 
 // Prefix1 sets the value of the first 1 tags, returning a CounterDef1 that
 // can be used to set the rest.
-func (h *CounterDef2[V0, V1]) Prefix1(v0 V0) *CounterDef1[V1] {
-	return &CounterDef1[V1]{
-		name: h.name,
+func (d CounterDef2[V0, V1]) Prefix1(v0 V0) CounterDef1[V1] {
+	return CounterDef1[V1]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 		},
-		keys: *((*[1]string)(h.keys[1:])),
+		keys: *((*[1]string)(d.keys[1:])),
+		ok:   d.ok,
 	}
 }
 
@@ -50,6 +54,7 @@ type CounterDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
 	name   string
 	prefix []string
 	keys   [3]string
+	ok     bool
 }
 
 func NewCounterDef3[V0 TagValue, V1 TagValue, V2 TagValue](
@@ -57,16 +62,17 @@ func NewCounterDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	description string,
 	unit Unit,
 	keys [3]string,
-) *CounterDef3[V0, V1, V2] {
-	registerDef(counterType, name, unit, description)
-	return &CounterDef3[V0, V1, V2]{
+) CounterDef3[V0, V1, V2] {
+	ok := registerDef(counterType, name, unit, description)
+	return CounterDef3[V0, V1, V2]{
 		name: name,
 		keys: keys,
+		ok:   ok,
 	}
 }
 
-func (d *CounterDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *CounterDef {
-	return &CounterDef{
+func (d CounterDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) CounterDef {
+	return CounterDef{
 		name: d.name,
 		tags: joinStrings(d.prefix, []string{
 
@@ -76,34 +82,37 @@ func (d *CounterDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *CounterDef {
 
 			makeTag(d.keys[2], tagValueString(v2)),
 		}),
+		ok: d.ok,
 	}
 }
 
 // Prefix1 sets the value of the first 1 tags, returning a CounterDef2 that
 // can be used to set the rest.
-func (h *CounterDef3[V0, V1, V2]) Prefix1(v0 V0) *CounterDef2[V1, V2] {
-	return &CounterDef2[V1, V2]{
-		name: h.name,
+func (d CounterDef3[V0, V1, V2]) Prefix1(v0 V0) CounterDef2[V1, V2] {
+	return CounterDef2[V1, V2]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 		},
-		keys: *((*[2]string)(h.keys[1:])),
+		keys: *((*[2]string)(d.keys[1:])),
+		ok:   d.ok,
 	}
 }
 
 // Prefix2 sets the value of the first 2 tags, returning a CounterDef1 that
 // can be used to set the rest.
-func (h *CounterDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) *CounterDef1[V2] {
-	return &CounterDef1[V2]{
-		name: h.name,
+func (d CounterDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) CounterDef1[V2] {
+	return CounterDef1[V2]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 		},
-		keys: *((*[1]string)(h.keys[2:])),
+		keys: *((*[1]string)(d.keys[2:])),
+		ok:   d.ok,
 	}
 }
 
@@ -111,6 +120,7 @@ type CounterDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
 	name   string
 	prefix []string
 	keys   [4]string
+	ok     bool
 }
 
 func NewCounterDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
@@ -118,16 +128,17 @@ func NewCounterDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	description string,
 	unit Unit,
 	keys [4]string,
-) *CounterDef4[V0, V1, V2, V3] {
-	registerDef(counterType, name, unit, description)
-	return &CounterDef4[V0, V1, V2, V3]{
+) CounterDef4[V0, V1, V2, V3] {
+	ok := registerDef(counterType, name, unit, description)
+	return CounterDef4[V0, V1, V2, V3]{
 		name: name,
 		keys: keys,
+		ok:   ok,
 	}
 }
 
-func (d *CounterDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *CounterDef {
-	return &CounterDef{
+func (d CounterDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) CounterDef {
+	return CounterDef{
 		name: d.name,
 		tags: joinStrings(d.prefix, []string{
 
@@ -139,51 +150,55 @@ func (d *CounterDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *Counte
 
 			makeTag(d.keys[3], tagValueString(v3)),
 		}),
+		ok: d.ok,
 	}
 }
 
 // Prefix1 sets the value of the first 1 tags, returning a CounterDef3 that
 // can be used to set the rest.
-func (h *CounterDef4[V0, V1, V2, V3]) Prefix1(v0 V0) *CounterDef3[V1, V2, V3] {
-	return &CounterDef3[V1, V2, V3]{
-		name: h.name,
+func (d CounterDef4[V0, V1, V2, V3]) Prefix1(v0 V0) CounterDef3[V1, V2, V3] {
+	return CounterDef3[V1, V2, V3]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 		},
-		keys: *((*[3]string)(h.keys[1:])),
+		keys: *((*[3]string)(d.keys[1:])),
+		ok:   d.ok,
 	}
 }
 
 // Prefix2 sets the value of the first 2 tags, returning a CounterDef2 that
 // can be used to set the rest.
-func (h *CounterDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) *CounterDef2[V2, V3] {
-	return &CounterDef2[V2, V3]{
-		name: h.name,
+func (d CounterDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) CounterDef2[V2, V3] {
+	return CounterDef2[V2, V3]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 		},
-		keys: *((*[2]string)(h.keys[2:])),
+		keys: *((*[2]string)(d.keys[2:])),
+		ok:   d.ok,
 	}
 }
 
 // Prefix3 sets the value of the first 3 tags, returning a CounterDef1 that
 // can be used to set the rest.
-func (h *CounterDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) *CounterDef1[V3] {
-	return &CounterDef1[V3]{
-		name: h.name,
+func (d CounterDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) CounterDef1[V3] {
+	return CounterDef1[V3]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-			makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 		},
-		keys: *((*[1]string)(h.keys[3:])),
+		keys: *((*[1]string)(d.keys[3:])),
+		ok:   d.ok,
 	}
 }
 
@@ -191,6 +206,7 @@ type CounterDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue
 	name   string
 	prefix []string
 	keys   [5]string
+	ok     bool
 }
 
 func NewCounterDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue](
@@ -198,16 +214,17 @@ func NewCounterDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagVa
 	description string,
 	unit Unit,
 	keys [5]string,
-) *CounterDef5[V0, V1, V2, V3, V4] {
-	registerDef(counterType, name, unit, description)
-	return &CounterDef5[V0, V1, V2, V3, V4]{
+) CounterDef5[V0, V1, V2, V3, V4] {
+	ok := registerDef(counterType, name, unit, description)
+	return CounterDef5[V0, V1, V2, V3, V4]{
 		name: name,
 		keys: keys,
+		ok:   ok,
 	}
 }
 
-func (d *CounterDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *CounterDef {
-	return &CounterDef{
+func (d CounterDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) CounterDef {
+	return CounterDef{
 		name: d.name,
 		tags: joinStrings(d.prefix, []string{
 
@@ -221,70 +238,75 @@ func (d *CounterDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 
 
 			makeTag(d.keys[4], tagValueString(v4)),
 		}),
+		ok: d.ok,
 	}
 }
 
 // Prefix1 sets the value of the first 1 tags, returning a CounterDef4 that
 // can be used to set the rest.
-func (h *CounterDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) *CounterDef4[V1, V2, V3, V4] {
-	return &CounterDef4[V1, V2, V3, V4]{
-		name: h.name,
+func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) CounterDef4[V1, V2, V3, V4] {
+	return CounterDef4[V1, V2, V3, V4]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 		},
-		keys: *((*[4]string)(h.keys[1:])),
+		keys: *((*[4]string)(d.keys[1:])),
+		ok:   d.ok,
 	}
 }
 
 // Prefix2 sets the value of the first 2 tags, returning a CounterDef3 that
 // can be used to set the rest.
-func (h *CounterDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) *CounterDef3[V2, V3, V4] {
-	return &CounterDef3[V2, V3, V4]{
-		name: h.name,
+func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) CounterDef3[V2, V3, V4] {
+	return CounterDef3[V2, V3, V4]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 		},
-		keys: *((*[3]string)(h.keys[2:])),
+		keys: *((*[3]string)(d.keys[2:])),
+		ok:   d.ok,
 	}
 }
 
 // Prefix3 sets the value of the first 3 tags, returning a CounterDef2 that
 // can be used to set the rest.
-func (h *CounterDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) *CounterDef2[V3, V4] {
-	return &CounterDef2[V3, V4]{
-		name: h.name,
+func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) CounterDef2[V3, V4] {
+	return CounterDef2[V3, V4]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-			makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 		},
-		keys: *((*[2]string)(h.keys[3:])),
+		keys: *((*[2]string)(d.keys[3:])),
+		ok:   d.ok,
 	}
 }
 
 // Prefix4 sets the value of the first 4 tags, returning a CounterDef1 that
 // can be used to set the rest.
-func (h *CounterDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3) *CounterDef1[V4] {
-	return &CounterDef1[V4]{
-		name: h.name,
+func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3) CounterDef1[V4] {
+	return CounterDef1[V4]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-			makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 
-			makeTag(h.keys[3], tagValueString(v3)),
+			makeTag(d.keys[3], tagValueString(v3)),
 		},
-		keys: *((*[1]string)(h.keys[4:])),
+		keys: *((*[1]string)(d.keys[4:])),
+		ok:   d.ok,
 	}
 }
 
@@ -292,6 +314,7 @@ type GaugeDef2[V0 TagValue, V1 TagValue] struct {
 	name   string
 	prefix []string
 	keys   [2]string
+	ok     bool
 }
 
 func NewGaugeDef2[V0 TagValue, V1 TagValue](
@@ -299,16 +322,17 @@ func NewGaugeDef2[V0 TagValue, V1 TagValue](
 	description string,
 	unit Unit,
 	keys [2]string,
-) *GaugeDef2[V0, V1] {
-	registerDef(gaugeType, name, unit, description)
-	return &GaugeDef2[V0, V1]{
+) GaugeDef2[V0, V1] {
+	ok := registerDef(gaugeType, name, unit, description)
+	return GaugeDef2[V0, V1]{
 		name: name,
 		keys: keys,
+		ok:   ok,
 	}
 }
 
-func (d *GaugeDef2[V0, V1]) Values(v0 V0, v1 V1) *GaugeDef {
-	return &GaugeDef{
+func (d GaugeDef2[V0, V1]) Values(v0 V0, v1 V1) GaugeDef {
+	return GaugeDef{
 		name: d.name,
 		tags: joinStrings(d.prefix, []string{
 
@@ -316,19 +340,21 @@ func (d *GaugeDef2[V0, V1]) Values(v0 V0, v1 V1) *GaugeDef {
 
 			makeTag(d.keys[1], tagValueString(v1)),
 		}),
+		ok: d.ok,
 	}
 }
 
 // Prefix1 sets the value of the first 1 tags, returning a GaugeDef1 that
 // can be used to set the rest.
-func (h *GaugeDef2[V0, V1]) Prefix1(v0 V0) *GaugeDef1[V1] {
-	return &GaugeDef1[V1]{
-		name: h.name,
+func (d GaugeDef2[V0, V1]) Prefix1(v0 V0) GaugeDef1[V1] {
+	return GaugeDef1[V1]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 		},
-		keys: *((*[1]string)(h.keys[1:])),
+		keys: *((*[1]string)(d.keys[1:])),
+		ok:   d.ok,
 	}
 }
 
@@ -336,6 +362,7 @@ type GaugeDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
 	name   string
 	prefix []string
 	keys   [3]string
+	ok     bool
 }
 
 func NewGaugeDef3[V0 TagValue, V1 TagValue, V2 TagValue](
@@ -343,16 +370,17 @@ func NewGaugeDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	description string,
 	unit Unit,
 	keys [3]string,
-) *GaugeDef3[V0, V1, V2] {
-	registerDef(gaugeType, name, unit, description)
-	return &GaugeDef3[V0, V1, V2]{
+) GaugeDef3[V0, V1, V2] {
+	ok := registerDef(gaugeType, name, unit, description)
+	return GaugeDef3[V0, V1, V2]{
 		name: name,
 		keys: keys,
+		ok:   ok,
 	}
 }
 
-func (d *GaugeDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *GaugeDef {
-	return &GaugeDef{
+func (d GaugeDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) GaugeDef {
+	return GaugeDef{
 		name: d.name,
 		tags: joinStrings(d.prefix, []string{
 
@@ -362,34 +390,37 @@ func (d *GaugeDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *GaugeDef {
 
 			makeTag(d.keys[2], tagValueString(v2)),
 		}),
+		ok: d.ok,
 	}
 }
 
 // Prefix1 sets the value of the first 1 tags, returning a GaugeDef2 that
 // can be used to set the rest.
-func (h *GaugeDef3[V0, V1, V2]) Prefix1(v0 V0) *GaugeDef2[V1, V2] {
-	return &GaugeDef2[V1, V2]{
-		name: h.name,
+func (d GaugeDef3[V0, V1, V2]) Prefix1(v0 V0) GaugeDef2[V1, V2] {
+	return GaugeDef2[V1, V2]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 		},
-		keys: *((*[2]string)(h.keys[1:])),
+		keys: *((*[2]string)(d.keys[1:])),
+		ok:   d.ok,
 	}
 }
 
 // Prefix2 sets the value of the first 2 tags, returning a GaugeDef1 that
 // can be used to set the rest.
-func (h *GaugeDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) *GaugeDef1[V2] {
-	return &GaugeDef1[V2]{
-		name: h.name,
+func (d GaugeDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) GaugeDef1[V2] {
+	return GaugeDef1[V2]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 		},
-		keys: *((*[1]string)(h.keys[2:])),
+		keys: *((*[1]string)(d.keys[2:])),
+		ok:   d.ok,
 	}
 }
 
@@ -397,6 +428,7 @@ type GaugeDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
 	name   string
 	prefix []string
 	keys   [4]string
+	ok     bool
 }
 
 func NewGaugeDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
@@ -404,16 +436,17 @@ func NewGaugeDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	description string,
 	unit Unit,
 	keys [4]string,
-) *GaugeDef4[V0, V1, V2, V3] {
-	registerDef(gaugeType, name, unit, description)
-	return &GaugeDef4[V0, V1, V2, V3]{
+) GaugeDef4[V0, V1, V2, V3] {
+	ok := registerDef(gaugeType, name, unit, description)
+	return GaugeDef4[V0, V1, V2, V3]{
 		name: name,
 		keys: keys,
+		ok:   ok,
 	}
 }
 
-func (d *GaugeDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *GaugeDef {
-	return &GaugeDef{
+func (d GaugeDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) GaugeDef {
+	return GaugeDef{
 		name: d.name,
 		tags: joinStrings(d.prefix, []string{
 
@@ -425,51 +458,55 @@ func (d *GaugeDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *GaugeDef
 
 			makeTag(d.keys[3], tagValueString(v3)),
 		}),
+		ok: d.ok,
 	}
 }
 
 // Prefix1 sets the value of the first 1 tags, returning a GaugeDef3 that
 // can be used to set the rest.
-func (h *GaugeDef4[V0, V1, V2, V3]) Prefix1(v0 V0) *GaugeDef3[V1, V2, V3] {
-	return &GaugeDef3[V1, V2, V3]{
-		name: h.name,
+func (d GaugeDef4[V0, V1, V2, V3]) Prefix1(v0 V0) GaugeDef3[V1, V2, V3] {
+	return GaugeDef3[V1, V2, V3]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 		},
-		keys: *((*[3]string)(h.keys[1:])),
+		keys: *((*[3]string)(d.keys[1:])),
+		ok:   d.ok,
 	}
 }
 
 // Prefix2 sets the value of the first 2 tags, returning a GaugeDef2 that
 // can be used to set the rest.
-func (h *GaugeDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) *GaugeDef2[V2, V3] {
-	return &GaugeDef2[V2, V3]{
-		name: h.name,
+func (d GaugeDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) GaugeDef2[V2, V3] {
+	return GaugeDef2[V2, V3]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 		},
-		keys: *((*[2]string)(h.keys[2:])),
+		keys: *((*[2]string)(d.keys[2:])),
+		ok:   d.ok,
 	}
 }
 
 // Prefix3 sets the value of the first 3 tags, returning a GaugeDef1 that
 // can be used to set the rest.
-func (h *GaugeDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) *GaugeDef1[V3] {
-	return &GaugeDef1[V3]{
-		name: h.name,
+func (d GaugeDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) GaugeDef1[V3] {
+	return GaugeDef1[V3]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-			makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 		},
-		keys: *((*[1]string)(h.keys[3:])),
+		keys: *((*[1]string)(d.keys[3:])),
+		ok:   d.ok,
 	}
 }
 
@@ -477,6 +514,7 @@ type GaugeDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue] 
 	name   string
 	prefix []string
 	keys   [5]string
+	ok     bool
 }
 
 func NewGaugeDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue](
@@ -484,16 +522,17 @@ func NewGaugeDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValu
 	description string,
 	unit Unit,
 	keys [5]string,
-) *GaugeDef5[V0, V1, V2, V3, V4] {
-	registerDef(gaugeType, name, unit, description)
-	return &GaugeDef5[V0, V1, V2, V3, V4]{
+) GaugeDef5[V0, V1, V2, V3, V4] {
+	ok := registerDef(gaugeType, name, unit, description)
+	return GaugeDef5[V0, V1, V2, V3, V4]{
 		name: name,
 		keys: keys,
+		ok:   ok,
 	}
 }
 
-func (d *GaugeDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *GaugeDef {
-	return &GaugeDef{
+func (d GaugeDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) GaugeDef {
+	return GaugeDef{
 		name: d.name,
 		tags: joinStrings(d.prefix, []string{
 
@@ -507,70 +546,75 @@ func (d *GaugeDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4
 
 			makeTag(d.keys[4], tagValueString(v4)),
 		}),
+		ok: d.ok,
 	}
 }
 
 // Prefix1 sets the value of the first 1 tags, returning a GaugeDef4 that
 // can be used to set the rest.
-func (h *GaugeDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) *GaugeDef4[V1, V2, V3, V4] {
-	return &GaugeDef4[V1, V2, V3, V4]{
-		name: h.name,
+func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) GaugeDef4[V1, V2, V3, V4] {
+	return GaugeDef4[V1, V2, V3, V4]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 		},
-		keys: *((*[4]string)(h.keys[1:])),
+		keys: *((*[4]string)(d.keys[1:])),
+		ok:   d.ok,
 	}
 }
 
 // Prefix2 sets the value of the first 2 tags, returning a GaugeDef3 that
 // can be used to set the rest.
-func (h *GaugeDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) *GaugeDef3[V2, V3, V4] {
-	return &GaugeDef3[V2, V3, V4]{
-		name: h.name,
+func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) GaugeDef3[V2, V3, V4] {
+	return GaugeDef3[V2, V3, V4]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 		},
-		keys: *((*[3]string)(h.keys[2:])),
+		keys: *((*[3]string)(d.keys[2:])),
+		ok:   d.ok,
 	}
 }
 
 // Prefix3 sets the value of the first 3 tags, returning a GaugeDef2 that
 // can be used to set the rest.
-func (h *GaugeDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) *GaugeDef2[V3, V4] {
-	return &GaugeDef2[V3, V4]{
-		name: h.name,
+func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) GaugeDef2[V3, V4] {
+	return GaugeDef2[V3, V4]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-			makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 		},
-		keys: *((*[2]string)(h.keys[3:])),
+		keys: *((*[2]string)(d.keys[3:])),
+		ok:   d.ok,
 	}
 }
 
 // Prefix4 sets the value of the first 4 tags, returning a GaugeDef1 that
 // can be used to set the rest.
-func (h *GaugeDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3) *GaugeDef1[V4] {
-	return &GaugeDef1[V4]{
-		name: h.name,
+func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3) GaugeDef1[V4] {
+	return GaugeDef1[V4]{
+		name: d.name,
 		prefix: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-			makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 
-			makeTag(h.keys[3], tagValueString(v3)),
+			makeTag(d.keys[3], tagValueString(v3)),
 		},
-		keys: *((*[1]string)(h.keys[4:])),
+		keys: *((*[1]string)(d.keys[4:])),
+		ok:   d.ok,
 	}
 }
 
@@ -578,6 +622,7 @@ type HistogramDef2[V0 TagValue, V1 TagValue] struct {
 	name       string
 	keys       [2]string
 	sampleRate float64
+	ok         bool
 }
 
 func NewHistogramDef2[V0 TagValue, V1 TagValue](
@@ -586,17 +631,18 @@ func NewHistogramDef2[V0 TagValue, V1 TagValue](
 	unit Unit,
 	keys [2]string,
 	sampleRate float64,
-) *HistogramDef2[V0, V1] {
-	registerDef(histogramType, name, unit, description)
-	return &HistogramDef2[V0, V1]{
+) HistogramDef2[V0, V1] {
+	ok := registerDef(histogramType, name, unit, description)
+	return HistogramDef2[V0, V1]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
+		ok:         ok,
 	}
 }
 
-func (d *HistogramDef2[V0, V1]) Values(v0 V0, v1 V1) *HistogramDef {
-	return &HistogramDef{
+func (d HistogramDef2[V0, V1]) Values(v0 V0, v1 V1) HistogramDef {
+	return HistogramDef{
 		name: d.name,
 		tags: []string{
 
@@ -605,6 +651,7 @@ func (d *HistogramDef2[V0, V1]) Values(v0 V0, v1 V1) *HistogramDef {
 			makeTag(d.keys[1], tagValueString(v1)),
 		},
 		sampleRate: d.sampleRate,
+		ok:         d.ok,
 	}
 }
 
@@ -612,6 +659,7 @@ type HistogramDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
 	name       string
 	keys       [3]string
 	sampleRate float64
+	ok         bool
 }
 
 func NewHistogramDef3[V0 TagValue, V1 TagValue, V2 TagValue](
@@ -620,17 +668,18 @@ func NewHistogramDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	unit Unit,
 	keys [3]string,
 	sampleRate float64,
-) *HistogramDef3[V0, V1, V2] {
-	registerDef(histogramType, name, unit, description)
-	return &HistogramDef3[V0, V1, V2]{
+) HistogramDef3[V0, V1, V2] {
+	ok := registerDef(histogramType, name, unit, description)
+	return HistogramDef3[V0, V1, V2]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
+		ok:         ok,
 	}
 }
 
-func (d *HistogramDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *HistogramDef {
-	return &HistogramDef{
+func (d HistogramDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) HistogramDef {
+	return HistogramDef{
 		name: d.name,
 		tags: []string{
 
@@ -641,6 +690,7 @@ func (d *HistogramDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *HistogramDef {
 			makeTag(d.keys[2], tagValueString(v2)),
 		},
 		sampleRate: d.sampleRate,
+		ok:         d.ok,
 	}
 }
 
@@ -648,6 +698,7 @@ type HistogramDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
 	name       string
 	keys       [4]string
 	sampleRate float64
+	ok         bool
 }
 
 func NewHistogramDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
@@ -656,17 +707,18 @@ func NewHistogramDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	unit Unit,
 	keys [4]string,
 	sampleRate float64,
-) *HistogramDef4[V0, V1, V2, V3] {
-	registerDef(histogramType, name, unit, description)
-	return &HistogramDef4[V0, V1, V2, V3]{
+) HistogramDef4[V0, V1, V2, V3] {
+	ok := registerDef(histogramType, name, unit, description)
+	return HistogramDef4[V0, V1, V2, V3]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
+		ok:         ok,
 	}
 }
 
-func (d *HistogramDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *HistogramDef {
-	return &HistogramDef{
+func (d HistogramDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) HistogramDef {
+	return HistogramDef{
 		name: d.name,
 		tags: []string{
 
@@ -679,6 +731,7 @@ func (d *HistogramDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *Hist
 			makeTag(d.keys[3], tagValueString(v3)),
 		},
 		sampleRate: d.sampleRate,
+		ok:         d.ok,
 	}
 }
 
@@ -686,6 +739,7 @@ type HistogramDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagVal
 	name       string
 	keys       [5]string
 	sampleRate float64
+	ok         bool
 }
 
 func NewHistogramDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue](
@@ -694,17 +748,18 @@ func NewHistogramDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 Tag
 	unit Unit,
 	keys [5]string,
 	sampleRate float64,
-) *HistogramDef5[V0, V1, V2, V3, V4] {
-	registerDef(histogramType, name, unit, description)
-	return &HistogramDef5[V0, V1, V2, V3, V4]{
+) HistogramDef5[V0, V1, V2, V3, V4] {
+	ok := registerDef(histogramType, name, unit, description)
+	return HistogramDef5[V0, V1, V2, V3, V4]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
+		ok:         ok,
 	}
 }
 
-func (d *HistogramDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *HistogramDef {
-	return &HistogramDef{
+func (d HistogramDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) HistogramDef {
+	return HistogramDef{
 		name: d.name,
 		tags: []string{
 
@@ -719,6 +774,7 @@ func (d *HistogramDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v
 			makeTag(d.keys[4], tagValueString(v4)),
 		},
 		sampleRate: d.sampleRate,
+		ok:         d.ok,
 	}
 }
 
@@ -726,6 +782,7 @@ type DistributionDef2[V0 TagValue, V1 TagValue] struct {
 	name       string
 	keys       [2]string
 	sampleRate float64
+	ok         bool
 }
 
 func NewDistributionDef2[V0 TagValue, V1 TagValue](
@@ -734,17 +791,18 @@ func NewDistributionDef2[V0 TagValue, V1 TagValue](
 	unit Unit,
 	keys [2]string,
 	sampleRate float64,
-) *DistributionDef2[V0, V1] {
-	registerDef(distributionType, name, unit, description)
-	return &DistributionDef2[V0, V1]{
+) DistributionDef2[V0, V1] {
+	ok := registerDef(distributionType, name, unit, description)
+	return DistributionDef2[V0, V1]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
+		ok:         ok,
 	}
 }
 
-func (d *DistributionDef2[V0, V1]) Values(v0 V0, v1 V1) *DistributionDef {
-	return &DistributionDef{
+func (d DistributionDef2[V0, V1]) Values(v0 V0, v1 V1) DistributionDef {
+	return DistributionDef{
 		name: d.name,
 		tags: []string{
 
@@ -753,6 +811,7 @@ func (d *DistributionDef2[V0, V1]) Values(v0 V0, v1 V1) *DistributionDef {
 			makeTag(d.keys[1], tagValueString(v1)),
 		},
 		sampleRate: d.sampleRate,
+		ok:         d.ok,
 	}
 }
 
@@ -760,6 +819,7 @@ type DistributionDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
 	name       string
 	keys       [3]string
 	sampleRate float64
+	ok         bool
 }
 
 func NewDistributionDef3[V0 TagValue, V1 TagValue, V2 TagValue](
@@ -768,17 +828,18 @@ func NewDistributionDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	unit Unit,
 	keys [3]string,
 	sampleRate float64,
-) *DistributionDef3[V0, V1, V2] {
-	registerDef(distributionType, name, unit, description)
-	return &DistributionDef3[V0, V1, V2]{
+) DistributionDef3[V0, V1, V2] {
+	ok := registerDef(distributionType, name, unit, description)
+	return DistributionDef3[V0, V1, V2]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
+		ok:         ok,
 	}
 }
 
-func (d *DistributionDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *DistributionDef {
-	return &DistributionDef{
+func (d DistributionDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) DistributionDef {
+	return DistributionDef{
 		name: d.name,
 		tags: []string{
 
@@ -789,6 +850,7 @@ func (d *DistributionDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *Distribution
 			makeTag(d.keys[2], tagValueString(v2)),
 		},
 		sampleRate: d.sampleRate,
+		ok:         d.ok,
 	}
 }
 
@@ -796,6 +858,7 @@ type DistributionDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct
 	name       string
 	keys       [4]string
 	sampleRate float64
+	ok         bool
 }
 
 func NewDistributionDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
@@ -804,17 +867,18 @@ func NewDistributionDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	unit Unit,
 	keys [4]string,
 	sampleRate float64,
-) *DistributionDef4[V0, V1, V2, V3] {
-	registerDef(distributionType, name, unit, description)
-	return &DistributionDef4[V0, V1, V2, V3]{
+) DistributionDef4[V0, V1, V2, V3] {
+	ok := registerDef(distributionType, name, unit, description)
+	return DistributionDef4[V0, V1, V2, V3]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
+		ok:         ok,
 	}
 }
 
-func (d *DistributionDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *DistributionDef {
-	return &DistributionDef{
+func (d DistributionDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) DistributionDef {
+	return DistributionDef{
 		name: d.name,
 		tags: []string{
 
@@ -827,6 +891,7 @@ func (d *DistributionDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *D
 			makeTag(d.keys[3], tagValueString(v3)),
 		},
 		sampleRate: d.sampleRate,
+		ok:         d.ok,
 	}
 }
 
@@ -834,6 +899,7 @@ type DistributionDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 Tag
 	name       string
 	keys       [5]string
 	sampleRate float64
+	ok         bool
 }
 
 func NewDistributionDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue](
@@ -842,17 +908,18 @@ func NewDistributionDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 
 	unit Unit,
 	keys [5]string,
 	sampleRate float64,
-) *DistributionDef5[V0, V1, V2, V3, V4] {
-	registerDef(distributionType, name, unit, description)
-	return &DistributionDef5[V0, V1, V2, V3, V4]{
+) DistributionDef5[V0, V1, V2, V3, V4] {
+	ok := registerDef(distributionType, name, unit, description)
+	return DistributionDef5[V0, V1, V2, V3, V4]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
+		ok:         ok,
 	}
 }
 
-func (d *DistributionDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *DistributionDef {
-	return &DistributionDef{
+func (d DistributionDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) DistributionDef {
+	return DistributionDef{
 		name: d.name,
 		tags: []string{
 
@@ -867,153 +934,166 @@ func (d *DistributionDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3
 			makeTag(d.keys[4], tagValueString(v4)),
 		},
 		sampleRate: d.sampleRate,
+		ok:         d.ok,
 	}
 }
 
-type SetDef2[K any, V0 TagValue, V1 TagValue] struct {
+type SetDef2[V0 TagValue, V1 TagValue] struct {
 	name       string
 	keys       [2]string
 	sampleRate float64
+	ok         bool
 }
 
-func NewSetDef2[K any, V0 TagValue, V1 TagValue](
+func NewSetDef2[V0 TagValue, V1 TagValue](
 	name string,
 	description string,
 	unit Unit,
 	keys [2]string,
 	sampleRate float64,
-) *SetDef2[K, V0, V1] {
-	registerDef(setType, name, unit, description)
-	return &SetDef2[K, V0, V1]{
+) SetDef2[V0, V1] {
+	ok := registerDef(setType, name, unit, description)
+	return SetDef2[V0, V1]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
+		ok:         ok,
 	}
 }
 
-func (h *SetDef2[K, V0, V1]) Values(v0 V0, v1 V1) *SetDef[K] {
-	return &SetDef[K]{
-		name: h.name,
+func (d SetDef2[V0, V1]) Values(v0 V0, v1 V1) SetDef {
+	return SetDef{
+		name: d.name,
 		tags: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 		},
-		sampleRate: h.sampleRate,
+		sampleRate: d.sampleRate,
+		ok:         d.ok,
 	}
 }
 
-type SetDef3[K any, V0 TagValue, V1 TagValue, V2 TagValue] struct {
+type SetDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
 	name       string
 	keys       [3]string
 	sampleRate float64
+	ok         bool
 }
 
-func NewSetDef3[K any, V0 TagValue, V1 TagValue, V2 TagValue](
+func NewSetDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	name string,
 	description string,
 	unit Unit,
 	keys [3]string,
 	sampleRate float64,
-) *SetDef3[K, V0, V1, V2] {
-	registerDef(setType, name, unit, description)
-	return &SetDef3[K, V0, V1, V2]{
+) SetDef3[V0, V1, V2] {
+	ok := registerDef(setType, name, unit, description)
+	return SetDef3[V0, V1, V2]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
+		ok:         ok,
 	}
 }
 
-func (h *SetDef3[K, V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) *SetDef[K] {
-	return &SetDef[K]{
-		name: h.name,
+func (d SetDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) SetDef {
+	return SetDef{
+		name: d.name,
 		tags: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-			makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 		},
-		sampleRate: h.sampleRate,
+		sampleRate: d.sampleRate,
+		ok:         d.ok,
 	}
 }
 
-type SetDef4[K any, V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
+type SetDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
 	name       string
 	keys       [4]string
 	sampleRate float64
+	ok         bool
 }
 
-func NewSetDef4[K any, V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
+func NewSetDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	name string,
 	description string,
 	unit Unit,
 	keys [4]string,
 	sampleRate float64,
-) *SetDef4[K, V0, V1, V2, V3] {
-	registerDef(setType, name, unit, description)
-	return &SetDef4[K, V0, V1, V2, V3]{
+) SetDef4[V0, V1, V2, V3] {
+	ok := registerDef(setType, name, unit, description)
+	return SetDef4[V0, V1, V2, V3]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
+		ok:         ok,
 	}
 }
 
-func (h *SetDef4[K, V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) *SetDef[K] {
-	return &SetDef[K]{
-		name: h.name,
+func (d SetDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) SetDef {
+	return SetDef{
+		name: d.name,
 		tags: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-			makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 
-			makeTag(h.keys[3], tagValueString(v3)),
+			makeTag(d.keys[3], tagValueString(v3)),
 		},
-		sampleRate: h.sampleRate,
+		sampleRate: d.sampleRate,
+		ok:         d.ok,
 	}
 }
 
-type SetDef5[K any, V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue] struct {
+type SetDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue] struct {
 	name       string
 	keys       [5]string
 	sampleRate float64
+	ok         bool
 }
 
-func NewSetDef5[K any, V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue](
+func NewSetDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue](
 	name string,
 	description string,
 	unit Unit,
 	keys [5]string,
 	sampleRate float64,
-) *SetDef5[K, V0, V1, V2, V3, V4] {
-	registerDef(setType, name, unit, description)
-	return &SetDef5[K, V0, V1, V2, V3, V4]{
+) SetDef5[V0, V1, V2, V3, V4] {
+	ok := registerDef(setType, name, unit, description)
+	return SetDef5[V0, V1, V2, V3, V4]{
 		name:       name,
 		keys:       keys,
 		sampleRate: sampleRate,
+		ok:         ok,
 	}
 }
 
-func (h *SetDef5[K, V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) *SetDef[K] {
-	return &SetDef[K]{
-		name: h.name,
+func (d SetDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) SetDef {
+	return SetDef{
+		name: d.name,
 		tags: []string{
 
-			makeTag(h.keys[0], tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 
-			makeTag(h.keys[1], tagValueString(v1)),
+			makeTag(d.keys[1], tagValueString(v1)),
 
-			makeTag(h.keys[2], tagValueString(v2)),
+			makeTag(d.keys[2], tagValueString(v2)),
 
-			makeTag(h.keys[3], tagValueString(v3)),
+			makeTag(d.keys[3], tagValueString(v3)),
 
-			makeTag(h.keys[4], tagValueString(v4)),
+			makeTag(d.keys[4], tagValueString(v4)),
 		},
-		sampleRate: h.sampleRate,
+		sampleRate: d.sampleRate,
+		ok:         d.ok,
 	}
 }

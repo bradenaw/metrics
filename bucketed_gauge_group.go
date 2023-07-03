@@ -16,13 +16,13 @@ type BucketedGaugeGroup struct {
 // By convention, the key for d is "bucket."
 func NewBucketedGaugeGroup(
 	m *Metrics,
-	d *GaugeDef1[string],
+	d GaugeDef1[string],
 	boundaries []float64,
 ) *BucketedGaugeGroup {
 	names := bucketNames(boundaries)
 	gauges := make([]*Gauge, len(names))
 	for i, name := range names {
-		gauges[i] = d.Values(name).Bind(m)
+		gauges[i] = m.Gauge(d.Values(name))
 	}
 	return &BucketedGaugeGroup{
 		boundaries: boundaries,
