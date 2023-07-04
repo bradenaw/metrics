@@ -5,13 +5,22 @@
 // counters logging is just a single atomic operation.
 //
 // For each metric type of Gauge, Count, Histogram, Distribution, and Set, there are a set of
-// NewMDefY methods where M is the metric type and Y is the number of tags. Calls to NewMDefY muts
-// be done at init time (ideally in a top-level var block) of a metrics.go file with names as full
+// NewMDefY methods where M is the metric type and Y is the number of tags. Calls to NewMDefY must
+// be done at init-time (ideally in a top-level var block) of a metrics.go file with names as full
 // literals so that metrics are easily greppable. Metrics not defined this way will cause the
 // process to panic if still at init-time, meaning before any code in main() has run, otherwise will
 // produce non-functional stats and produce to a gauge stat called metrics.bad_metric_definitions.
 // It's a good idea to put an alert on this stat so that if it starts logging during a deploy, you
 // know your other metrics may not be trustworthy.
+//
+// See the example folder for an example of usage.
+//
+// Generally you will have:
+//  1. metrics.NewMDefY calls in a top-level var block of metrics.go in packages that log metrics,
+//     named ending in "Def".
+//  2. metrics.New() in main(), passed down through constructors.
+//  3. At the point of logging metrics, e.g.
+//     m.Counter(myCounterDef.Values(tag1, tag2)).Add(1)
 package metrics
 
 import (
@@ -156,6 +165,54 @@ func New(p Publisher) *Metrics {
 	return m
 }
 
+// Counter returns the Counter for the given CounterDef. For metrics with tags (e.g. CounterDef2),
+// the CounterDef can be made by calling Values(), for example:
+//
+//	// ---- metrics.go -----------------------------------------------------------------------------
+//	rpcResponseDef = metrics.NewCounterDef2[string, string](
+//		"rpc_responses",
+//		"Counts responses to each RPC by method and status.",
+//		[...]string{"method", "status"},
+//		metrics.UnitResponse,
+//	)
+//
+//	// ---- at the point of logging the metric -----------------------------------------------------
+//	m.Counter(rpcResponseDef.Values(methodName, status)).Add(1)
+//
+// Metrics.Counter is relatively expensive relative to Counter.Add, so very high-throughput logging
+// should cache the result of this function:
+//
+//	// ---- at creation of RPC server --------------------------------------------------------------
+//	// rpc_responses method:get status:ok
+//	s.getOKCounter = m.Counter(rpcResponseDef.Values("get", "ok"))
+//
+//	// rpc_responses method:get status:error
+//	s.getErrorCounter = m.Counter(rpcResponseDef.Values("get", "error"))
+//
+//	// ---- inside the Get() RPC handler -----------------------------------------------------------
+//	if err == nil {
+//		s.getOKCounter.Add(1)
+//	} else {
+//		s.getErrorCounter.Add(1)
+//	}
+func (m *Metrics) Counter(d CounterDef) *Counter {
+	if !d.ok {
+		return noOpCounter
+	}
+
+	k := newMetricKey(d.name, d.tags)
+	c, ok := m.counters.Load(k)
+	if !ok {
+		c = &Counter{
+			m:    m,
+			name: d.name,
+			tags: d.tags,
+		}
+		c, _ = m.counters.LoadOrStore(k, c)
+	}
+	return c
+}
+
 func (m *Metrics) Gauge(d GaugeDef) *Gauge {
 	if !d.ok {
 		return noOpGauge
@@ -173,24 +230,6 @@ func (m *Metrics) Gauge(d GaugeDef) *Gauge {
 		g, _ = m.gauges.LoadOrStore(k, g)
 	}
 	return g
-}
-
-func (m *Metrics) Counter(d CounterDef) *Counter {
-	if !d.ok {
-		return noOpCounter
-	}
-
-	k := newMetricKey(d.name, d.tags)
-	c, ok := m.counters.Load(k)
-	if !ok {
-		c = &Counter{
-			m:    m,
-			name: d.name,
-			tags: d.tags,
-		}
-		c, _ = m.counters.LoadOrStore(k, c)
-	}
-	return c
 }
 
 func (m *Metrics) Histogram(d HistogramDef) *Histogram {
