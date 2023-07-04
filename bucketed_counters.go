@@ -3,6 +3,7 @@ package metrics
 import (
 	"fmt"
 	"math"
+	"sort"
 
 	"github.com/bradenaw/juniper/xsort"
 )
@@ -25,11 +26,16 @@ type BucketedCounter struct {
 // boundaries.
 //
 // By convention, the key for d is "bucket."
+//
+// Boundaries must be in increasing order.
 func NewBucketedCounter(
 	m *Metrics,
 	d CounterDef1[string],
 	boundaries []float64,
 ) *BucketedCounter {
+	if !boundariesSortedAndUnique(boundaries) {
+		boundaries = nil
+	}
 	names := bucketNames(boundaries)
 	counters := make([]*Counter, len(names))
 	for i, name := range names {
@@ -116,4 +122,16 @@ func LinearBuckets(start float64, step float64, n int) []float64 {
 		boundaries[i] = start + step*float64(n)
 	}
 	return boundaries
+}
+
+func boundariesSortedAndUnique(s []float64) bool {
+	if !sort.Float64sAreSorted(s) {
+		return false
+	}
+	for i := 0; i < len(s)-1; i++ {
+		if s[i] == s[i+1] {
+			return false
+		}
+	}
+	return true
 }

@@ -29,11 +29,16 @@ type BucketedGaugeGroup struct {
 // bucket.
 //
 // By convention, the key for d is "bucket."
+//
+// Boundaries must be in sorted order.
 func NewBucketedGaugeGroup(
 	m *Metrics,
 	d GaugeDef1[string],
 	boundaries []float64,
 ) *BucketedGaugeGroup {
+	if !boundariesSortedAndUnique(boundaries) {
+		boundaries = nil
+	}
 	names := bucketNames(boundaries)
 	gauges := make([]*Gauge, len(names))
 	for i, name := range names {
