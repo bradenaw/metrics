@@ -13,7 +13,7 @@ func ExampleBucketedGaugeGroup() {
 			"connections_by_active_streams",
 			"The number of open TCP connections by the number of active streams on each.",
 			metrics.Unit(""),
-			"bucket", // key
+			[...]string{"bucket"}, // key
 		)
 	)
 

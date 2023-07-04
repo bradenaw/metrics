@@ -141,6 +141,7 @@ func NewHistogramDef(
 
 type HistogramDef1[V0 TagValue] struct {
 	name       string
+	prefix     []string
 	keys       [1]string
 	sampleRate float64
 	ok         bool
@@ -204,6 +205,7 @@ func NewDistributionDef(
 
 type DistributionDef1[V0 TagValue] struct {
 	name       string
+	prefix     []string
 	keys       [1]string
 	sampleRate float64
 	ok         bool
@@ -267,6 +269,7 @@ func NewSetDef(
 
 type SetDef1[V0 TagValue] struct {
 	name       string
+	prefix     []string
 	keys       [1]string
 	sampleRate float64
 	ok         bool

@@ -15,9 +15,10 @@ func main() {
 	fmt.Println()
 
 	type vars struct {
-		N      int
-		Ns     []int
-		Metric string
+		N          int
+		Ns         []int
+		Metric     string
+		SampleRate bool
 	}
 
 	n := 6
@@ -26,60 +27,58 @@ func main() {
 		ns[j] = j
 	}
 
-	for _, metric := range []string{"Counter", "Gauge"} {
+	type metricOpts struct {
+		Name       string
+		SampleRate bool
+	}
+
+	for _, metric := range []metricOpts{
+		{Name: "Counter", SampleRate: false},
+		{Name: "Gauge", SampleRate: false},
+		{Name: "Histogram", SampleRate: true},
+		{Name: "Distribution", SampleRate: true},
+		{Name: "Set", SampleRate: true},
+	} {
 		for i := 2; i < n; i++ {
-			counterGaugeTmpl.Execute(os.Stdout, vars{
-				N:      i,
-				Ns:     ns[:i],
-				Metric: metric,
+			metricTmpl.Execute(os.Stdout, vars{
+				N:          i,
+				Ns:         ns[:i],
+				Metric:     metric.Name,
+				SampleRate: metric.SampleRate,
 			})
 
 			for k := 1; k <= i-1; k++ {
 				bindPrefixTmpl.Execute(os.Stdout, struct {
-					N        int
-					Ns       []int
-					K        int
-					Ks       []int
-					NMinusK  int
-					NMinusKs []int
-					Metric   string
+					N          int
+					Ns         []int
+					K          int
+					Ks         []int
+					NMinusK    int
+					NMinusKs   []int
+					Metric     string
+					SampleRate bool
 				}{
-					N:        i,
-					Ns:       ns[:i],
-					K:        k,
-					Ks:       ns[:k],
-					NMinusK:  i - k,
-					NMinusKs: ns[k:i],
-					Metric:   metric,
+					N:          i,
+					Ns:         ns[:i],
+					K:          k,
+					Ks:         ns[:k],
+					NMinusK:    i - k,
+					NMinusKs:   ns[k:i],
+					Metric:     metric.Name,
+					SampleRate: metric.SampleRate,
 				})
 			}
 		}
 	}
-	for _, metric := range []string{"Histogram", "Distribution"} {
-		for i := 2; i < n; i++ {
-			histogramDistributionTmpl.Execute(os.Stdout, vars{
-				N:      i,
-				Ns:     ns[:i],
-				Metric: metric,
-			})
-		}
-	}
-
-	for i := 2; i < n; i++ {
-		setTmpl.Execute(os.Stdout, vars{
-			N:      i,
-			Ns:     ns[:i],
-			Metric: "Set",
-		})
-	}
 }
 
-var counterGaugeTmpl = template.Must(template.New("name").Parse(`
+var metricTmpl = template.Must(template.New("name").Parse(`
 type {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}] struct {
-	name   string
-	prefix []string
-	keys   [{{.N}}]string
-	ok     bool
+	name       string
+	prefix     []string
+	keys       [{{.N}}]string
+	{{if .SampleRate}} sampleRate float64 {{end}}
+	ok         bool
 }
 
 func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
@@ -87,6 +86,7 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	description string,
 	unit Unit,
 	keys [{{.N}}]string,
+	{{if .SampleRate}} sampleRate float64, {{end}}
 ) {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}] {
 	{{range .Ns}}
 	var zero{{.}} V{{.}}
@@ -104,13 +104,14 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 		},
 	)
 	return {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]{
-		name: name,
-		keys: keys,
-		ok:   ok,
+		name:       name,
+		keys:       keys,
+		{{if .SampleRate}}sampleRate: sampleRate,{{end}}
+		ok:         ok,
 	}
 }
 
-func (d {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}}v{{.}} V{{.}}, {{end}}) {{.Metric}}Def {
+func (d {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}} v{{.}} V{{.}}, {{end}}) {{.Metric}}Def {
 	return {{.Metric}}Def{
 		name: d.name,
 		tags: joinStrings(d.prefix, []string{
@@ -118,111 +119,8 @@ func (d {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}
 			makeTag(d.keys[{{.}}], tagValueString(v{{.}})),
 			{{ end }}
 		}),
+		{{if .SampleRate}}sampleRate: d.sampleRate,{{end}}
 		ok: d.ok,
-	}
-}
-`))
-
-var histogramDistributionTmpl = template.Must(template.New("name").Parse(`
-type {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}] struct {
-	name       string
-	keys       [{{.N}}]string
-	sampleRate float64
-	ok         bool
-}
-
-func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
-	name string,
-	description string,
-	unit Unit,
-	keys [{{.N}}]string,
-	sampleRate float64,
-) {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}] {
-	{{range .Ns}}
-	var zero{{.}} V{{.}}
-	{{ end }}
-	ok := registerDef(
-		{{.Metric}}Type,
-		name,
-		description,
-		unit,
-		keys[:],
-		[]reflect.Type{
-			{{range .Ns}}
-			reflect.TypeOf(zero{{.}}),
-			{{ end }}
-		},
-	)
-	return {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]{
-		name:       name,
-		keys:       keys,
-		sampleRate: sampleRate,
-		ok:         ok,
-	}
-}
-
-func (d {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}} v{{.}} V{{.}}, {{end}}) {{.Metric}}Def {
-	return {{.Metric}}Def{
-		name: d.name,
-		tags: []string{
-			{{range .Ns}}
-			makeTag(d.keys[{{.}}], tagValueString(v{{.}})),
-			{{ end }}
-		},
-		sampleRate: d.sampleRate,
-		ok: d.ok,
-	}
-}
-`))
-
-var setTmpl = template.Must(template.New("name").Parse(`
-type {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}] struct {
-	name       string
-	keys       [{{.N}}]string
-	sampleRate float64
-	ok         bool
-}
-
-func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
-	name string,
-	description string,
-	unit Unit,
-	keys [{{.N}}]string,
-	sampleRate float64,
-) {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}] {
-	{{range .Ns}}
-	var zero{{.}} V{{.}}
-	{{ end }}
-	ok := registerDef(
-		{{.Metric}}Type,
-		name,
-		description,
-		unit,
-		keys[:],
-		[]reflect.Type{
-			{{range .Ns}}
-			reflect.TypeOf(zero{{.}}),
-			{{ end }}
-		},
-	)
-	return {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]{
-		name:       name,
-		keys:       keys,
-		sampleRate: sampleRate,
-		ok:         ok,
-	}
-}
-
-func (d {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}} v{{.}} V{{.}}, {{end}}) {{.Metric}}Def {
-	return {{.Metric}}Def{
-		name: d.name,
-		tags: []string{
-			{{range .Ns}}
-			makeTag(d.keys[{{.}}], tagValueString(v{{.}})),
-			{{ end }}
-		},
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
 	}
 }
 `))
@@ -239,6 +137,7 @@ func (d {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Prefix{{.K}}({{rang
 			{{ end }}
 		},
 		keys: *((*[{{.NMinusK}}]string)(d.keys[{{.K}}:])),
+		{{if .SampleRate}}sampleRate: d.sampleRate,{{end}}
 		ok:   d.ok,
 	}
 }
