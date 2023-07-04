@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -33,12 +32,11 @@ func main() {
 	flag.Parse()
 
 	if showMetricNames {
-		b, err := json.MarshalIndent(metrics.Defs(), "" /*prefix*/, "  " /*indent*/)
+		err := metrics.DumpDefs()
 		if err != nil {
-			fmt.Println("couldn't marshal metrics: ", err)
+			fmt.Println("couldn't dump metrics: ", err)
 			os.Exit(1)
 		}
-		fmt.Println(string(b))
 		os.Exit(0)
 	}
 

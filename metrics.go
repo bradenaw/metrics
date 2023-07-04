@@ -25,6 +25,7 @@ package metrics
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math"
 	"reflect"
@@ -597,8 +598,10 @@ func registerDef(
 	return true
 }
 
-// Defs returns metadata about all of the metric definitions in this binary. Since metrics are
-// registered during init-time, this should be called only after main() has already begun.
+// Defs returns metadata about all of the metric definitions in this process.
+//
+// Since metrics are registered during init-time, this should be called only after main() has
+// already begun.
 func Defs() map[string]Metadata {
 	result := make(map[string]Metadata)
 	defs.Range(func(name string, m *Metadata) bool {
@@ -606,6 +609,20 @@ func Defs() map[string]Metadata {
 		return true
 	})
 	return result
+}
+
+// DumpDefs prints JSON-formatted metadata about all of the metrics defined in this process to
+// stdout.
+//
+// Since metrics are registered during init-time, this should be called only after main() has
+// already begun.
+func DumpDefs() error {
+	b, err := json.MarshalIndent(Defs(), "" /*prefix*/, "  " /*indent*/)
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(b))
+	return nil
 }
 
 func joinStrings(a []string, b []string) []string {
