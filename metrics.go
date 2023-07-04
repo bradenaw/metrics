@@ -417,14 +417,14 @@ const (
 )
 
 type Metadata struct {
-	MetricType  MetricType
-	Name        string
-	Description string
-	Unit        Unit
-	Keys        []string
-	ValueTypes  []reflect.Type
-	File        string
-	Line        int
+	MetricType  MetricType     `json:"metricType"`
+	Name        string         `json:"name"`
+	Description string         `json:"description"`
+	Unit        Unit           `json:"unit"`
+	Keys        []string       `json:"keys"`
+	ValueTypes  []reflect.Type `json:"-"`
+	File        string         `json:"file"`
+	Line        int            `json:"line"`
 }
 
 var defs xsync.Map[string, *Metadata]

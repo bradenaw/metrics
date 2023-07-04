@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -25,16 +26,19 @@ func main() {
 	var showMetricNames bool
 	flag.BoolVar(
 		&showMetricNames,
-		"metric-names",
+		"show-metrics",
 		false,
-		"If set, prints the name of all metrics defined in this binary and exits.",
+		"If set, dumps information about all of the metrics defined in this binary and exits.",
 	)
 	flag.Parse()
 
 	if showMetricNames {
-		for _, metric := range metrics.Defs() {
-			fmt.Println(metric.Name)
+		b, err := json.MarshalIndent(metrics.Defs(), "" /*prefix*/, "  " /*indent*/)
+		if err != nil {
+			fmt.Println("couldn't marshal metrics: ", err)
+			os.Exit(1)
 		}
+		fmt.Println(string(b))
 		os.Exit(0)
 	}
 
