@@ -31,6 +31,7 @@ import (
 	"reflect"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -65,8 +66,13 @@ type Publisher interface {
 }
 
 // TagValue is the value of a key:value pair in a metric tag. They are formatted the same as
-// fmt.Sprint.
+// fmt.Sprint unless the type implements TagValuer, in which case MetricTagValue() is used instead.
 type TagValue any
+
+// See the comment on type TagValue.
+type TagValuer interface {
+	MetricTagValue() string
+}
 
 type Metrics struct {
 	p        Publisher
@@ -443,7 +449,28 @@ func makeTag(key string, value TagValue) string {
 }
 
 func tagValueString(v TagValue) string {
-	return fmt.Sprint(v)
+	switch v := v.(type) {
+	case string:
+		return v
+	case bool:
+		return strconv.FormatBool(v)
+	case int:
+		return strconv.FormatInt(int64(v), 10)
+	case int32:
+		return strconv.FormatInt(int64(v), 10)
+	case int64:
+		return strconv.FormatInt(int64(v), 10)
+	case uint32:
+		return strconv.FormatUint(uint64(v), 10)
+	case uint64:
+		return strconv.FormatUint(uint64(v), 10)
+	case TagValuer:
+		return v.MetricTagValue()
+	case fmt.Stringer:
+		return v.String()
+	default:
+		return fmt.Sprint(v)
+	}
 }
 
 type MetricType string
