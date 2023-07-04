@@ -41,6 +41,7 @@ func NewBucketedGaugeGroup(
 	}
 	return &BucketedGaugeGroup{
 		boundaries: boundaries,
+		gauges:     gauges,
 		pending:    make([]float64, len(gauges)),
 	}
 }
