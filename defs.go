@@ -1,5 +1,9 @@
 package metrics
 
+import (
+	"reflect"
+)
+
 type CounterDef struct {
 	name string
 	tags []string
@@ -11,7 +15,7 @@ func NewCounterDef(
 	description string,
 	unit Unit,
 ) CounterDef {
-	ok := registerDef(counterType, name, unit, description)
+	ok := registerDef(CounterType, name, description, unit, nil, nil)
 	return CounterDef{
 		name: name,
 		ok:   ok,
@@ -29,12 +33,20 @@ func NewCounterDef1[V0 TagValue](
 	name string,
 	description string,
 	unit Unit,
-	key string,
+	keys [1]string,
 ) CounterDef1[V0] {
-	ok := registerDef(counterType, name, unit, description)
+	var zero0 V0
+	ok := registerDef(
+		CounterType,
+		name,
+		description,
+		unit,
+		keys[:],
+		[]reflect.Type{reflect.TypeOf(zero0)},
+	)
 	return CounterDef1[V0]{
 		name: name,
-		keys: [1]string{key},
+		keys: keys,
 		ok:   ok,
 	}
 }
@@ -60,7 +72,7 @@ func NewGaugeDef(
 	description string,
 	unit Unit,
 ) GaugeDef {
-	ok := registerDef(gaugeType, name, unit, description)
+	ok := registerDef(GaugeType, name, description, unit, nil, nil)
 	return GaugeDef{
 		name: name,
 		ok:   ok,
@@ -78,12 +90,20 @@ func NewGaugeDef1[V0 TagValue](
 	name string,
 	description string,
 	unit Unit,
-	key string,
+	keys [1]string,
 ) GaugeDef1[V0] {
-	ok := registerDef(gaugeType, name, unit, description)
+	var zero0 V0
+	ok := registerDef(
+		GaugeType,
+		name,
+		description,
+		unit,
+		keys[:],
+		[]reflect.Type{reflect.TypeOf(zero0)},
+	)
 	return GaugeDef1[V0]{
 		name: name,
-		keys: [1]string{key},
+		keys: keys,
 		ok:   ok,
 	}
 }
@@ -111,7 +131,7 @@ func NewHistogramDef(
 	unit Unit,
 	sampleRate float64,
 ) HistogramDef {
-	ok := registerDef(histogramType, name, unit, description)
+	ok := registerDef(HistogramType, name, description, unit, nil, nil)
 	return HistogramDef{
 		name:       name,
 		sampleRate: sampleRate,
@@ -121,7 +141,7 @@ func NewHistogramDef(
 
 type HistogramDef1[V0 TagValue] struct {
 	name       string
-	key        string
+	keys       [1]string
 	sampleRate float64
 	ok         bool
 }
@@ -130,13 +150,21 @@ func NewHistogramDef1[V0 TagValue](
 	name string,
 	description string,
 	unit Unit,
-	key string,
+	keys [1]string,
 	sampleRate float64,
 ) HistogramDef1[V0] {
-	ok := registerDef(histogramType, name, unit, description)
+	var zero0 V0
+	ok := registerDef(
+		HistogramType,
+		name,
+		description,
+		unit,
+		keys[:],
+		[]reflect.Type{reflect.TypeOf(zero0)},
+	)
 	return HistogramDef1[V0]{
 		name:       name,
-		key:        key,
+		keys:       keys,
 		sampleRate: sampleRate,
 		ok:         ok,
 	}
@@ -146,7 +174,7 @@ func (d HistogramDef1[V0]) Values(v0 V0) HistogramDef {
 	return HistogramDef{
 		name: d.name,
 		tags: []string{
-			makeTag(d.key, tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 		},
 		sampleRate: d.sampleRate,
 		ok:         d.ok,
@@ -166,7 +194,7 @@ func NewDistributionDef(
 	unit Unit,
 	sampleRate float64,
 ) DistributionDef {
-	ok := registerDef(distributionType, name, unit, description)
+	ok := registerDef(DistributionType, name, description, unit, nil, nil)
 	return DistributionDef{
 		name:       name,
 		sampleRate: sampleRate,
@@ -176,7 +204,7 @@ func NewDistributionDef(
 
 type DistributionDef1[V0 TagValue] struct {
 	name       string
-	key        string
+	keys       [1]string
 	sampleRate float64
 	ok         bool
 }
@@ -185,13 +213,21 @@ func NewDistributionDef1[V0 TagValue](
 	name string,
 	description string,
 	unit Unit,
-	key string,
+	keys [1]string,
 	sampleRate float64,
 ) DistributionDef1[V0] {
-	ok := registerDef(distributionType, name, unit, description)
+	var zero0 V0
+	ok := registerDef(
+		DistributionType,
+		name,
+		description,
+		unit,
+		keys[:],
+		[]reflect.Type{reflect.TypeOf(zero0)},
+	)
 	return DistributionDef1[V0]{
 		name:       name,
-		key:        key,
+		keys:       keys,
 		sampleRate: sampleRate,
 		ok:         ok,
 	}
@@ -201,7 +237,7 @@ func (d DistributionDef1[V0]) Values(v0 V0) DistributionDef {
 	return DistributionDef{
 		name: d.name,
 		tags: []string{
-			makeTag(d.key, tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 		},
 		sampleRate: d.sampleRate,
 		ok:         d.ok,
@@ -210,7 +246,6 @@ func (d DistributionDef1[V0]) Values(v0 V0) DistributionDef {
 
 type SetDef struct {
 	name       string
-	key        string
 	tags       []string
 	sampleRate float64
 	ok         bool
@@ -222,7 +257,7 @@ func NewSetDef(
 	unit Unit,
 	sampleRate float64,
 ) SetDef {
-	ok := registerDef(setType, name, unit, description)
+	ok := registerDef(SetType, name, description, unit, nil, nil)
 	return SetDef{
 		name:       name,
 		sampleRate: sampleRate,
@@ -232,7 +267,7 @@ func NewSetDef(
 
 type SetDef1[V0 TagValue] struct {
 	name       string
-	key        string
+	keys       [1]string
 	sampleRate float64
 	ok         bool
 }
@@ -241,13 +276,21 @@ func NewSetDef1[V0 TagValue](
 	name string,
 	description string,
 	unit Unit,
-	key string,
+	keys [1]string,
 	sampleRate float64,
 ) SetDef1[V0] {
-	ok := registerDef(setType, name, unit, description)
+	var zero0 V0
+	ok := registerDef(
+		SetType,
+		name,
+		description,
+		unit,
+		keys[:],
+		[]reflect.Type{reflect.TypeOf(zero0)},
+	)
 	return SetDef1[V0]{
 		name:       name,
-		key:        key,
+		keys:       keys,
 		sampleRate: sampleRate,
 		ok:         ok,
 	}
@@ -257,7 +300,7 @@ func (d SetDef1[V0]) Values(v0 V0) SetDef {
 	return SetDef{
 		name: d.name,
 		tags: []string{
-			makeTag(d.key, tagValueString(v0)),
+			makeTag(d.keys[0], tagValueString(v0)),
 		},
 		sampleRate: d.sampleRate,
 		ok:         d.ok,

@@ -23,6 +23,6 @@ var (
 		"function_calls",
 		"counts the number of time each function is called",
 		metrics.UnitEvent,
-		"name",
+		[...]string{"name"},
 	)
 )

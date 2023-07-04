@@ -22,19 +22,19 @@ func (f *frobber) Bar() {
 }
 
 func main() {
-	var showMetricsMetadata bool
+	var showMetricNames bool
 	flag.BoolVar(
-		&showMetricsMetadata,
-		"metrics-metadata-json",
+		&showMetricNames,
+		"metric-names",
 		false,
-		"If set, prints the metadata for the metrics reported by this process in the format "+
-			"accepted by https://docs.datadoghq.com/api/latest/metrics/#edit-metric-metadata and "+
-			"then exits.",
+		"If set, prints the name of all metrics defined in this binary and exits.",
 	)
 	flag.Parse()
 
-	if showMetricsMetadata {
-		fmt.Println(metrics.FormatMetadataJSON())
+	if showMetricNames {
+		for _, metric := range metrics.Defs() {
+			fmt.Println(metric.Name)
+		}
 		os.Exit(0)
 	}
 

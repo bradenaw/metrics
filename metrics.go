@@ -16,9 +16,9 @@ package metrics
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"math"
+	"reflect"
 	"regexp"
 	"runtime"
 	"strings"
@@ -26,7 +26,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bradenaw/juniper/xsort"
+	"github.com/bradenaw/juniper/xslices"
 	"github.com/bradenaw/juniper/xsync"
 	"golang.org/x/exp/maps"
 )
@@ -112,7 +112,7 @@ var (
 		"The number of calls to NewMGaugeY that are invalid for some reason. These definitions "+
 			"will not be able to log metrics at all.",
 		UnitItem,
-		"reason",
+		[...]string{"reason"},
 	)
 )
 
@@ -402,27 +402,28 @@ func tagValueString(v TagValue) string {
 	return fmt.Sprint(v)
 }
 
-type metricType int
+type MetricType string
 
 const (
-	counterType metricType = iota + 1
-	gaugeType
-	histogramType
-	distributionType
-	setType
+	CounterType      MetricType = "counter"
+	GaugeType        MetricType = "gauge"
+	HistogramType    MetricType = "histogram"
+	DistributionType MetricType = "distribution"
+	SetType          MetricType = "set"
 )
 
-type metadata struct {
-	metricType   metricType
-	name         string
-	unit         Unit
-	description  string
-	multipleDefs atomic.Bool
-	file         string
-	line         int
+type Metadata struct {
+	MetricType  MetricType
+	Name        string
+	Description string
+	Unit        Unit
+	Keys        []string
+	ValueTypes  []reflect.Type
+	File        string
+	Line        int
 }
 
-var defs xsync.Map[string, *metadata]
+var defs xsync.Map[string, *Metadata]
 var badDefsCallersFrames atomic.Int64
 var badDefsNotAtInit atomic.Int64
 
@@ -430,7 +431,14 @@ var badDefsNotAtInit atomic.Int64
 var nameRegexp = regexp.MustCompile("^[a-z][a-zA-Z0-9_.]{0,199}")
 
 // Returns false if the metric definition is invalid, and so should not emit.
-func registerDef(metricType metricType, name string, unit Unit, description string) bool {
+func registerDef(
+	metricType MetricType,
+	name string,
+	description string,
+	unit Unit,
+	keys []string,
+	valueTypes []reflect.Type,
+) bool {
 	pc, file, line, ok := runtime.Caller(2)
 	if !ok {
 		badDefsCallersFrames.Add(1)
@@ -460,13 +468,15 @@ func registerDef(metricType metricType, name string, unit Unit, description stri
 		))
 	}
 
-	d, loaded := defs.LoadOrStore(name, &metadata{
-		metricType:  metricType,
-		name:        name,
-		unit:        unit,
-		description: description,
-		file:        file,
-		line:        line,
+	d, loaded := defs.LoadOrStore(name, &Metadata{
+		MetricType:  metricType,
+		Name:        name,
+		Description: description,
+		Unit:        unit,
+		Keys:        xslices.Clone(keys),
+		ValueTypes:  valueTypes,
+		File:        file,
+		Line:        line,
 	})
 	if loaded {
 		panic(fmt.Sprintf(
@@ -474,7 +484,7 @@ func registerDef(metricType metricType, name string, unit Unit, description stri
 				"\t%s:%d\n"+
 				"\t%s:%d",
 			name,
-			d.file, d.line,
+			d.File, d.Line,
 			file, line,
 		))
 	}
@@ -482,73 +492,13 @@ func registerDef(metricType metricType, name string, unit Unit, description stri
 	return true
 }
 
-// Prints the metrics defined by this process in the format accepted by Datadog's API for metric
-// metadata.
-//
-// https://docs.datadoghq.com/api/latest/metrics/#edit-metric-metadata
-func FormatMetadataJSON() string {
-	ms := metadatasByName()
-	var sb strings.Builder
-
-	writeMetadataJSON := func(name string, unit Unit, description string) {
-		type metadataJSON struct {
-			Unit        string `json:"unit"`
-			Description string `json:"description"`
-		}
-
-		_, _ = sb.WriteString(name)
-		_, _ = sb.WriteString(" ")
-		b, err := json.Marshal(&metadataJSON{
-			Unit:        string(unit),
-			Description: description,
-		})
-		if err != nil {
-			panic(err)
-		}
-		_, _ = sb.Write(b)
-		_, _ = sb.WriteString("\n")
-	}
-
-	// https://docs.datadoghq.com/metrics/types
-
-	for _, m := range ms {
-		switch m.metricType {
-		case counterType, gaugeType, setType:
-			writeMetadataJSON(m.name, m.unit, m.description)
-		case histogramType:
-			for _, suffix := range [...]string{"avg", "median", "95percentile", "max"} {
-				writeMetadataJSON(m.name+"."+suffix, m.unit, m.description)
-			}
-			writeMetadataJSON(m.name+".count", UnitEvent, m.description)
-		case distributionType:
-			for _, prefix := range [...]string{
-				"avg",
-				"max",
-				"min",
-				"sum",
-				"p50",
-				"p75",
-				"p90",
-				"p95",
-				"p99",
-			} {
-				writeMetadataJSON(prefix+":"+m.name, m.unit, m.description)
-			}
-			writeMetadataJSON("count:"+m.name, UnitEvent, m.description)
-		}
-	}
-
-	return sb.String()
-}
-
-func metadatasByName() []*metadata {
-	var result []*metadata
-	defs.Range(func(_ string, m *metadata) bool {
-		result = append(result, m)
+// Defs returns metadata about all of the metric definitions in this binary. Since metrics are
+// registered during init-time, this should be called only after main() has already begun.
+func Defs() map[string]Metadata {
+	result := make(map[string]Metadata)
+	defs.Range(func(name string, m *Metadata) bool {
+		result[name] = *m
 		return true
-	})
-	xsort.Slice(result, func(a, b *metadata) bool {
-		return a.name < b.name
 	})
 	return result
 }
