@@ -4,6 +4,8 @@ type Unit string
 
 // Copied from https://docs.datadoghq.com/metrics/units/#unit-list
 const (
+	NoUnits Unit = ""
+
 	// BYTES
 	UnitBit      Unit = "bit"
 	UnitByte     Unit = "byte"
