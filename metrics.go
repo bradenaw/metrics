@@ -471,7 +471,25 @@ var badDefsCallersFrames atomic.Int64
 var badDefsNotAtInit atomic.Int64
 
 // https://docs.datadoghq.com/metrics/custom_metrics/#naming-custom-metrics
-var nameRegexp = regexp.MustCompile("^[a-z][a-zA-Z0-9_.]{0,199}")
+var nameRegexp = regexp.MustCompile("^[a-z][a-zA-Z0-9_.]{0,199}$")
+
+// https://docs.datadoghq.com/getting_started/tagging/
+//
+// : is allowed in tags, but because the first : is also used to mark the end of the key and the
+// beginning of the value, we don't allow them here.
+//
+// Also, empty string is accepted, which makes the tag entirely into whatever the value is.
+var tagKeyRegexp = regexp.MustCompile("^(|[a-z][a-zA-Z0-9_./-]{0,199})$")
+
+// From https://docs.datadoghq.com/getting_started/tagging/
+var reservedTagKeys = map[string]struct{}{
+	"host":    {},
+	"device":  {},
+	"source":  {},
+	"service": {},
+	"env":     {},
+	"version": {},
+}
 
 // Returns false if the metric definition is invalid, and so should not emit.
 func registerDef(
@@ -497,9 +515,14 @@ func registerDef(
 
 	if !nameRegexp.MatchString(name) {
 		panic(fmt.Sprintf(
-			"metric definition's name doesn't match required %s\n\n"+
+			"metric definition's name %q doesn't match required %s (see "+
+				"https://docs.datadoghq.com/metrics/custom_metrics/#naming-custom-metrics)\n\n"+
 				"metric %s defined at %s:%d",
-			nameRegexp, name, file, line,
+			name,
+			nameRegexp,
+			name,
+			file,
+			line,
 		))
 	}
 	if !strings.HasSuffix(file, "/metrics.go") {
@@ -530,6 +553,45 @@ func registerDef(
 			d.File, d.Line,
 			file, line,
 		))
+	}
+
+	seenKeys := make(map[string]bool, len(keys))
+	for _, key := range keys {
+		_, ok := reservedTagKeys[key]
+		if ok {
+			panic(fmt.Sprintf(
+				"metric used reserved tag key %q (see "+
+					"https://docs.datadoghq.com/getting_started/tagging/#overview)\n\n"+
+					"metric %s defined at %s:%d",
+				key,
+				name,
+				file,
+				line,
+			))
+		}
+		if !tagKeyRegexp.MatchString(key) {
+			panic(fmt.Sprintf(
+				"metric tag key %q doesn't match %s (see "+
+					"https://docs.datadoghq.com/getting_started/tagging/#define-tags)\n\n"+
+					"metric %s defined at %s:%d",
+				key,
+				tagKeyRegexp,
+				name,
+				file,
+				line,
+			))
+		}
+		if key != "" && seenKeys[key] {
+			panic(fmt.Sprintf(
+				"duplicate tag key %q\n\n"+
+					"metric %s defined at %s:%d",
+				key,
+				name,
+				file,
+				line,
+			))
+		}
+		seenKeys[key] = true
 	}
 
 	return true
