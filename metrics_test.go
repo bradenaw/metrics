@@ -1,64 +1,131 @@
-package metrics_test
+package metrics
 
 import (
-	"github.com/bradenaw/metrics"
-	"sync"
+	"testing"
 )
 
-func ExampleBucketedGaugeGroup() {
-	// --- metrics.go ------------------------------------------------------------------------------
+func TestBucketedGaugeGroup(t *testing.T) {
+	d := GaugeDef1[string]{
+		name: "test_bucketed_gauge_group",
+		keys: [...]string{"bucket"},
+		ok:   true,
+	}
 
-	var (
-		streamsPerConnectionDef = metrics.NewGaugeDef1[string](
-			"connections_by_active_streams",
-			"The number of open TCP connections by the number of active streams on each.",
-			metrics.Unit(""),
-			[...]string{"bucket"}, // key
+	gg := NewBucketedGaugeGroup(NoOpMetrics, d, []float64{1, 10, 100, 1000})
+
+	// lt_1
+	gg.Observe(0)
+	gg.Observe(0)
+
+	// gte_1_lt_10
+	gg.Observe(1)
+	gg.Observe(2)
+	gg.Observe(9)
+
+	// gte_10_lt_100
+	gg.Observe(10)
+	gg.Observe(11)
+	gg.Observe(12)
+	gg.Observe(99)
+
+	// gte_100_lt_1000
+	gg.Observe(100)
+	gg.Observe(101)
+	gg.Observe(102)
+	gg.Observe(103)
+	gg.Observe(999)
+
+	// gte_1000
+	gg.Observe(1000)
+	gg.Observe(1001)
+	gg.Observe(1002)
+	gg.Observe(1003)
+	gg.Observe(1004)
+	gg.Observe(1005)
+
+	gg.Emit()
+
+	type expected struct {
+		bucket string
+		count  int
+	}
+	for _, e := range []expected{
+		{"lt_1", 2},
+		{"gte_1_lt_10", 3},
+		{"gte_10_lt_100", 4},
+		{"gte_100_lt_1000", 5},
+		{"gte_1000", 6},
+	} {
+		g, ok := NoOpMetrics.gauges.Load(
+			newMetricKey("test_bucketed_gauge_group", []string{"bucket:" + e.bucket}),
 		)
-	)
-
-	// --- server.go -------------------------------------------------------------------------------
-
-	type Connection struct {
-		// ...
+		if !ok {
+			t.Fatalf("bucket %s didn't get created", e.bucket)
+		}
+		if g.value() != float64(e.count) {
+			t.Fatalf("bucket %s has value %f, expected %d", e.bucket, g.value(), e.count)
+		}
 	}
-	type Stream struct {
-		// ...
-	}
+}
 
-	type Server struct {
-		// Should be called from Server.Close().
-		stopEmittingMetrics func()
-
-		m           sync.Mutex
-		connections map[*Connection][]*Stream
+func TestBucketedCounter(t *testing.T) {
+	d := CounterDef1[string]{
+		name: "test_bucketed_counter",
+		keys: [...]string{"bucket"},
+		ok:   true,
 	}
 
-	// Imagine this is func NewServer():
-	_ = func(mtr *metrics.Metrics) *Server {
-		s := &Server{ /* ... */ }
-		streamsPerConnection := metrics.NewBucketedGaugeGroup(
-			mtr,
-			streamsPerConnectionDef,
-			// These are the boundaries between buckets. This causes these gauges to be made:
-			//   connections_by_active_streams   bucket:lt_1
-			//   connections_by_active_streams   bucket:gte_1_lt_10
-			//   connections_by_active_streams   bucket:gte_10_lt_100
-			//   connections_by_active_streams   bucket:gte_100
-			[]float64{1, 10, 100},
+	bc := NewBucketedCounter(NoOpMetrics, d, []float64{1, 10, 100, 1000})
+
+	// lt_1
+	bc.Observe(0)
+	bc.Observe(0)
+
+	// gte_1_lt_10
+	bc.Observe(1)
+	bc.Observe(2)
+	bc.Observe(9)
+
+	// gte_10_lt_100
+	bc.Observe(10)
+	bc.Observe(11)
+	bc.Observe(12)
+	bc.Observe(99)
+
+	// gte_100_lt_1000
+	bc.Observe(100)
+	bc.Observe(101)
+	bc.Observe(102)
+	bc.Observe(103)
+	bc.Observe(999)
+
+	// gte_1000
+	bc.Observe(1000)
+	bc.Observe(1001)
+	bc.Observe(1002)
+	bc.Observe(1003)
+	bc.Observe(1004)
+	bc.Observe(1005)
+
+	type expected struct {
+		bucket string
+		count  int
+	}
+	for _, e := range []expected{
+		{"lt_1", 2},
+		{"gte_1_lt_10", 3},
+		{"gte_10_lt_100", 4},
+		{"gte_100_lt_1000", 5},
+		{"gte_1000", 6},
+	} {
+		c, ok := NoOpMetrics.counters.Load(
+			newMetricKey("test_bucketed_counter", []string{"bucket:" + e.bucket}),
 		)
-
-		// EveryFlush will be called at least once per 10-second metrics interval. It is called
-		// infrequently so it's acceptable to do slightly-expensive metrics computation.
-		s.stopEmittingMetrics = mtr.EveryFlush(func() {
-			s.m.Lock()
-			defer s.m.Unlock()
-			for _, streams := range s.connections {
-				streamsPerConnection.Observe(float64(len(streams)))
-			}
-			streamsPerConnection.Emit()
-		})
-
-		return s
+		if !ok {
+			t.Fatalf("bucket %s didn't get created", e.bucket)
+		}
+		if c.v.Load() != int64(e.count) {
+			t.Fatalf("bucket %s has value %d, expected %d", e.bucket, c.v.Load(), e.count)
+		}
 	}
 }

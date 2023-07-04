@@ -304,8 +304,12 @@ func (g *Gauge) Unset() {
 	g.v.Store(math.Float64bits(math.NaN()))
 }
 
+func (g *Gauge) value() float64 {
+	return math.Float64frombits(g.v.Load())
+}
+
 func (g *Gauge) publish() {
-	v := math.Float64frombits(g.v.Load())
+	v := g.value()
 	if math.IsNaN(v) {
 		return
 	}

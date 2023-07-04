@@ -43,6 +43,9 @@ func NewBucketedCounter(
 
 func (b *BucketedCounter) Observe(v float64) {
 	idx := xsort.Search(b.boundaries, xsort.OrderedLess[float64], v)
+	if idx < len(b.boundaries) && v == b.boundaries[idx] {
+		idx++
+	}
 	b.counters[idx].Add(1)
 }
 
@@ -66,16 +69,16 @@ func bucketNames(boundaries []float64) []string {
 	}
 
 	results := make([]string, len(boundaries)+1)
-	results[0] = fmt.Sprintf("lt_%f", boundaries[0])
+	results[0] = fmt.Sprintf("lt_%g", boundaries[0])
 	for i := 1; i < len(boundaries); i++ {
 		results[i] = fmt.Sprintf(
-			"gte_%f_lt_%f",
+			"gte_%g_lt_%g",
 			boundaries[i-1],
 			boundaries[i],
 		)
 	}
 	results[len(boundaries)] = fmt.Sprintf(
-		"gte_%f",
+		"gte_%g",
 		boundaries[len(boundaries)-1],
 	)
 	return results

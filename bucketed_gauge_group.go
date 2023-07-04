@@ -49,6 +49,9 @@ func NewBucketedGaugeGroup(
 // Observe adds one to the bucket that v falls in.
 func (gg *BucketedGaugeGroup) Observe(v float64) {
 	idx := xsort.Search(gg.boundaries, xsort.OrderedLess[float64], v)
+	if idx < len(gg.boundaries) && v == gg.boundaries[idx] {
+		idx++
+	}
 	gg.pending[idx]++
 }
 
