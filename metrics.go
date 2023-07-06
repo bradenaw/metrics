@@ -67,6 +67,8 @@ type Publisher interface {
 
 // TagValue is the value of a key:value pair in a metric tag. They are formatted the same as
 // fmt.Sprint unless the type implements TagValuer, in which case MetricTagValue() is used instead.
+//
+// TagValues that produce the same string are considered the same.
 type TagValue any
 
 // See the comment on type TagValue.
@@ -172,8 +174,11 @@ func New(p Publisher) *Metrics {
 	return m
 }
 
-// Counter returns the Counter for the given CounterDef. For metrics with tags (e.g. CounterDef2),
-// the CounterDef can be made by calling Values(), for example:
+// Counter returns the Counter for the given CounterDef. For the same CounterDef, including one
+// produced from CounterDefY.Values() with the same values, this will return the same *Counter.
+//
+// For metrics with tags (e.g. CounterDef2), the CounterDef can be made by calling Values(), for
+// example:
 //
 //	// ---- metrics.go -----------------------------------------------------------------------------
 //	rpcResponseDef = metrics.NewCounterDef2[string, string](
@@ -220,6 +225,8 @@ func (m *Metrics) Counter(d CounterDef) *Counter {
 	return c
 }
 
+// Gauge returns the Gauge for the given GaugeDef. For the same GaugeDef, including one produced
+// from GaugeDefY.Values() with the same values, this will return the same *Gauge.
 func (m *Metrics) Gauge(d GaugeDef) *Gauge {
 	if !d.ok {
 		return noOpGauge
@@ -239,6 +246,9 @@ func (m *Metrics) Gauge(d GaugeDef) *Gauge {
 	return g
 }
 
+// Histogram returns the Histogram for the given HistogramDef. For the same HistogramDef, including
+// one produced from HistogramDefY.Values() with the same values, this will return the same
+// *Histogram.
 func (m *Metrics) Histogram(d HistogramDef) *Histogram {
 	if !d.ok {
 		return noOpHistogram
@@ -258,6 +268,9 @@ func (m *Metrics) Histogram(d HistogramDef) *Histogram {
 	return c
 }
 
+// Distribution returns the Distribution for the given DistributionDef. For the same
+// DistributionDef, including one produced from DistributionDefY.Values() with the same values, this
+// will return the same *Distribution.
 func (m *Metrics) Distribution(d DistributionDef) *Distribution {
 	if !d.ok {
 		return noOpDistribution
@@ -277,6 +290,8 @@ func (m *Metrics) Distribution(d DistributionDef) *Distribution {
 	return c
 }
 
+// Set returns the Set for the given SetDef. For the same SetDef, including one produced from
+// SetDefY.Values() with the same values, this will return the same *Set.
 func (m *Metrics) Set(d SetDef) *Set {
 	if !d.ok {
 		return noOpSet
@@ -316,6 +331,8 @@ func (m *Metrics) EveryFlush(f func()) func() {
 	}
 }
 
+// Flush immediately sends pending metric data to the Publisher given to m in New() and blocks
+// until complete.
 func (m *Metrics) Flush() {
 	if m.flushNow == nil {
 		return
@@ -327,6 +344,7 @@ func (m *Metrics) Flush() {
 	<-flushed
 }
 
+// Close frees resources associated with m. After Close, m should not be used.
 func (m *Metrics) Close() {
 	m.bg.StopAndWait()
 }
@@ -335,6 +353,9 @@ func (m *Metrics) Close() {
 //
 // Unlike Datadog's native gauge in the statsd client, Gauges report this value until the end of the
 // process or until explicitly Unset().
+//
+// Gauges are good for measuring states, for example the number of open connections or the size of a
+// buffer.
 type Gauge struct {
 	m    *Metrics
 	name string
@@ -342,10 +363,14 @@ type Gauge struct {
 	v    atomic.Uint64
 }
 
+// Set sets the value of the gauge. The gauge will continue to have this value until the next Set or
+// Unset, or the end of the process.
 func (g *Gauge) Set(v float64) {
 	g.v.Store(math.Float64bits(v))
 }
 
+// Unset unsets the value of the gauge. If the Gauge remains unset, it will have no value for time
+// buckets after this.
 func (g *Gauge) Unset() {
 	g.v.Store(math.Float64bits(math.NaN()))
 }
@@ -363,6 +388,9 @@ func (g *Gauge) publish() {
 }
 
 // Counter is a metric that keeps track of the number of events that happen per time interval.
+//
+// Counters are good for measuring the rate of events, for example requests per second, or measuring
+// the ratio between events by using tags, such as error rate.
 type Counter struct {
 	m    *Metrics
 	name string
@@ -381,6 +409,11 @@ func (c *Counter) publish() {
 	}
 }
 
+// Histogram produces quantile metrics, e.g. 50th, 90th, 99th percentiles of the values passed to
+// Observe for each time bucket.
+//
+// It is not statistically accurate (sometimes very poorly so) to aggregate over many tag values
+// (e.g. task or host). Use Distribution instead.
 type Histogram struct {
 	m          *Metrics
 	name       string
@@ -392,6 +425,10 @@ func (h *Histogram) Observe(value float64) {
 	h.m.p.Histogram(h.name, value, h.tags, h.sampleRate)
 }
 
+// Distribution produces quantile metrics, e.g. 50th, 90th, 99th percentiles of the values passed to
+// Observe for each time bucket.
+//
+// It is more accurate than Histogram, but more expensive.
 type Distribution struct {
 	m          *Metrics
 	name       string
@@ -403,6 +440,8 @@ func (h *Distribution) Observe(value float64) {
 	h.m.p.Distribution(h.name, value, h.tags, h.sampleRate)
 }
 
+// Set measures the cardinality of values passed to Observe for each time bucket, that is, it
+// estimates how many _unique_ values have been passed to it.
 type Set struct {
 	m          *Metrics
 	name       string

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"text/template"
 )
 
@@ -15,10 +16,11 @@ func main() {
 	fmt.Println()
 
 	type vars struct {
-		N          int
-		Ns         []int
-		Metric     string
-		SampleRate bool
+		N           int
+		Ns          []int
+		Metric      string
+		MetricLower string
+		SampleRate  bool
 	}
 
 	n := 6
@@ -41,10 +43,11 @@ func main() {
 	} {
 		for i := 1; i < n; i++ {
 			metricTmpl.Execute(os.Stdout, vars{
-				N:          i,
-				Ns:         ns[:i],
-				Metric:     metric.Name,
-				SampleRate: metric.SampleRate,
+				N:           i,
+				Ns:          ns[:i],
+				Metric:      metric.Name,
+				MetricLower: strings.ToLower(metric.Name),
+				SampleRate:  metric.SampleRate,
 			})
 
 			for k := 1; k <= i-1; k++ {
@@ -73,6 +76,7 @@ func main() {
 }
 
 var metricTmpl = template.Must(template.New("name").Parse(`
+// {{.Metric}}Def{{.N}} is the definition of a {{.MetricLower}} metric with {{.N}} tag(s).
 type {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}] struct {
 	name       string
 	prefix     []string
@@ -81,6 +85,10 @@ type {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}] struct {
 	ok         bool
 }
 
+// New{{.Metric}}Def{{.N}} defines a {{.MetricLower}} metric with {{.N}} tag(s).
+//
+// It must be called from a top-level var block in a file called metrics.go, otherwise it will panic
+// (if main() has not yet started) or return an inert def that will not produce any data.
 func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	name string,
 	description string,
@@ -111,6 +119,8 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	}
 }
 
+// Values returns a {{.Metric}}Def that has all of the given tag values bound. It can be passed to
+// Metrics.{{.Metric}}() to produce a metric to log data to.
 func (d {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}} v{{.}} V{{.}}, {{end}}) {{.Metric}}Def {
 	return {{.Metric}}Def{
 		name: d.name,
