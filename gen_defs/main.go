@@ -39,7 +39,7 @@ func main() {
 		{Name: "Distribution", SampleRate: true},
 		{Name: "Set", SampleRate: true},
 	} {
-		for i := 2; i < n; i++ {
+		for i := 1; i < n; i++ {
 			metricTmpl.Execute(os.Stdout, vars{
 				N:          i,
 				Ns:         ns[:i],
