@@ -592,7 +592,7 @@ func registerDef(
 			line,
 		))
 	}
-	if !strings.HasSuffix(file, "/metrics.go") {
+	if !(strings.HasSuffix(file, "/metrics.go") || strings.HasSuffix(file, "_example_test.go")) {
 		panic(fmt.Sprintf(
 			"metric definitions must be defined in init() or a top-level var block of a "+
 				"file named metrics.go\n\n"+

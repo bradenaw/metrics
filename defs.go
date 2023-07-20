@@ -1,9 +1,5 @@
 package metrics
 
-import (
-	"reflect"
-)
-
 type CounterDef struct {
 	name string
 	tags []string
