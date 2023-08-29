@@ -320,13 +320,28 @@ func (m *Metrics) EveryFlush(f func()) func() {
 	m.m.Lock()
 	defer m.m.Unlock()
 
+	// Held during f so that the returned stop-reporting can be sure that f will not be in progress
+	// nor called again once it returns.
+	var fm sync.Mutex
+	done := false
+
 	id := m.nextID
 	m.nextID++
-	m.polls[id] = f
+	m.polls[id] = func() {
+		fm.Lock()
+		defer fm.Unlock()
+		if done {
+			return
+		}
+		f()
+	}
 
 	return func() {
 		m.m.Lock()
 		defer m.m.Unlock()
+		fm.Lock()
+		defer fm.Unlock()
+		done = true
 		delete(m.polls, id)
 	}
 }
