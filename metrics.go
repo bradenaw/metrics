@@ -337,10 +337,10 @@ func (m *Metrics) EveryFlush(f func()) func() {
 	}
 
 	return func() {
-		m.m.Lock()
-		defer m.m.Unlock()
 		fm.Lock()
 		defer fm.Unlock()
+		m.m.Lock()
+		defer m.m.Unlock()
 		done = true
 		delete(m.polls, id)
 	}
