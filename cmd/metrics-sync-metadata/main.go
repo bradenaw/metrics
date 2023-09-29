@@ -40,6 +40,8 @@ For example:
 	package main
 
 	import (
+		"flag"
+
 		"github.com/bradenaw/metrics"
 	)
 
@@ -75,12 +77,9 @@ func main2() error {
 	flag.Usage = func() {
 		out := flag.CommandLine.Output()
 		fmt.Fprintf(out, "Usage of %s:\n", os.Args[0])
+		fmt.Fprint(out, usage)
 		fmt.Fprint(out, "\n\n")
-		fmt.Fprintf(
-			out,
-
-			os.Args[0],
-		)
+		fmt.Fprint(out, "Flags:\n")
 		flag.PrintDefaults()
 	}
 	flag.Parse()
