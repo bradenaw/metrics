@@ -37,7 +37,6 @@ func main() {
 	for _, metric := range []metricOpts{
 		{Name: "Counter", SampleRate: false},
 		{Name: "Gauge", SampleRate: false},
-		{Name: "Histogram", SampleRate: true},
 		{Name: "Distribution", SampleRate: true},
 		{Name: "Set", SampleRate: true},
 	} {

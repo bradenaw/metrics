@@ -4,14 +4,14 @@
 // This is done by separating tags from logging metrics so that for frequently-logged gauges and
 // counters logging is just a single atomic operation.
 //
-// For each metric type of Gauge, Count, Histogram, Distribution, and Set, there are a set of
-// NewMDefY methods where M is the metric type and Y is the number of tags. Calls to NewMDefY must
-// be done at init-time (ideally in a top-level var block) of a metrics.go file with names as full
-// literals so that metrics are easily greppable. Metrics not defined this way will cause the
-// process to panic if still at init-time, meaning before any code in main() has run, otherwise will
-// produce non-functional stats and produce to a gauge stat called metrics.bad_metric_definitions.
-// It's a good idea to put an alert on this stat so that if it starts logging during a deploy, you
-// know your other metrics may not be trustworthy.
+// For each metric type of Gauge, Count, Distribution, and Set, there are a set of NewMDefY methods
+// where M is the metric type and Y is the number of tags. Calls to NewMDefY must be done at
+// init-time (ideally in a top-level var block) of a metrics.go file with names as full literals so
+// that metrics are easily greppable. Metrics not defined this way will cause the process to panic
+// if still at init-time, meaning before any code in main() has run, otherwise will produce
+// non-functional stats and produce to a gauge stat called metrics.bad_metric_definitions.  It's a
+// good idea to put an alert on this stat so that if it starts logging during a deploy, you know
+// your other metrics may not be trustworthy.
 //
 // See the example folder for an example of usage.
 //
@@ -60,7 +60,6 @@ const (
 type Publisher interface {
 	Gauge(name string, value float64, tags []string, rate float64) error
 	Count(name string, value int64, tags []string, rate float64) error
-	Histogram(name string, value float64, tags []string, rate float64) error
 	Distribution(name string, value float64, tags []string, rate float64) error
 	Set(name string, value string, tags []string, rate float64) error
 }
@@ -83,7 +82,6 @@ type Metrics struct {
 
 	gauges        xsync.Map[metricKey, *Gauge]
 	counters      xsync.Map[metricKey, *Counter]
-	histograms    xsync.Map[metricKey, *Histogram]
 	distributions xsync.Map[metricKey, *Distribution]
 	sets          xsync.Map[metricKey, *Set]
 
@@ -99,9 +97,6 @@ func (p noOpPublisher) Gauge(name string, value float64, tags []string, rate flo
 	return nil
 }
 func (p noOpPublisher) Count(name string, value int64, tags []string, rate float64) error {
-	return nil
-}
-func (p noOpPublisher) Histogram(name string, value float64, tags []string, rate float64) error {
 	return nil
 }
 func (p noOpPublisher) Distribution(name string, value float64, tags []string, rate float64) error {
@@ -121,7 +116,6 @@ var (
 	// can't be logged.
 	noOpCounter      = &Counter{m: NoOpMetrics}
 	noOpGauge        = &Gauge{m: NoOpMetrics}
-	noOpHistogram    = &Histogram{m: NoOpMetrics}
 	noOpDistribution = &Distribution{m: NoOpMetrics}
 	noOpSet          = &Set{m: NoOpMetrics}
 
@@ -244,28 +238,6 @@ func (m *Metrics) Gauge(d GaugeDef) *Gauge {
 		g, _ = m.gauges.LoadOrStore(k, g)
 	}
 	return g
-}
-
-// Histogram returns the Histogram for the given HistogramDef. For the same HistogramDef, including
-// one produced from HistogramDefY.Values() with the same values, this will return the same
-// *Histogram.
-func (m *Metrics) Histogram(d HistogramDef) *Histogram {
-	if !d.ok {
-		return noOpHistogram
-	}
-
-	k := newMetricKey(d.name, d.tags)
-	c, ok := m.histograms.Load(k)
-	if !ok {
-		c = &Histogram{
-			m:          m,
-			name:       d.name,
-			tags:       d.tags,
-			sampleRate: d.sampleRate,
-		}
-		c, _ = m.histograms.LoadOrStore(k, c)
-	}
-	return c
 }
 
 // Distribution returns the Distribution for the given DistributionDef. For the same
@@ -424,26 +396,8 @@ func (c *Counter) publish() {
 	}
 }
 
-// Histogram produces quantile metrics, e.g. 50th, 90th, 99th percentiles of the values passed to
-// Observe for each time bucket.
-//
-// It is not statistically accurate (sometimes very poorly so) to aggregate over many tag values
-// (e.g. task or host). Use Distribution instead.
-type Histogram struct {
-	m          *Metrics
-	name       string
-	tags       []string
-	sampleRate float64
-}
-
-func (h *Histogram) Observe(value float64) {
-	h.m.p.Histogram(h.name, value, h.tags, h.sampleRate)
-}
-
 // Distribution produces quantile metrics, e.g. 50th, 90th, 99th percentiles of the values passed to
 // Observe for each time bucket.
-//
-// It is more accurate than Histogram, but more expensive.
 type Distribution struct {
 	m          *Metrics
 	name       string
@@ -532,7 +486,6 @@ type MetricType string
 const (
 	CounterType      MetricType = "counter"
 	GaugeType        MetricType = "gauge"
-	HistogramType    MetricType = "histogram"
 	DistributionType MetricType = "distribution"
 	SetType          MetricType = "set"
 )

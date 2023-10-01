@@ -36,27 +36,6 @@ func NewGaugeDef(
 	}
 }
 
-type HistogramDef struct {
-	name       string
-	tags       []string
-	sampleRate float64
-	ok         bool
-}
-
-func NewHistogramDef(
-	name string,
-	description string,
-	unit Unit,
-	sampleRate float64,
-) HistogramDef {
-	ok := registerDef(HistogramType, name, description, unit, nil, nil)
-	return HistogramDef{
-		name:       name,
-		sampleRate: sampleRate,
-		ok:         ok,
-	}
-}
-
 type DistributionDef struct {
 	name       string
 	tags       []string
