@@ -61,9 +61,9 @@ func Emit(m *metrics.Metrics) {
 func makeBucketNames(lowerBounds []float64) []string {
 	names := make([]string, len(lowerBounds))
 	for i := range lowerBounds {
-		unboundedLower := math.IsInf(lowerBounds[0], -1)
+		unboundedLower := math.IsInf(lowerBounds[i], -1)
 		unboundedUpper := i == len(lowerBounds)-1 || math.IsInf(lowerBounds[i+1], 1)
-		if unboundedLower && unboundedUpper {
+		if (unboundedLower && unboundedUpper) || math.IsInf(lowerBounds[i], 1) {
 			names[i] = ""
 		} else if unboundedLower {
 			names[i] = fmt.Sprintf("lt_%g", lowerBounds[i+1])
