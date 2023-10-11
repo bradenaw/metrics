@@ -1,3 +1,5 @@
+// package runtime_metrics allows reporting the Go runtime's builtin metrics provided by the
+// runtime/metrics package to DataDog.
 package runtime_metrics
 
 import (
@@ -8,6 +10,8 @@ import (
 	"github.com/bradenaw/metrics"
 )
 
+// Emit emits runtime/metrics to DataDog. It should be called just once for the lifetime of the
+// process.
 func Emit(m *metrics.Metrics) {
 	samples := make([]gometrics.Sample, len(descriptions))
 	gauges := make([][]*metrics.Gauge, len(descriptions))
