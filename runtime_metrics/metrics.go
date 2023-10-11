@@ -10,13 +10,16 @@ import (
 
 var (
 	// Lifted from https://pkg.go.dev/runtime/metrics@go1.21.3#Description.
-	nameRegexp     = regexp.MustCompile("^(?P<name>/[^:]+):(?P<unit>[^:*/]+(?:[*/][^:*/]+)*)$")
+	nameRegexp = regexp.MustCompile("^(?P<name>/[^:]+):(?P<unit>[^:*/]+(?:[*/][^:*/]+)*)$")
+
+	// Slightly-manual reproduction of the list in
+	// https://pkg.go.dev/runtime/metrics@go1.21.3#hdr-Supported_metrics
 	unitsStrToUnit = map[string]metrics.Unit{
 		"bytes":   metrics.UnitByte,
 		"threads": metrics.UnitThread,
 		"seconds": metrics.UnitSecond,
 		"events":  metrics.UnitEvent,
-		// gc-cyle is a counter incremented every GC, gc-cycles is a number of garbage collections.
+		// gc-cycle is a counter incremented every GC, gc-cycles is a number of garbage collections.
 		"gc-cycles":   metrics.UnitGarbageCollection,
 		"objects":     metrics.UnitObject,
 		"percent":     metrics.UnitPercent,
@@ -24,20 +27,18 @@ var (
 		"calls":       metrics.UnitEvent,
 	}
 
-	gaugeDefs         []metrics.GaugeDef
+	descriptions []gometrics.Description
+	// With the same indexes as descriptions, KindFloat64 and KindUint64 are populated.
+	gaugeDefs []metrics.GaugeDef
+	// With the same indexes as descriptions, KindFloat64Histogram are populated.
 	bucketedGaugeDefs []metrics.GaugeDef1[string]
 )
 
 func init() {
-	descriptions := gometrics.All()
-	samples := make([]gometrics.Sample, len(descriptions))
+	descriptions = gometrics.All()
 	gaugeDefs = make([]metrics.GaugeDef, len(descriptions))
 	bucketedGaugeDefs = make([]metrics.GaugeDef1[string], len(descriptions))
 
-	for i, description := range descriptions {
-		samples[i].Name = description.Name
-	}
-	gometrics.Read(samples)
 	for i, description := range descriptions {
 		submatches := nameRegexp.FindStringSubmatch(description.Name)
 		cleanName := submatches[1]

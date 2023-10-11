@@ -9,7 +9,6 @@ import (
 )
 
 func Emit(m *metrics.Metrics) {
-	descriptions := gometrics.All()
 	samples := make([]gometrics.Sample, len(descriptions))
 	gauges := make([][]*metrics.Gauge, len(descriptions))
 
@@ -17,6 +16,7 @@ func Emit(m *metrics.Metrics) {
 		samples[i].Name = description.Name
 	}
 	gometrics.Read(samples)
+
 	for i, description := range descriptions {
 		if description.Kind == gometrics.KindFloat64Histogram {
 			bucketNames := makeBucketNames(samples[i].Value.Float64Histogram().Buckets)
