@@ -3,35 +3,18 @@ package runtime_metrics
 import (
 	"fmt"
 	"math"
-	"regexp"
-	"strings"
-
 	gometrics "runtime/metrics"
 
 	"github.com/bradenaw/metrics"
 )
 
-var (
-	// Lifted from https://pkg.go.dev/runtime/metrics@go1.21.3#Description.
-	nameRegexp = regexp.MustCompile("^(?P<name>/[^:]+):(?P<unit>[^:*/]+(?:[*/][^:*/]+)*)$")
-)
-
 func Emit(m *metrics.Metrics) {
 	descriptions := gometrics.All()
 	samples := make([]gometrics.Sample, len(descriptions))
-	names := make([]string, len(descriptions))
 	gauges := make([][]*metrics.Gauge, len(descriptions))
 
 	for i, description := range descriptions {
 		samples[i].Name = description.Name
-		names[i] = strings.ReplaceAll(
-			strings.Trim(
-				nameRegexp.FindStringSubmatch(description.Name)[0],
-				"/",
-			),
-			"/",
-			".",
-		)
 	}
 	gometrics.Read(samples)
 	for i, description := range descriptions {
@@ -39,12 +22,13 @@ func Emit(m *metrics.Metrics) {
 			bucketNames := makeBucketNames(samples[i].Value.Float64Histogram().Buckets)
 			gauges[i] = make([]*metrics.Gauge, 0, len(bucketNames))
 			for _, bucketName := range bucketNames {
-				gauges[i] = append(gauges[i], m.Gauge(bucketedGaugeDef.Values(names[i], bucketName)))
+				gauges[i] = append(gauges[i], m.Gauge(bucketedGaugeDefs[i].Values(bucketName)))
 			}
 		} else {
-			gauges[i] = []*metrics.Gauge{m.Gauge(gaugeDef.Values(names[i]))}
+			gauges[i] = []*metrics.Gauge{m.Gauge(gaugeDefs[i])}
 		}
 	}
+
 	m.EveryFlush(func() {
 		gometrics.Read(samples)
 
@@ -68,7 +52,8 @@ func Emit(m *metrics.Metrics) {
 }
 
 // similar to metrics.bucketNames, but slightly different. runtime/metrics's buckets are all lower
-// bounds, and they include -Inf and +Inf. Attempt to make the same style of names.
+// bounds, and they include -Inf and +Inf. Attempt to make the same style of names as
+// BucketedCounter/BucketedGaugeGroup.
 func makeBucketNames(lowerBounds []float64) []string {
 	names := make([]string, len(lowerBounds))
 	for i := range lowerBounds {
