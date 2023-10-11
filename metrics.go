@@ -541,7 +541,7 @@ func registerDef(
 		return false
 	}
 	fn := runtime.FuncForPC(pc)
-	if !strings.HasSuffix(fn.Name(), ".init") {
+	if !strings.HasSuffix(fn.Name(), ".init") && !strings.HasSuffix(fn.Name(), ".init.0") {
 		badDefsNotAtInit.Add(1)
 		return false
 	}

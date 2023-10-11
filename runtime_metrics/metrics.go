@@ -40,8 +40,13 @@ func init() {
 	gometrics.Read(samples)
 	for i, description := range descriptions {
 		submatches := nameRegexp.FindStringSubmatch(description.Name)
-		name := "go.runtime." + strings.ReplaceAll(strings.Trim(submatches[0], "/"), "/", ".")
-		unitsStr := submatches[1]
+		cleanName := submatches[1]
+		cleanName = strings.Trim(cleanName, "/")
+		unitsStr := submatches[2]
+		// Include units in the name because there are duplicates of just the name part, e.g.
+		//   gc/heap/allocs:bytes
+		//   gc/heap/allocs:objects
+		name := sanitizeName("go.runtime." + cleanName + "_" + unitsStr)
 		unit := unitsStrToUnit[unitsStr]
 
 		if description.Kind == gometrics.KindFloat64Histogram {
@@ -59,4 +64,21 @@ func init() {
 			)
 		}
 	}
+}
+
+var disallowedNameChars = regexp.MustCompile("[^a-zA-Z0-9_.]")
+
+// The actual allowed regex is ^[a-z][a-zA-Z0-9_.]{0,199}$
+func sanitizeName(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	s = disallowedNameChars.ReplaceAllString(s, "_")
+	if !(s[0] >= 'a' && s[0] <= 'z') {
+		s = "a" + s
+	}
+	if len(s) > 199 {
+		s = s[:199]
+	}
+	return s
 }

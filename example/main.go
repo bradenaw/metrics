@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/bradenaw/metrics"
+	"github.com/bradenaw/metrics/runtime_metrics"
 )
 
 type frobber struct {
@@ -44,6 +45,7 @@ func main() {
 	//   metrics.New(statsd.New("addr-here", statsd.WithoutClientSideAggregation()))
 	m := metrics.NoOpMetrics
 	defer m.Flush()
+	runtime_metrics.Emit(m)
 
 	m.Counter(runCounterDef).Add(1)
 	m.Gauge(runningGaugeDef).Set(1)
