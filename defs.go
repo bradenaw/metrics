@@ -38,6 +38,7 @@ func NewGaugeDef(
 
 type DistributionDef struct {
 	name       string
+	unit       Unit
 	tags       []string
 	sampleRate float64
 	ok         bool
@@ -52,6 +53,7 @@ func NewDistributionDef(
 	ok := registerDef(DistributionType, name, description, unit, nil, nil)
 	return DistributionDef{
 		name:       name,
+		unit:       unit,
 		sampleRate: sampleRate,
 		ok:         ok,
 	}

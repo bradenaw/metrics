@@ -6,7 +6,8 @@ import "reflect"
 
 // CounterDef1 is the definition of a counter metric with 1 tag(s).
 type CounterDef1[V0 TagValue] struct {
-	name   string
+	name string
+
 	prefix []string
 	keys   [1]string
 
@@ -40,6 +41,7 @@ func NewCounterDef1[V0 TagValue](
 	)
 	return CounterDef1[V0]{
 		name: name,
+
 		keys: keys,
 
 		ok: ok,
@@ -51,6 +53,7 @@ func NewCounterDef1[V0 TagValue](
 func (d CounterDef1[V0]) Values(v0 V0) CounterDef {
 	return CounterDef{
 		name: d.name,
+
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -62,7 +65,8 @@ func (d CounterDef1[V0]) Values(v0 V0) CounterDef {
 
 // CounterDef2 is the definition of a counter metric with 2 tag(s).
 type CounterDef2[V0 TagValue, V1 TagValue] struct {
-	name   string
+	name string
+
 	prefix []string
 	keys   [2]string
 
@@ -100,6 +104,7 @@ func NewCounterDef2[V0 TagValue, V1 TagValue](
 	)
 	return CounterDef2[V0, V1]{
 		name: name,
+
 		keys: keys,
 
 		ok: ok,
@@ -111,6 +116,7 @@ func NewCounterDef2[V0 TagValue, V1 TagValue](
 func (d CounterDef2[V0, V1]) Values(v0 V0, v1 V1) CounterDef {
 	return CounterDef{
 		name: d.name,
+
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -127,6 +133,7 @@ func (d CounterDef2[V0, V1]) Values(v0 V0, v1 V1) CounterDef {
 func (d CounterDef2[V0, V1]) Prefix1(v0 V0) CounterDef1[V1] {
 	return CounterDef1[V1]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -139,7 +146,8 @@ func (d CounterDef2[V0, V1]) Prefix1(v0 V0) CounterDef1[V1] {
 
 // CounterDef3 is the definition of a counter metric with 3 tag(s).
 type CounterDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
-	name   string
+	name string
+
 	prefix []string
 	keys   [3]string
 
@@ -181,6 +189,7 @@ func NewCounterDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	)
 	return CounterDef3[V0, V1, V2]{
 		name: name,
+
 		keys: keys,
 
 		ok: ok,
@@ -192,6 +201,7 @@ func NewCounterDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 func (d CounterDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) CounterDef {
 	return CounterDef{
 		name: d.name,
+
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -210,6 +220,7 @@ func (d CounterDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) CounterDef {
 func (d CounterDef3[V0, V1, V2]) Prefix1(v0 V0) CounterDef2[V1, V2] {
 	return CounterDef2[V1, V2]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -225,6 +236,7 @@ func (d CounterDef3[V0, V1, V2]) Prefix1(v0 V0) CounterDef2[V1, V2] {
 func (d CounterDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) CounterDef1[V2] {
 	return CounterDef1[V2]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -239,7 +251,8 @@ func (d CounterDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) CounterDef1[V2] {
 
 // CounterDef4 is the definition of a counter metric with 4 tag(s).
 type CounterDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
-	name   string
+	name string
+
 	prefix []string
 	keys   [4]string
 
@@ -285,6 +298,7 @@ func NewCounterDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	)
 	return CounterDef4[V0, V1, V2, V3]{
 		name: name,
+
 		keys: keys,
 
 		ok: ok,
@@ -296,6 +310,7 @@ func NewCounterDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 func (d CounterDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) CounterDef {
 	return CounterDef{
 		name: d.name,
+
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -316,6 +331,7 @@ func (d CounterDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) CounterD
 func (d CounterDef4[V0, V1, V2, V3]) Prefix1(v0 V0) CounterDef3[V1, V2, V3] {
 	return CounterDef3[V1, V2, V3]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -331,6 +347,7 @@ func (d CounterDef4[V0, V1, V2, V3]) Prefix1(v0 V0) CounterDef3[V1, V2, V3] {
 func (d CounterDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) CounterDef2[V2, V3] {
 	return CounterDef2[V2, V3]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -348,6 +365,7 @@ func (d CounterDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) CounterDef2[V2, V3] {
 func (d CounterDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) CounterDef1[V3] {
 	return CounterDef1[V3]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -364,7 +382,8 @@ func (d CounterDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) CounterDef1[V3
 
 // CounterDef5 is the definition of a counter metric with 5 tag(s).
 type CounterDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue] struct {
-	name   string
+	name string
+
 	prefix []string
 	keys   [5]string
 
@@ -414,6 +433,7 @@ func NewCounterDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagVa
 	)
 	return CounterDef5[V0, V1, V2, V3, V4]{
 		name: name,
+
 		keys: keys,
 
 		ok: ok,
@@ -425,6 +445,7 @@ func NewCounterDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagVa
 func (d CounterDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) CounterDef {
 	return CounterDef{
 		name: d.name,
+
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -447,6 +468,7 @@ func (d CounterDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V
 func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) CounterDef4[V1, V2, V3, V4] {
 	return CounterDef4[V1, V2, V3, V4]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -462,6 +484,7 @@ func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) CounterDef4[V1, V2, V3, 
 func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) CounterDef3[V2, V3, V4] {
 	return CounterDef3[V2, V3, V4]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -479,6 +502,7 @@ func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) CounterDef3[V2, V
 func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) CounterDef2[V3, V4] {
 	return CounterDef2[V3, V4]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -498,6 +522,7 @@ func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) CounterDef
 func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3) CounterDef1[V4] {
 	return CounterDef1[V4]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -516,7 +541,8 @@ func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3) Cou
 
 // GaugeDef1 is the definition of a gauge metric with 1 tag(s).
 type GaugeDef1[V0 TagValue] struct {
-	name   string
+	name string
+
 	prefix []string
 	keys   [1]string
 
@@ -550,6 +576,7 @@ func NewGaugeDef1[V0 TagValue](
 	)
 	return GaugeDef1[V0]{
 		name: name,
+
 		keys: keys,
 
 		ok: ok,
@@ -561,6 +588,7 @@ func NewGaugeDef1[V0 TagValue](
 func (d GaugeDef1[V0]) Values(v0 V0) GaugeDef {
 	return GaugeDef{
 		name: d.name,
+
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -572,7 +600,8 @@ func (d GaugeDef1[V0]) Values(v0 V0) GaugeDef {
 
 // GaugeDef2 is the definition of a gauge metric with 2 tag(s).
 type GaugeDef2[V0 TagValue, V1 TagValue] struct {
-	name   string
+	name string
+
 	prefix []string
 	keys   [2]string
 
@@ -610,6 +639,7 @@ func NewGaugeDef2[V0 TagValue, V1 TagValue](
 	)
 	return GaugeDef2[V0, V1]{
 		name: name,
+
 		keys: keys,
 
 		ok: ok,
@@ -621,6 +651,7 @@ func NewGaugeDef2[V0 TagValue, V1 TagValue](
 func (d GaugeDef2[V0, V1]) Values(v0 V0, v1 V1) GaugeDef {
 	return GaugeDef{
 		name: d.name,
+
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -637,6 +668,7 @@ func (d GaugeDef2[V0, V1]) Values(v0 V0, v1 V1) GaugeDef {
 func (d GaugeDef2[V0, V1]) Prefix1(v0 V0) GaugeDef1[V1] {
 	return GaugeDef1[V1]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -649,7 +681,8 @@ func (d GaugeDef2[V0, V1]) Prefix1(v0 V0) GaugeDef1[V1] {
 
 // GaugeDef3 is the definition of a gauge metric with 3 tag(s).
 type GaugeDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
-	name   string
+	name string
+
 	prefix []string
 	keys   [3]string
 
@@ -691,6 +724,7 @@ func NewGaugeDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	)
 	return GaugeDef3[V0, V1, V2]{
 		name: name,
+
 		keys: keys,
 
 		ok: ok,
@@ -702,6 +736,7 @@ func NewGaugeDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 func (d GaugeDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) GaugeDef {
 	return GaugeDef{
 		name: d.name,
+
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -720,6 +755,7 @@ func (d GaugeDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) GaugeDef {
 func (d GaugeDef3[V0, V1, V2]) Prefix1(v0 V0) GaugeDef2[V1, V2] {
 	return GaugeDef2[V1, V2]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -735,6 +771,7 @@ func (d GaugeDef3[V0, V1, V2]) Prefix1(v0 V0) GaugeDef2[V1, V2] {
 func (d GaugeDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) GaugeDef1[V2] {
 	return GaugeDef1[V2]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -749,7 +786,8 @@ func (d GaugeDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) GaugeDef1[V2] {
 
 // GaugeDef4 is the definition of a gauge metric with 4 tag(s).
 type GaugeDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
-	name   string
+	name string
+
 	prefix []string
 	keys   [4]string
 
@@ -795,6 +833,7 @@ func NewGaugeDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	)
 	return GaugeDef4[V0, V1, V2, V3]{
 		name: name,
+
 		keys: keys,
 
 		ok: ok,
@@ -806,6 +845,7 @@ func NewGaugeDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 func (d GaugeDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) GaugeDef {
 	return GaugeDef{
 		name: d.name,
+
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -826,6 +866,7 @@ func (d GaugeDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) GaugeDef {
 func (d GaugeDef4[V0, V1, V2, V3]) Prefix1(v0 V0) GaugeDef3[V1, V2, V3] {
 	return GaugeDef3[V1, V2, V3]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -841,6 +882,7 @@ func (d GaugeDef4[V0, V1, V2, V3]) Prefix1(v0 V0) GaugeDef3[V1, V2, V3] {
 func (d GaugeDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) GaugeDef2[V2, V3] {
 	return GaugeDef2[V2, V3]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -858,6 +900,7 @@ func (d GaugeDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) GaugeDef2[V2, V3] {
 func (d GaugeDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) GaugeDef1[V3] {
 	return GaugeDef1[V3]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -874,7 +917,8 @@ func (d GaugeDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) GaugeDef1[V3] {
 
 // GaugeDef5 is the definition of a gauge metric with 5 tag(s).
 type GaugeDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue] struct {
-	name   string
+	name string
+
 	prefix []string
 	keys   [5]string
 
@@ -924,6 +968,7 @@ func NewGaugeDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValu
 	)
 	return GaugeDef5[V0, V1, V2, V3, V4]{
 		name: name,
+
 		keys: keys,
 
 		ok: ok,
@@ -935,6 +980,7 @@ func NewGaugeDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValu
 func (d GaugeDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) GaugeDef {
 	return GaugeDef{
 		name: d.name,
+
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -957,6 +1003,7 @@ func (d GaugeDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4)
 func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) GaugeDef4[V1, V2, V3, V4] {
 	return GaugeDef4[V1, V2, V3, V4]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -972,6 +1019,7 @@ func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) GaugeDef4[V1, V2, V3, V4] 
 func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) GaugeDef3[V2, V3, V4] {
 	return GaugeDef3[V2, V3, V4]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -989,6 +1037,7 @@ func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) GaugeDef3[V2, V3, V
 func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) GaugeDef2[V3, V4] {
 	return GaugeDef2[V3, V4]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1008,6 +1057,7 @@ func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) GaugeDef2[V3
 func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3) GaugeDef1[V4] {
 	return GaugeDef1[V4]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1027,6 +1077,7 @@ func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3) Gauge
 // DistributionDef1 is the definition of a distribution metric with 1 tag(s).
 type DistributionDef1[V0 TagValue] struct {
 	name       string
+	unit       Unit
 	prefix     []string
 	keys       [1]string
 	sampleRate float64
@@ -1060,6 +1111,7 @@ func NewDistributionDef1[V0 TagValue](
 	)
 	return DistributionDef1[V0]{
 		name:       name,
+		unit:       unit,
 		keys:       keys,
 		sampleRate: sampleRate,
 		ok:         ok,
@@ -1071,6 +1123,7 @@ func NewDistributionDef1[V0 TagValue](
 func (d DistributionDef1[V0]) Values(v0 V0) DistributionDef {
 	return DistributionDef{
 		name: d.name,
+		unit: d.unit,
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1083,6 +1136,7 @@ func (d DistributionDef1[V0]) Values(v0 V0) DistributionDef {
 // DistributionDef2 is the definition of a distribution metric with 2 tag(s).
 type DistributionDef2[V0 TagValue, V1 TagValue] struct {
 	name       string
+	unit       Unit
 	prefix     []string
 	keys       [2]string
 	sampleRate float64
@@ -1120,6 +1174,7 @@ func NewDistributionDef2[V0 TagValue, V1 TagValue](
 	)
 	return DistributionDef2[V0, V1]{
 		name:       name,
+		unit:       unit,
 		keys:       keys,
 		sampleRate: sampleRate,
 		ok:         ok,
@@ -1131,6 +1186,7 @@ func NewDistributionDef2[V0 TagValue, V1 TagValue](
 func (d DistributionDef2[V0, V1]) Values(v0 V0, v1 V1) DistributionDef {
 	return DistributionDef{
 		name: d.name,
+		unit: d.unit,
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1147,6 +1203,7 @@ func (d DistributionDef2[V0, V1]) Values(v0 V0, v1 V1) DistributionDef {
 func (d DistributionDef2[V0, V1]) Prefix1(v0 V0) DistributionDef1[V1] {
 	return DistributionDef1[V1]{
 		name: d.name,
+		unit: d.unit,
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1160,6 +1217,7 @@ func (d DistributionDef2[V0, V1]) Prefix1(v0 V0) DistributionDef1[V1] {
 // DistributionDef3 is the definition of a distribution metric with 3 tag(s).
 type DistributionDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
 	name       string
+	unit       Unit
 	prefix     []string
 	keys       [3]string
 	sampleRate float64
@@ -1201,6 +1259,7 @@ func NewDistributionDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 	)
 	return DistributionDef3[V0, V1, V2]{
 		name:       name,
+		unit:       unit,
 		keys:       keys,
 		sampleRate: sampleRate,
 		ok:         ok,
@@ -1212,6 +1271,7 @@ func NewDistributionDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 func (d DistributionDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) DistributionDef {
 	return DistributionDef{
 		name: d.name,
+		unit: d.unit,
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1230,6 +1290,7 @@ func (d DistributionDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) DistributionDe
 func (d DistributionDef3[V0, V1, V2]) Prefix1(v0 V0) DistributionDef2[V1, V2] {
 	return DistributionDef2[V1, V2]{
 		name: d.name,
+		unit: d.unit,
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1245,6 +1306,7 @@ func (d DistributionDef3[V0, V1, V2]) Prefix1(v0 V0) DistributionDef2[V1, V2] {
 func (d DistributionDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) DistributionDef1[V2] {
 	return DistributionDef1[V2]{
 		name: d.name,
+		unit: d.unit,
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1260,6 +1322,7 @@ func (d DistributionDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) DistributionDef1[V2]
 // DistributionDef4 is the definition of a distribution metric with 4 tag(s).
 type DistributionDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
 	name       string
+	unit       Unit
 	prefix     []string
 	keys       [4]string
 	sampleRate float64
@@ -1305,6 +1368,7 @@ func NewDistributionDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 	)
 	return DistributionDef4[V0, V1, V2, V3]{
 		name:       name,
+		unit:       unit,
 		keys:       keys,
 		sampleRate: sampleRate,
 		ok:         ok,
@@ -1316,6 +1380,7 @@ func NewDistributionDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 func (d DistributionDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) DistributionDef {
 	return DistributionDef{
 		name: d.name,
+		unit: d.unit,
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1336,6 +1401,7 @@ func (d DistributionDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) Dis
 func (d DistributionDef4[V0, V1, V2, V3]) Prefix1(v0 V0) DistributionDef3[V1, V2, V3] {
 	return DistributionDef3[V1, V2, V3]{
 		name: d.name,
+		unit: d.unit,
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1351,6 +1417,7 @@ func (d DistributionDef4[V0, V1, V2, V3]) Prefix1(v0 V0) DistributionDef3[V1, V2
 func (d DistributionDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) DistributionDef2[V2, V3] {
 	return DistributionDef2[V2, V3]{
 		name: d.name,
+		unit: d.unit,
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1368,6 +1435,7 @@ func (d DistributionDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) DistributionDef2
 func (d DistributionDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) DistributionDef1[V3] {
 	return DistributionDef1[V3]{
 		name: d.name,
+		unit: d.unit,
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1385,6 +1453,7 @@ func (d DistributionDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) Distribut
 // DistributionDef5 is the definition of a distribution metric with 5 tag(s).
 type DistributionDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue] struct {
 	name       string
+	unit       Unit
 	prefix     []string
 	keys       [5]string
 	sampleRate float64
@@ -1434,6 +1503,7 @@ func NewDistributionDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 
 	)
 	return DistributionDef5[V0, V1, V2, V3, V4]{
 		name:       name,
+		unit:       unit,
 		keys:       keys,
 		sampleRate: sampleRate,
 		ok:         ok,
@@ -1445,6 +1515,7 @@ func NewDistributionDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 
 func (d DistributionDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) DistributionDef {
 	return DistributionDef{
 		name: d.name,
+		unit: d.unit,
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1467,6 +1538,7 @@ func (d DistributionDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3,
 func (d DistributionDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) DistributionDef4[V1, V2, V3, V4] {
 	return DistributionDef4[V1, V2, V3, V4]{
 		name: d.name,
+		unit: d.unit,
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1482,6 +1554,7 @@ func (d DistributionDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) DistributionDef4[V1
 func (d DistributionDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) DistributionDef3[V2, V3, V4] {
 	return DistributionDef3[V2, V3, V4]{
 		name: d.name,
+		unit: d.unit,
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1499,6 +1572,7 @@ func (d DistributionDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) Distribution
 func (d DistributionDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) DistributionDef2[V3, V4] {
 	return DistributionDef2[V3, V4]{
 		name: d.name,
+		unit: d.unit,
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1518,6 +1592,7 @@ func (d DistributionDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) Distr
 func (d DistributionDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3) DistributionDef1[V4] {
 	return DistributionDef1[V4]{
 		name: d.name,
+		unit: d.unit,
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1536,7 +1611,8 @@ func (d DistributionDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3
 
 // SetDef1 is the definition of a set metric with 1 tag(s).
 type SetDef1[V0 TagValue] struct {
-	name       string
+	name string
+
 	prefix     []string
 	keys       [1]string
 	sampleRate float64
@@ -1569,7 +1645,8 @@ func NewSetDef1[V0 TagValue](
 		},
 	)
 	return SetDef1[V0]{
-		name:       name,
+		name: name,
+
 		keys:       keys,
 		sampleRate: sampleRate,
 		ok:         ok,
@@ -1581,6 +1658,7 @@ func NewSetDef1[V0 TagValue](
 func (d SetDef1[V0]) Values(v0 V0) SetDef {
 	return SetDef{
 		name: d.name,
+
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1592,7 +1670,8 @@ func (d SetDef1[V0]) Values(v0 V0) SetDef {
 
 // SetDef2 is the definition of a set metric with 2 tag(s).
 type SetDef2[V0 TagValue, V1 TagValue] struct {
-	name       string
+	name string
+
 	prefix     []string
 	keys       [2]string
 	sampleRate float64
@@ -1629,7 +1708,8 @@ func NewSetDef2[V0 TagValue, V1 TagValue](
 		},
 	)
 	return SetDef2[V0, V1]{
-		name:       name,
+		name: name,
+
 		keys:       keys,
 		sampleRate: sampleRate,
 		ok:         ok,
@@ -1641,6 +1721,7 @@ func NewSetDef2[V0 TagValue, V1 TagValue](
 func (d SetDef2[V0, V1]) Values(v0 V0, v1 V1) SetDef {
 	return SetDef{
 		name: d.name,
+
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1657,6 +1738,7 @@ func (d SetDef2[V0, V1]) Values(v0 V0, v1 V1) SetDef {
 func (d SetDef2[V0, V1]) Prefix1(v0 V0) SetDef1[V1] {
 	return SetDef1[V1]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1669,7 +1751,8 @@ func (d SetDef2[V0, V1]) Prefix1(v0 V0) SetDef1[V1] {
 
 // SetDef3 is the definition of a set metric with 3 tag(s).
 type SetDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
-	name       string
+	name string
+
 	prefix     []string
 	keys       [3]string
 	sampleRate float64
@@ -1710,7 +1793,8 @@ func NewSetDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 		},
 	)
 	return SetDef3[V0, V1, V2]{
-		name:       name,
+		name: name,
+
 		keys:       keys,
 		sampleRate: sampleRate,
 		ok:         ok,
@@ -1722,6 +1806,7 @@ func NewSetDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 func (d SetDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) SetDef {
 	return SetDef{
 		name: d.name,
+
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1740,6 +1825,7 @@ func (d SetDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) SetDef {
 func (d SetDef3[V0, V1, V2]) Prefix1(v0 V0) SetDef2[V1, V2] {
 	return SetDef2[V1, V2]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1755,6 +1841,7 @@ func (d SetDef3[V0, V1, V2]) Prefix1(v0 V0) SetDef2[V1, V2] {
 func (d SetDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) SetDef1[V2] {
 	return SetDef1[V2]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1769,7 +1856,8 @@ func (d SetDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) SetDef1[V2] {
 
 // SetDef4 is the definition of a set metric with 4 tag(s).
 type SetDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
-	name       string
+	name string
+
 	prefix     []string
 	keys       [4]string
 	sampleRate float64
@@ -1814,7 +1902,8 @@ func NewSetDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 		},
 	)
 	return SetDef4[V0, V1, V2, V3]{
-		name:       name,
+		name: name,
+
 		keys:       keys,
 		sampleRate: sampleRate,
 		ok:         ok,
@@ -1826,6 +1915,7 @@ func NewSetDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 func (d SetDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) SetDef {
 	return SetDef{
 		name: d.name,
+
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1846,6 +1936,7 @@ func (d SetDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) SetDef {
 func (d SetDef4[V0, V1, V2, V3]) Prefix1(v0 V0) SetDef3[V1, V2, V3] {
 	return SetDef3[V1, V2, V3]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1861,6 +1952,7 @@ func (d SetDef4[V0, V1, V2, V3]) Prefix1(v0 V0) SetDef3[V1, V2, V3] {
 func (d SetDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) SetDef2[V2, V3] {
 	return SetDef2[V2, V3]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1878,6 +1970,7 @@ func (d SetDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) SetDef2[V2, V3] {
 func (d SetDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) SetDef1[V3] {
 	return SetDef1[V3]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1894,7 +1987,8 @@ func (d SetDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) SetDef1[V3] {
 
 // SetDef5 is the definition of a set metric with 5 tag(s).
 type SetDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue] struct {
-	name       string
+	name string
+
 	prefix     []string
 	keys       [5]string
 	sampleRate float64
@@ -1943,7 +2037,8 @@ func NewSetDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue]
 		},
 	)
 	return SetDef5[V0, V1, V2, V3, V4]{
-		name:       name,
+		name: name,
+
 		keys:       keys,
 		sampleRate: sampleRate,
 		ok:         ok,
@@ -1955,6 +2050,7 @@ func NewSetDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue]
 func (d SetDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) SetDef {
 	return SetDef{
 		name: d.name,
+
 		tags: joinStrings(d.prefix, []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1977,6 +2073,7 @@ func (d SetDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) S
 func (d SetDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) SetDef4[V1, V2, V3, V4] {
 	return SetDef4[V1, V2, V3, V4]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -1992,6 +2089,7 @@ func (d SetDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) SetDef4[V1, V2, V3, V4] {
 func (d SetDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) SetDef3[V2, V3, V4] {
 	return SetDef3[V2, V3, V4]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -2009,6 +2107,7 @@ func (d SetDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) SetDef3[V2, V3, V4] {
 func (d SetDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) SetDef2[V3, V4] {
 	return SetDef2[V3, V4]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),
@@ -2028,6 +2127,7 @@ func (d SetDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) SetDef2[V3, V4
 func (d SetDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3) SetDef1[V4] {
 	return SetDef1[V4]{
 		name: d.name,
+
 		prefix: []string{
 
 			makeTag(d.keys[0], tagValueString(v0)),

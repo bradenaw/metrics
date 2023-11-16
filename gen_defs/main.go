@@ -21,6 +21,7 @@ func main() {
 		Metric      string
 		MetricLower string
 		SampleRate  bool
+		Unit        bool
 	}
 
 	n := 6
@@ -31,23 +32,28 @@ func main() {
 
 	type metricOpts struct {
 		Name       string
+		Unit       bool
 		SampleRate bool
 	}
 
 	for _, metric := range []metricOpts{
-		{Name: "Counter", SampleRate: false},
-		{Name: "Gauge", SampleRate: false},
-		{Name: "Distribution", SampleRate: true},
-		{Name: "Set", SampleRate: true},
+		{Name: "Counter", SampleRate: false, Unit: false},
+		{Name: "Gauge", SampleRate: false, Unit: false},
+		{Name: "Distribution", SampleRate: true, Unit: true},
+		{Name: "Set", SampleRate: true, Unit: false},
 	} {
 		for i := 1; i < n; i++ {
-			metricTmpl.Execute(os.Stdout, vars{
+			err := metricTmpl.Execute(os.Stdout, vars{
 				N:           i,
 				Ns:          ns[:i],
 				Metric:      metric.Name,
 				MetricLower: strings.ToLower(metric.Name),
 				SampleRate:  metric.SampleRate,
+				Unit:        metric.Unit,
 			})
+			if err != nil {
+				panic(err)
+			}
 
 			for k := 1; k <= i-1; k++ {
 				bindPrefixTmpl.Execute(os.Stdout, struct {
@@ -59,6 +65,7 @@ func main() {
 					NMinusKs   []int
 					Metric     string
 					SampleRate bool
+					Unit       bool
 				}{
 					N:          i,
 					Ns:         ns[:i],
@@ -68,6 +75,7 @@ func main() {
 					NMinusKs:   ns[k:i],
 					Metric:     metric.Name,
 					SampleRate: metric.SampleRate,
+					Unit:       metric.Unit,
 				})
 			}
 		}
@@ -78,6 +86,7 @@ var metricTmpl = template.Must(template.New("name").Parse(`
 // {{.Metric}}Def{{.N}} is the definition of a {{.MetricLower}} metric with {{.N}} tag(s).
 type {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}] struct {
 	name       string
+	{{if .Unit}} unit Unit {{end}}
 	prefix     []string
 	keys       [{{.N}}]string
 	{{if .SampleRate}} sampleRate float64 {{end}}
@@ -112,6 +121,7 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 	)
 	return {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]{
 		name:       name,
+		{{if .Unit}}unit: unit,{{end}}
 		keys:       keys,
 		{{if .SampleRate}}sampleRate: sampleRate,{{end}}
 		ok:         ok,
@@ -123,6 +133,7 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 func (d {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}} v{{.}} V{{.}}, {{end}}) {{.Metric}}Def {
 	return {{.Metric}}Def{
 		name: d.name,
+		{{if .Unit}}unit: d.unit,{{end}}
 		tags: joinStrings(d.prefix, []string{
 			{{range .Ns}}
 			makeTag(d.keys[{{.}}], tagValueString(v{{.}})),
@@ -140,6 +151,7 @@ var bindPrefixTmpl = template.Must(template.New("name").Parse(`
 func (d {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Prefix{{.K}}({{range .Ks}} v{{.}} V{{.}}, {{end}}) {{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}] {
 	return {{.Metric}}Def{{.NMinusK}}[{{range .NMinusKs}} V{{.}}, {{end}}]{
 		name: d.name,
+		{{if .Unit}}unit: d.unit,{{end}}
 		prefix: []string{
 			{{range .Ks}}
 			makeTag(d.keys[{{.}}], tagValueString(v{{.}})),

@@ -401,12 +401,38 @@ func (c *Counter) publish() {
 type Distribution struct {
 	m          *Metrics
 	name       string
+	unit       Unit
 	tags       []string
 	sampleRate float64
 }
 
-func (h *Distribution) Observe(value float64) {
-	h.m.p.Distribution(h.name, value, h.tags, h.sampleRate)
+func (d *Distribution) Observe(value float64) {
+	d.m.p.Distribution(d.name, value, d.tags, d.sampleRate)
+}
+
+// As long as d's units are in nanoseconds, microseconds, milliseconds, seconds, minutes, or hours,
+// records the given duration in the correct units.
+//
+// Days and weeks are not supported, because not all days are the same length - in parts of the
+// world that observe daylight savings, one day of the year is 25 hours and another is 23. As such,
+// a time.Duration is not enough information to know days nor weeks so those must be recorded
+// differently.
+func (d *Distribution) ObserveDuration(value time.Duration) {
+	switch d.unit {
+	case UnitNanosecond:
+		d.m.p.Distribution(d.name, float64(value.Nanoseconds()), d.tags, d.sampleRate)
+	case UnitMicrosecond:
+		d.m.p.Distribution(d.name, value.Seconds()*1_000_000, d.tags, d.sampleRate)
+	case UnitMillisecond:
+		d.m.p.Distribution(d.name, value.Seconds()*1_000, d.tags, d.sampleRate)
+	case UnitSecond:
+		d.m.p.Distribution(d.name, value.Seconds(), d.tags, d.sampleRate)
+	case UnitMinute:
+		d.m.p.Distribution(d.name, value.Seconds()/60, d.tags, d.sampleRate)
+	case UnitHour:
+		d.m.p.Distribution(d.name, value.Seconds()/3600, d.tags, d.sampleRate)
+	default:
+	}
 }
 
 // Set measures the cardinality of values passed to Observe for each time bucket, that is, it
