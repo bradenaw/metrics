@@ -21,6 +21,15 @@
 //  2. metrics.New() in main(), passed down through constructors.
 //  3. At the point of logging metrics, e.g.
 //     m.Counter(myCounterDef.Values(tag1, tag2)).Add(1)
+//
+// # bad_metric_definitions reasons
+//
+//   - not_at_init_time: The call to NewMDefY did not happen at init time (in either a top-level var
+//     block or func init()).
+//   - runtime_caller_failed: [runtime.Caller] returned false in its final return trying to evaluate
+//     the above.
+//   - observe_duration_bad_units: [Distribution.ObserveDuration] was used on a def that did not
+//     have compatible units. See the comment on [Distribution.ObserveDuration].
 package metrics
 
 import (
@@ -121,7 +130,7 @@ var (
 
 	badDefsDef = NewGaugeDef1[string](
 		"metrics.bad_metric_definitions",
-		"The number of calls to NewMGaugeY that are invalid for some reason. These definitions "+
+		"The number of calls to NewMDefY that are invalid for some reason. These definitions "+
 			"will not be able to log metrics at all.",
 		UnitItem,
 		[...]string{"reason"},
@@ -138,6 +147,7 @@ func New(p Publisher) *Metrics {
 
 	badDefsCallersFramesGauge := m.Gauge(badDefsDef.Values("runtime_caller_failed"))
 	badDefsNotAtInitGauge := m.Gauge(badDefsDef.Values("not_at_init_time"))
+	badDefsObserveDurationBadUnitsGauge := m.Gauge(badDefsDef.Values("observe_duration_bad_units"))
 
 	m.flushNow = m.bg.PeriodicOrTrigger(flushInterval, 0 /*jitter*/, func(ctx context.Context) {
 		m.m.Lock()
@@ -149,6 +159,7 @@ func New(p Publisher) *Metrics {
 
 		badDefsCallersFramesGauge.Set(float64(badDefsCallersFrames.Load()))
 		badDefsNotAtInitGauge.Set(float64(badDefsNotAtInit.Load()))
+		badDefsObserveDurationBadUnitsGauge.Set(float64(badObserveDurations.Load()))
 
 		m.gauges.Range(func(_ metricKey, g *Gauge) bool {
 			g.publish()
@@ -410,6 +421,11 @@ func (d *Distribution) Observe(value float64) {
 	d.m.p.Distribution(d.name, value, d.tags, d.sampleRate)
 }
 
+var (
+	badObserveDurationsSet = xsync.Map[string, struct{}]{}
+	badObserveDurations    atomic.Uint64
+)
+
 // As long as d's units are in nanoseconds, microseconds, milliseconds, seconds, minutes, or hours,
 // records the given duration in the correct units.
 //
@@ -417,6 +433,9 @@ func (d *Distribution) Observe(value float64) {
 // world that observe daylight savings, one day of the year is 25 hours and another is 23. As such,
 // a time.Duration is not enough information to know days nor weeks so those must be recorded
 // differently.
+//
+// Other units will record nothing, but will emit a metrics.bad_metrics_definitions with
+// reason:observe_duration_bad_units.
 func (d *Distribution) ObserveDuration(value time.Duration) {
 	switch d.unit {
 	case UnitNanosecond:
@@ -432,6 +451,10 @@ func (d *Distribution) ObserveDuration(value time.Duration) {
 	case UnitHour:
 		d.m.p.Distribution(d.name, value.Seconds()/3600, d.tags, d.sampleRate)
 	default:
+		_, loaded := badObserveDurationsSet.LoadOrStore(d.name, struct{}{})
+		if !loaded {
+			badObserveDurations.Add(1)
+		}
 	}
 }
 
