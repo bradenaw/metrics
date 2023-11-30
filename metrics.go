@@ -265,6 +265,7 @@ func (m *Metrics) Distribution(d DistributionDef) *Distribution {
 		c = &Distribution{
 			m:          m,
 			name:       d.name,
+			unit:       d.unit,
 			tags:       d.tags,
 			sampleRate: d.sampleRate,
 		}
