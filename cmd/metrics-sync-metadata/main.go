@@ -131,12 +131,20 @@ func main2() error {
 			continue
 		}
 
+		description := metadata.Description
+		if len(description) > 400 {
+			// If longer, UpdateMetricMetadata will return 400 with no additional information.
+			// Truncate here because the top-level package is supposed to keep this from happening
+			// anyway.
+			description = description[:400]
+		}
+
 		_, r, err := api.UpdateMetricMetadata(ctx, fullName, datadogV1.MetricMetadata{
 			Unit:        datadog.PtrString(string(metadata.Unit)),
-			Description: &metadata.Description,
+			Description: &description,
 		})
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error when calling `MetricsApi.UpdateMetricMetadata`: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error when calling `MetricsApi.UpdateMetricMetadata` for %s: %v\n", name, err)
 			fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 			return err
 		}

@@ -618,6 +618,13 @@ func registerDef(
 			name, file, line,
 		))
 	}
+	if len(description) > 400 {
+		panic(fmt.Sprintf(
+			"metric descriptions cannot be more than 400 characters, this one is %d\n\n"+
+				"metric %s defined at %s:%d",
+			len(description), name, file, line,
+		))
+	}
 
 	d, loaded := defs.LoadOrStore(name, &Metadata{
 		MetricType:  metricType,
