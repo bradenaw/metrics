@@ -129,3 +129,47 @@ func TestBucketedCounter(t *testing.T) {
 		}
 	}
 }
+
+func TestTagValueSanitize(t *testing.T) {
+	check := func(
+		s string,
+		expected string,
+	) {
+		actual := tagValueSanitize(s)
+		if actual != expected {
+			t.Errorf("tagValueSanitize(%q) -> %q, expected %q", s, actual, expected)
+		}
+	}
+
+	check("abcdefghijklmnopqrstuvwxyz0123456789-:./", "abcdefghijklmnopqrstuvwxyz0123456789-:./")
+	check("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-:./", "abcdefghijklmnopqrstuvwxyz0123456789-:./")
+	check("abc?123", "abc_123")
+	check(",", "_")
+	check("|@", "__")
+	// NOTE: ɱ̊ is two runes
+	check("2o4?uASfd$j⁛1℘aℵ]ɱ̊Mę14\nq", "2o4_uasfd_j_1_a____m_14_q")
+}
+
+func BenchmarkTagValueSanitize(b *testing.B) {
+	const alreadyValid = "abcdefghijklmnopqrstuvwxyz0123456789-:./"
+	b.Run("AlreadyValid", func(b *testing.B) {
+		b.ReportAllocs()
+
+		total := 0
+		for i := 0; i < b.N; i++ {
+			total += len(tagValueSanitize(alreadyValid))
+		}
+		b.Log(total)
+	})
+
+	const withInvalid = "2o43uasfdaj⁛℘ℵɱ̊ę1230"
+	b.Run("WithInvalid", func(b *testing.B) {
+		b.ReportAllocs()
+
+		total := 0
+		for i := 0; i < b.N; i++ {
+			total += len(tagValueSanitize(withInvalid))
+		}
+		b.Log(total)
+	})
+}

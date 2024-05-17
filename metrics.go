@@ -506,10 +506,89 @@ func makeTag(key string, value TagValue) string {
 	return key + ":" + tagValueString(value)
 }
 
+var validTagCharacters = func() [256]bool {
+	var b [256]bool
+
+	// https://docs.datadoghq.com/getting_started/tagging/#define-tags
+	//
+	// Allows:
+	// - Alphanumerics
+	// - Underscores
+	// - Minuses
+	// - Colons
+	// - Periods
+	// - Slashes
+
+	// Note that uppercase have to get lowercased so we'll consider them 'invalid' and let the below
+	// stuff sort it out.
+
+	for r := 'a'; r <= 'z'; r++ {
+		b[int(r)] = true
+	}
+	for r := '0'; r <= '9'; r++ {
+		b[int(r)] = true
+	}
+	b['-'] = true
+	b[':'] = true
+	b['.'] = true
+	b['/'] = true
+
+	return b
+}()
+
+// Tag constraints are here:
+// https://docs.datadoghq.com/getting_started/tagging/#define-tags
+//
+// There's some peculiarity here because tags that don't match this definition are automatically
+// converted via lowercasing and replacing invalid characters with underscores, but:
+//
+// - This happens in the ddagent, after we've already sent it over the network.
+// - The protocol to the ddagent uses some of these unsupported characters as delimiters.
+// - The datadog client does _not_ do this conversion nor escape invalid characters.
+//
+// Which means that very strange results can come out. For example, a comma in a tag value will get
+// interpreted as two separate tags, |@ will be interpreted as a sampling rate, \n will be
+// interpreted as another metric altogether, etc.
+//
+// So we'll repeat the conversion here to save grief.
+func tagValueSanitize(s string) string {
+	ok := true
+
+	// Most strings should be valid already so let's make that cheap and require no allocs.
+	for _, b := range []byte(s) {
+		if !validTagCharacters[b] {
+			ok = false
+			break
+		}
+	}
+
+	if ok {
+		return s
+	}
+
+	var sb strings.Builder
+	// This'll never produce a string longer than s because we replace upper with lowercase ASCII
+	// (both always one byte) and replace other characters including multi-byte with _ which is also
+	// one byte.
+	//
+	// We could do the math but the caller should really just be handing us better strings.
+	sb.Grow(len(s))
+	for _, r := range s {
+		if int(r) < 256 && validTagCharacters[int(r)] {
+			sb.WriteRune(r)
+		} else if r >= 'A' && r <= 'Z' {
+			sb.WriteRune(r + ('a' - 'A'))
+		} else {
+			sb.WriteRune('_')
+		}
+	}
+	return sb.String()
+}
+
 func tagValueString(v TagValue) string {
 	switch v := v.(type) {
 	case string:
-		return v
+		return tagValueSanitize(v)
 	case bool:
 		return strconv.FormatBool(v)
 	case int:
@@ -523,11 +602,11 @@ func tagValueString(v TagValue) string {
 	case uint64:
 		return strconv.FormatUint(uint64(v), 10)
 	case TagValuer:
-		return v.MetricTagValue()
+		return tagValueSanitize(v.MetricTagValue())
 	case fmt.Stringer:
-		return v.String()
+		return tagValueSanitize(v.String())
 	default:
-		return fmt.Sprint(v)
+		return tagValueSanitize(fmt.Sprint(v))
 	}
 }
 
