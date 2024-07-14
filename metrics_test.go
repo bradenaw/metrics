@@ -1,6 +1,8 @@
 package metrics
 
 import (
+	"strings"
+	"sync"
 	"testing"
 )
 
@@ -127,6 +129,67 @@ func TestBucketedCounter(t *testing.T) {
 		if c.v.Load() != int64(e.count) {
 			t.Fatalf("bucket %s has value %d, expected %d", e.bucket, c.v.Load(), e.count)
 		}
+	}
+}
+
+type capturingPublisher struct {
+	mu       sync.Mutex
+	counters map[string]int64
+}
+
+func (p *capturingPublisher) Gauge(name string, value float64, tags []string, rate float64) error {
+	return nil
+}
+func (p *capturingPublisher) Distribution(name string, value float64, tags []string, rate float64) error {
+	return nil
+}
+func (p *capturingPublisher) Set(name string, value string, tags []string, rate float64) error {
+	return nil
+}
+func (p *capturingPublisher) Count(name string, value int64, tags []string, rate float64) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.counters[p.makeKey(name, tags)] += value
+	return nil
+}
+func (p *capturingPublisher) makeKey(name string, tags []string) string {
+	return name + ":" + strings.Join(tags, ",")
+}
+func (p *capturingPublisher) countSeen(name string, tags []string) int64 {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.counters[p.makeKey(name, tags)]
+}
+
+func TestMetrics(t *testing.T) {
+	p := capturingPublisher{counters: make(map[string]int64)}
+	m := New(&p)
+
+	def := CounterDef3[string, int, bool]{
+		name: "test_metrics_counter",
+		keys: [...]string{"string", "int", "bool"},
+		ok:   true,
+	}
+
+	a := m.Counter(def.Prefix1("foo").Values(123, false))
+	b := m.Counter(def.Prefix2("foo", 123).Values(false))
+	c := m.Counter(def.Values("foo", 123, false))
+	d := m.Counter(def.Values("bar", 456, true))
+
+	a.Add(1)
+	b.Add(2)
+	c.Add(3)
+	d.Add(7)
+
+	m.Flush()
+
+	abcSeen := p.countSeen(def.name, []string{"string:foo", "int:123", "bool:false"})
+	if abcSeen != 6 {
+		t.Fatalf("expected 6, got %d", abcSeen)
+	}
+	dSeen := p.countSeen(def.name, []string{"string:bar", "int:456", "bool:true"})
+	if dSeen != 7 {
+		t.Fatalf("expected 7, got %d", dSeen)
 	}
 }
 
