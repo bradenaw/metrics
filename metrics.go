@@ -475,27 +475,29 @@ func (s *Set) Observe(value string) {
 // metricKey is used to dedupe metrics so that multiple calls on a def result in the same metric. It
 // contains the name and tag values.
 type metricKey struct {
-	name             string
-	comparableValues [maxTags]any
-	otherValues      [maxTags]string
+	name   string
+	values [maxTags]any
 }
 
 func newMetricKey(name string, n int, values [maxTags]any, allComparable bool) metricKey {
 	if allComparable {
 		// Fast path - avoid reflection when all of the tag values are comparable.
 		return metricKey{
-			name:             name,
-			comparableValues: values,
+			name:   name,
+			values: values,
 		}
 	}
+
 	k := metricKey{name: name}
+
 	for i := range values {
 		if reflect.ValueOf(values[i]).Comparable() {
-			k.comparableValues[i] = values[i]
+			k.values[i] = values[i]
 		} else {
-			k.otherValues[i] = tagValueString(values[i])
+			k.values[i] = tagValueString(values[i])
 		}
 	}
+
 	return k
 }
 
