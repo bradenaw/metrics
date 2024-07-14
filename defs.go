@@ -1,9 +1,10 @@
 package metrics
 
 type CounterDef struct {
-	name string
-	tags tags
-	ok   bool
+	name          string
+	tags          tags
+	allComparable bool
+	ok            bool
 }
 
 func NewCounterDef(
@@ -13,15 +14,17 @@ func NewCounterDef(
 ) CounterDef {
 	ok := registerDef(CounterType, name, description, unit, nil, nil)
 	return CounterDef{
-		name: name,
-		ok:   ok,
+		name:          name,
+		allComparable: true,
+		ok:            ok,
 	}
 }
 
 type GaugeDef struct {
-	name string
-	tags tags
-	ok   bool
+	name          string
+	tags          tags
+	allComparable bool
+	ok            bool
 }
 
 func NewGaugeDef(
@@ -31,17 +34,19 @@ func NewGaugeDef(
 ) GaugeDef {
 	ok := registerDef(GaugeType, name, description, unit, nil, nil)
 	return GaugeDef{
-		name: name,
-		ok:   ok,
+		name:          name,
+		allComparable: true,
+		ok:            ok,
 	}
 }
 
 type DistributionDef struct {
-	name       string
-	unit       Unit
-	tags       tags
-	sampleRate float64
-	ok         bool
+	name          string
+	unit          Unit
+	tags          tags
+	sampleRate    float64
+	allComparable bool
+	ok            bool
 }
 
 func NewDistributionDef(
@@ -52,18 +57,20 @@ func NewDistributionDef(
 ) DistributionDef {
 	ok := registerDef(DistributionType, name, description, unit, nil, nil)
 	return DistributionDef{
-		name:       name,
-		unit:       unit,
-		sampleRate: sampleRate,
-		ok:         ok,
+		name:          name,
+		unit:          unit,
+		sampleRate:    sampleRate,
+		allComparable: true,
+		ok:            ok,
 	}
 }
 
 type SetDef struct {
-	name       string
-	tags       tags
-	sampleRate float64
-	ok         bool
+	name          string
+	tags          tags
+	sampleRate    float64
+	allComparable bool
+	ok            bool
 }
 
 func NewSetDef(
@@ -74,8 +81,9 @@ func NewSetDef(
 ) SetDef {
 	ok := registerDef(SetType, name, description, unit, nil, nil)
 	return SetDef{
-		name:       name,
-		sampleRate: sampleRate,
-		ok:         ok,
+		name:          name,
+		sampleRate:    sampleRate,
+		allComparable: true,
+		ok:            ok,
 	}
 }

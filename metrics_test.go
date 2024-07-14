@@ -8,9 +8,10 @@ import (
 
 func TestBucketedGaugeGroup(t *testing.T) {
 	d := GaugeDef1[string]{
-		name: "test_bucketed_gauge_group",
-		keys: [...]string{"bucket"},
-		ok:   true,
+		name:          "test_bucketed_gauge_group",
+		keys:          [...]string{"bucket"},
+		allComparable: true,
+		ok:            true,
 	}
 
 	gg := NewBucketedGaugeGroup(NoOpMetrics, d, []float64{1, 10, 100, 1000})
@@ -59,7 +60,12 @@ func TestBucketedGaugeGroup(t *testing.T) {
 		{"gte_1000", 6},
 	} {
 		g, ok := NoOpMetrics.gauges.Load(
-			newMetricKey("test_bucketed_gauge_group", []any{e.bucket}),
+			newMetricKey(
+				"test_bucketed_gauge_group",
+				1, // nTags
+				[maxTags]any{e.bucket},
+				true,
+			),
 		)
 		if !ok {
 			t.Fatalf("bucket %s didn't get created", e.bucket)
@@ -72,9 +78,10 @@ func TestBucketedGaugeGroup(t *testing.T) {
 
 func TestBucketedCounter(t *testing.T) {
 	d := CounterDef1[string]{
-		name: "test_bucketed_counter",
-		keys: [...]string{"bucket"},
-		ok:   true,
+		name:          "test_bucketed_counter",
+		keys:          [...]string{"bucket"},
+		allComparable: true,
+		ok:            true,
 	}
 
 	bc := NewBucketedCounter(NoOpMetrics, d, []float64{1, 10, 100, 1000})
@@ -121,7 +128,12 @@ func TestBucketedCounter(t *testing.T) {
 		{"gte_1000", 6},
 	} {
 		c, ok := NoOpMetrics.counters.Load(
-			newMetricKey("test_bucketed_counter", []any{e.bucket}),
+			newMetricKey(
+				"test_bucketed_counter",
+				1, // nTags
+				[maxTags]any{e.bucket},
+				true, // allComparable
+			),
 		)
 		if !ok {
 			t.Fatalf("bucket %s didn't get created", e.bucket)
@@ -277,9 +289,10 @@ func BenchmarkMetricLookup(b *testing.B) {
 	m := New(noOpPublisher{})
 	b.ReportAllocs()
 	d := CounterDef3[string, int, bool]{
-		name: "benchmark_metric_lookup",
-		keys: [...]string{"", "", ""},
-		ok:   true,
+		name:          "benchmark_metric_lookup",
+		keys:          [...]string{"", "", ""},
+		allComparable: true,
+		ok:            true,
 	}
 
 	foo := "foo"

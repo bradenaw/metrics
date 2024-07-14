@@ -92,7 +92,8 @@ type {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}] struct {
 	prefix     tags
 	keys       [{{.N}}]string
 	{{if .SampleRate}} sampleRate float64 {{end}}
-	ok         bool
+	allComparable bool
+	ok            bool
 }
 
 // New{{.Metric}}Def{{.N}} defines a {{.MetricLower}} metric with {{.N}} tag(s).
@@ -124,6 +125,8 @@ func New{{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}} TagValue, {{end}}](
 		{{if .Unit}}unit: unit,{{end}}
 		keys:       keys,
 		{{if .SampleRate}}sampleRate: sampleRate,{{end}}
+		allComparable: {{range .Ns}}reflect.TypeOf(zero{{.}}).Comparable() &&
+		{{end}} true,
 		ok:         ok,
 	}
 }
@@ -140,6 +143,7 @@ func (d {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Values({{range .Ns}
 		{{if .Unit}}unit: d.unit,{{end}}
 		tags: d.prefix.append(t),
 		{{if .SampleRate}}sampleRate: d.sampleRate,{{end}}
+		allComparable: d.allComparable,
 		ok: d.ok,
 	}
 }
@@ -160,6 +164,7 @@ func (d {{.Metric}}Def{{.N}}[{{range .Ns}} V{{.}}, {{end}}]) Prefix{{.K}}({{rang
 		prefix: t,
 		keys: *((*[{{.NMinusK}}]string)(d.keys[{{.K}}:])),
 		{{if .SampleRate}}sampleRate: d.sampleRate,{{end}}
+		allComparable: d.allComparable,
 		ok:   d.ok,
 	}
 }

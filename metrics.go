@@ -217,7 +217,7 @@ func (m *Metrics) Counter(d CounterDef) *Counter {
 		return noOpCounter
 	}
 
-	k := newMetricKey(d.name, d.tags.values[:d.tags.n])
+	k := newMetricKey(d.name, d.tags.n, d.tags.values, d.allComparable)
 	c, ok := m.counters.Load(k)
 	if !ok {
 		c = &Counter{
@@ -237,7 +237,7 @@ func (m *Metrics) Gauge(d GaugeDef) *Gauge {
 		return noOpGauge
 	}
 
-	k := newMetricKey(d.name, d.tags.values[:d.tags.n])
+	k := newMetricKey(d.name, d.tags.n, d.tags.values, d.allComparable)
 	g, ok := m.gauges.Load(k)
 	if !ok {
 		g = &Gauge{
@@ -259,7 +259,7 @@ func (m *Metrics) Distribution(d DistributionDef) *Distribution {
 		return noOpDistribution
 	}
 
-	k := newMetricKey(d.name, d.tags.values[:d.tags.n])
+	k := newMetricKey(d.name, d.tags.n, d.tags.values, d.allComparable)
 	c, ok := m.distributions.Load(k)
 	if !ok {
 		c = &Distribution{
@@ -281,7 +281,7 @@ func (m *Metrics) Set(d SetDef) *Set {
 		return noOpSet
 	}
 
-	k := newMetricKey(d.name, d.tags.values[:d.tags.n])
+	k := newMetricKey(d.name, d.tags.n, d.tags.values, d.allComparable)
 	c, ok := m.sets.Load(k)
 	if !ok {
 		c = &Set{
@@ -473,15 +473,21 @@ func (s *Set) Observe(value string) {
 }
 
 // metricKey is used to dedupe metrics so that multiple calls on a def result in the same metric. It
-// contains the name and tags.
-
+// contains the name and tag values.
 type metricKey struct {
 	name             string
 	comparableValues [maxTags]any
 	otherValues      [maxTags]string
 }
 
-func newMetricKey(name string, values []any) metricKey {
+func newMetricKey(name string, n int, values [maxTags]any, allComparable bool) metricKey {
+	if allComparable {
+		// Fast path - avoid reflection when all of the tag values are comparable.
+		return metricKey{
+			name:             name,
+			comparableValues: values,
+		}
+	}
 	k := metricKey{name: name}
 	for i := range values {
 		if reflect.ValueOf(values[i]).Comparable() {

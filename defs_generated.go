@@ -13,7 +13,8 @@ type CounterDef1[V0 TagValue] struct {
 	prefix tags
 	keys   [1]string
 
-	ok bool
+	allComparable bool
+	ok            bool
 }
 
 // NewCounterDef1 defines a counter metric with 1 tag(s).
@@ -44,6 +45,8 @@ func NewCounterDef1[V0 TagValue](
 
 		keys: keys,
 
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			true,
 		ok: ok,
 	}
 }
@@ -60,7 +63,8 @@ func (d CounterDef1[V0]) Values(v0 V0) CounterDef {
 
 		tags: d.prefix.append(t),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -71,7 +75,8 @@ type CounterDef2[V0 TagValue, V1 TagValue] struct {
 	prefix tags
 	keys   [2]string
 
-	ok bool
+	allComparable bool
+	ok            bool
 }
 
 // NewCounterDef2 defines a counter metric with 2 tag(s).
@@ -104,6 +109,9 @@ func NewCounterDef2[V0 TagValue, V1 TagValue](
 
 		keys: keys,
 
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			true,
 		ok: ok,
 	}
 }
@@ -121,7 +129,8 @@ func (d CounterDef2[V0, V1]) Values(v0 V0, v1 V1) CounterDef {
 
 		tags: d.prefix.append(t),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -138,7 +147,8 @@ func (d CounterDef2[V0, V1]) Prefix1(v0 V0) CounterDef1[V1] {
 		prefix: t,
 		keys:   *((*[1]string)(d.keys[1:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -149,7 +159,8 @@ type CounterDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
 	prefix tags
 	keys   [3]string
 
-	ok bool
+	allComparable bool
+	ok            bool
 }
 
 // NewCounterDef3 defines a counter metric with 3 tag(s).
@@ -184,6 +195,10 @@ func NewCounterDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 
 		keys: keys,
 
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			reflect.TypeOf(zero2).Comparable() &&
+			true,
 		ok: ok,
 	}
 }
@@ -202,7 +217,8 @@ func (d CounterDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) CounterDef {
 
 		tags: d.prefix.append(t),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -219,7 +235,8 @@ func (d CounterDef3[V0, V1, V2]) Prefix1(v0 V0) CounterDef2[V1, V2] {
 		prefix: t,
 		keys:   *((*[2]string)(d.keys[1:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -237,7 +254,8 @@ func (d CounterDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) CounterDef1[V2] {
 		prefix: t,
 		keys:   *((*[1]string)(d.keys[2:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -248,7 +266,8 @@ type CounterDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
 	prefix tags
 	keys   [4]string
 
-	ok bool
+	allComparable bool
+	ok            bool
 }
 
 // NewCounterDef4 defines a counter metric with 4 tag(s).
@@ -285,6 +304,11 @@ func NewCounterDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 
 		keys: keys,
 
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			reflect.TypeOf(zero2).Comparable() &&
+			reflect.TypeOf(zero3).Comparable() &&
+			true,
 		ok: ok,
 	}
 }
@@ -304,7 +328,8 @@ func (d CounterDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) CounterD
 
 		tags: d.prefix.append(t),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -321,7 +346,8 @@ func (d CounterDef4[V0, V1, V2, V3]) Prefix1(v0 V0) CounterDef3[V1, V2, V3] {
 		prefix: t,
 		keys:   *((*[3]string)(d.keys[1:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -339,7 +365,8 @@ func (d CounterDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) CounterDef2[V2, V3] {
 		prefix: t,
 		keys:   *((*[2]string)(d.keys[2:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -358,7 +385,8 @@ func (d CounterDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) CounterDef1[V3
 		prefix: t,
 		keys:   *((*[1]string)(d.keys[3:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -369,7 +397,8 @@ type CounterDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue
 	prefix tags
 	keys   [5]string
 
-	ok bool
+	allComparable bool
+	ok            bool
 }
 
 // NewCounterDef5 defines a counter metric with 5 tag(s).
@@ -408,6 +437,12 @@ func NewCounterDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagVa
 
 		keys: keys,
 
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			reflect.TypeOf(zero2).Comparable() &&
+			reflect.TypeOf(zero3).Comparable() &&
+			reflect.TypeOf(zero4).Comparable() &&
+			true,
 		ok: ok,
 	}
 }
@@ -428,7 +463,8 @@ func (d CounterDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V
 
 		tags: d.prefix.append(t),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -445,7 +481,8 @@ func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) CounterDef4[V1, V2, V3, 
 		prefix: t,
 		keys:   *((*[4]string)(d.keys[1:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -463,7 +500,8 @@ func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) CounterDef3[V2, V
 		prefix: t,
 		keys:   *((*[3]string)(d.keys[2:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -482,7 +520,8 @@ func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) CounterDef
 		prefix: t,
 		keys:   *((*[2]string)(d.keys[3:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -502,7 +541,8 @@ func (d CounterDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3) Cou
 		prefix: t,
 		keys:   *((*[1]string)(d.keys[4:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -513,7 +553,8 @@ type GaugeDef1[V0 TagValue] struct {
 	prefix tags
 	keys   [1]string
 
-	ok bool
+	allComparable bool
+	ok            bool
 }
 
 // NewGaugeDef1 defines a gauge metric with 1 tag(s).
@@ -544,6 +585,8 @@ func NewGaugeDef1[V0 TagValue](
 
 		keys: keys,
 
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			true,
 		ok: ok,
 	}
 }
@@ -560,7 +603,8 @@ func (d GaugeDef1[V0]) Values(v0 V0) GaugeDef {
 
 		tags: d.prefix.append(t),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -571,7 +615,8 @@ type GaugeDef2[V0 TagValue, V1 TagValue] struct {
 	prefix tags
 	keys   [2]string
 
-	ok bool
+	allComparable bool
+	ok            bool
 }
 
 // NewGaugeDef2 defines a gauge metric with 2 tag(s).
@@ -604,6 +649,9 @@ func NewGaugeDef2[V0 TagValue, V1 TagValue](
 
 		keys: keys,
 
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			true,
 		ok: ok,
 	}
 }
@@ -621,7 +669,8 @@ func (d GaugeDef2[V0, V1]) Values(v0 V0, v1 V1) GaugeDef {
 
 		tags: d.prefix.append(t),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -638,7 +687,8 @@ func (d GaugeDef2[V0, V1]) Prefix1(v0 V0) GaugeDef1[V1] {
 		prefix: t,
 		keys:   *((*[1]string)(d.keys[1:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -649,7 +699,8 @@ type GaugeDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
 	prefix tags
 	keys   [3]string
 
-	ok bool
+	allComparable bool
+	ok            bool
 }
 
 // NewGaugeDef3 defines a gauge metric with 3 tag(s).
@@ -684,6 +735,10 @@ func NewGaugeDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 
 		keys: keys,
 
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			reflect.TypeOf(zero2).Comparable() &&
+			true,
 		ok: ok,
 	}
 }
@@ -702,7 +757,8 @@ func (d GaugeDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) GaugeDef {
 
 		tags: d.prefix.append(t),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -719,7 +775,8 @@ func (d GaugeDef3[V0, V1, V2]) Prefix1(v0 V0) GaugeDef2[V1, V2] {
 		prefix: t,
 		keys:   *((*[2]string)(d.keys[1:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -737,7 +794,8 @@ func (d GaugeDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) GaugeDef1[V2] {
 		prefix: t,
 		keys:   *((*[1]string)(d.keys[2:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -748,7 +806,8 @@ type GaugeDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
 	prefix tags
 	keys   [4]string
 
-	ok bool
+	allComparable bool
+	ok            bool
 }
 
 // NewGaugeDef4 defines a gauge metric with 4 tag(s).
@@ -785,6 +844,11 @@ func NewGaugeDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 
 		keys: keys,
 
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			reflect.TypeOf(zero2).Comparable() &&
+			reflect.TypeOf(zero3).Comparable() &&
+			true,
 		ok: ok,
 	}
 }
@@ -804,7 +868,8 @@ func (d GaugeDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) GaugeDef {
 
 		tags: d.prefix.append(t),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -821,7 +886,8 @@ func (d GaugeDef4[V0, V1, V2, V3]) Prefix1(v0 V0) GaugeDef3[V1, V2, V3] {
 		prefix: t,
 		keys:   *((*[3]string)(d.keys[1:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -839,7 +905,8 @@ func (d GaugeDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) GaugeDef2[V2, V3] {
 		prefix: t,
 		keys:   *((*[2]string)(d.keys[2:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -858,7 +925,8 @@ func (d GaugeDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) GaugeDef1[V3] {
 		prefix: t,
 		keys:   *((*[1]string)(d.keys[3:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -869,7 +937,8 @@ type GaugeDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue] 
 	prefix tags
 	keys   [5]string
 
-	ok bool
+	allComparable bool
+	ok            bool
 }
 
 // NewGaugeDef5 defines a gauge metric with 5 tag(s).
@@ -908,6 +977,12 @@ func NewGaugeDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValu
 
 		keys: keys,
 
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			reflect.TypeOf(zero2).Comparable() &&
+			reflect.TypeOf(zero3).Comparable() &&
+			reflect.TypeOf(zero4).Comparable() &&
+			true,
 		ok: ok,
 	}
 }
@@ -928,7 +1003,8 @@ func (d GaugeDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4)
 
 		tags: d.prefix.append(t),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -945,7 +1021,8 @@ func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) GaugeDef4[V1, V2, V3, V4] 
 		prefix: t,
 		keys:   *((*[4]string)(d.keys[1:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -963,7 +1040,8 @@ func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) GaugeDef3[V2, V3, V
 		prefix: t,
 		keys:   *((*[3]string)(d.keys[2:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -982,7 +1060,8 @@ func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) GaugeDef2[V3
 		prefix: t,
 		keys:   *((*[2]string)(d.keys[3:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1002,18 +1081,20 @@ func (d GaugeDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3) Gauge
 		prefix: t,
 		keys:   *((*[1]string)(d.keys[4:])),
 
-		ok: d.ok,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
 // DistributionDef1 is the definition of a distribution metric with 1 tag(s).
 type DistributionDef1[V0 TagValue] struct {
-	name       string
-	unit       Unit
-	prefix     tags
-	keys       [1]string
-	sampleRate float64
-	ok         bool
+	name          string
+	unit          Unit
+	prefix        tags
+	keys          [1]string
+	sampleRate    float64
+	allComparable bool
+	ok            bool
 }
 
 // NewDistributionDef1 defines a distribution metric with 1 tag(s).
@@ -1044,7 +1125,9 @@ func NewDistributionDef1[V0 TagValue](
 		unit:       unit,
 		keys:       keys,
 		sampleRate: sampleRate,
-		ok:         ok,
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			true,
+		ok: ok,
 	}
 }
 
@@ -1056,22 +1139,24 @@ func (d DistributionDef1[V0]) Values(v0 V0) DistributionDef {
 	t.values[0] = v0
 
 	return DistributionDef{
-		name:       d.name,
-		unit:       d.unit,
-		tags:       d.prefix.append(t),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		name:          d.name,
+		unit:          d.unit,
+		tags:          d.prefix.append(t),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
 // DistributionDef2 is the definition of a distribution metric with 2 tag(s).
 type DistributionDef2[V0 TagValue, V1 TagValue] struct {
-	name       string
-	unit       Unit
-	prefix     tags
-	keys       [2]string
-	sampleRate float64
-	ok         bool
+	name          string
+	unit          Unit
+	prefix        tags
+	keys          [2]string
+	sampleRate    float64
+	allComparable bool
+	ok            bool
 }
 
 // NewDistributionDef2 defines a distribution metric with 2 tag(s).
@@ -1104,7 +1189,10 @@ func NewDistributionDef2[V0 TagValue, V1 TagValue](
 		unit:       unit,
 		keys:       keys,
 		sampleRate: sampleRate,
-		ok:         ok,
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			true,
+		ok: ok,
 	}
 }
 
@@ -1117,11 +1205,12 @@ func (d DistributionDef2[V0, V1]) Values(v0 V0, v1 V1) DistributionDef {
 	t.values[1] = v1
 
 	return DistributionDef{
-		name:       d.name,
-		unit:       d.unit,
-		tags:       d.prefix.append(t),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		name:          d.name,
+		unit:          d.unit,
+		tags:          d.prefix.append(t),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1133,23 +1222,25 @@ func (d DistributionDef2[V0, V1]) Prefix1(v0 V0) DistributionDef1[V1] {
 	t.values[0] = v0
 
 	return DistributionDef1[V1]{
-		name:       d.name,
-		unit:       d.unit,
-		prefix:     t,
-		keys:       *((*[1]string)(d.keys[1:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		name:          d.name,
+		unit:          d.unit,
+		prefix:        t,
+		keys:          *((*[1]string)(d.keys[1:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
 // DistributionDef3 is the definition of a distribution metric with 3 tag(s).
 type DistributionDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
-	name       string
-	unit       Unit
-	prefix     tags
-	keys       [3]string
-	sampleRate float64
-	ok         bool
+	name          string
+	unit          Unit
+	prefix        tags
+	keys          [3]string
+	sampleRate    float64
+	allComparable bool
+	ok            bool
 }
 
 // NewDistributionDef3 defines a distribution metric with 3 tag(s).
@@ -1184,7 +1275,11 @@ func NewDistributionDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 		unit:       unit,
 		keys:       keys,
 		sampleRate: sampleRate,
-		ok:         ok,
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			reflect.TypeOf(zero2).Comparable() &&
+			true,
+		ok: ok,
 	}
 }
 
@@ -1198,11 +1293,12 @@ func (d DistributionDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) DistributionDe
 	t.values[2] = v2
 
 	return DistributionDef{
-		name:       d.name,
-		unit:       d.unit,
-		tags:       d.prefix.append(t),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		name:          d.name,
+		unit:          d.unit,
+		tags:          d.prefix.append(t),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1214,12 +1310,13 @@ func (d DistributionDef3[V0, V1, V2]) Prefix1(v0 V0) DistributionDef2[V1, V2] {
 	t.values[0] = v0
 
 	return DistributionDef2[V1, V2]{
-		name:       d.name,
-		unit:       d.unit,
-		prefix:     t,
-		keys:       *((*[2]string)(d.keys[1:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		name:          d.name,
+		unit:          d.unit,
+		prefix:        t,
+		keys:          *((*[2]string)(d.keys[1:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1232,23 +1329,25 @@ func (d DistributionDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) DistributionDef1[V2]
 	t.values[1] = v1
 
 	return DistributionDef1[V2]{
-		name:       d.name,
-		unit:       d.unit,
-		prefix:     t,
-		keys:       *((*[1]string)(d.keys[2:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		name:          d.name,
+		unit:          d.unit,
+		prefix:        t,
+		keys:          *((*[1]string)(d.keys[2:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
 // DistributionDef4 is the definition of a distribution metric with 4 tag(s).
 type DistributionDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
-	name       string
-	unit       Unit
-	prefix     tags
-	keys       [4]string
-	sampleRate float64
-	ok         bool
+	name          string
+	unit          Unit
+	prefix        tags
+	keys          [4]string
+	sampleRate    float64
+	allComparable bool
+	ok            bool
 }
 
 // NewDistributionDef4 defines a distribution metric with 4 tag(s).
@@ -1285,7 +1384,12 @@ func NewDistributionDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 		unit:       unit,
 		keys:       keys,
 		sampleRate: sampleRate,
-		ok:         ok,
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			reflect.TypeOf(zero2).Comparable() &&
+			reflect.TypeOf(zero3).Comparable() &&
+			true,
+		ok: ok,
 	}
 }
 
@@ -1300,11 +1404,12 @@ func (d DistributionDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) Dis
 	t.values[3] = v3
 
 	return DistributionDef{
-		name:       d.name,
-		unit:       d.unit,
-		tags:       d.prefix.append(t),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		name:          d.name,
+		unit:          d.unit,
+		tags:          d.prefix.append(t),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1316,12 +1421,13 @@ func (d DistributionDef4[V0, V1, V2, V3]) Prefix1(v0 V0) DistributionDef3[V1, V2
 	t.values[0] = v0
 
 	return DistributionDef3[V1, V2, V3]{
-		name:       d.name,
-		unit:       d.unit,
-		prefix:     t,
-		keys:       *((*[3]string)(d.keys[1:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		name:          d.name,
+		unit:          d.unit,
+		prefix:        t,
+		keys:          *((*[3]string)(d.keys[1:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1334,12 +1440,13 @@ func (d DistributionDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) DistributionDef2
 	t.values[1] = v1
 
 	return DistributionDef2[V2, V3]{
-		name:       d.name,
-		unit:       d.unit,
-		prefix:     t,
-		keys:       *((*[2]string)(d.keys[2:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		name:          d.name,
+		unit:          d.unit,
+		prefix:        t,
+		keys:          *((*[2]string)(d.keys[2:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1353,23 +1460,25 @@ func (d DistributionDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) Distribut
 	t.values[2] = v2
 
 	return DistributionDef1[V3]{
-		name:       d.name,
-		unit:       d.unit,
-		prefix:     t,
-		keys:       *((*[1]string)(d.keys[3:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		name:          d.name,
+		unit:          d.unit,
+		prefix:        t,
+		keys:          *((*[1]string)(d.keys[3:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
 // DistributionDef5 is the definition of a distribution metric with 5 tag(s).
 type DistributionDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue] struct {
-	name       string
-	unit       Unit
-	prefix     tags
-	keys       [5]string
-	sampleRate float64
-	ok         bool
+	name          string
+	unit          Unit
+	prefix        tags
+	keys          [5]string
+	sampleRate    float64
+	allComparable bool
+	ok            bool
 }
 
 // NewDistributionDef5 defines a distribution metric with 5 tag(s).
@@ -1408,7 +1517,13 @@ func NewDistributionDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 
 		unit:       unit,
 		keys:       keys,
 		sampleRate: sampleRate,
-		ok:         ok,
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			reflect.TypeOf(zero2).Comparable() &&
+			reflect.TypeOf(zero3).Comparable() &&
+			reflect.TypeOf(zero4).Comparable() &&
+			true,
+		ok: ok,
 	}
 }
 
@@ -1424,11 +1539,12 @@ func (d DistributionDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3,
 	t.values[4] = v4
 
 	return DistributionDef{
-		name:       d.name,
-		unit:       d.unit,
-		tags:       d.prefix.append(t),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		name:          d.name,
+		unit:          d.unit,
+		tags:          d.prefix.append(t),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1440,12 +1556,13 @@ func (d DistributionDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) DistributionDef4[V1
 	t.values[0] = v0
 
 	return DistributionDef4[V1, V2, V3, V4]{
-		name:       d.name,
-		unit:       d.unit,
-		prefix:     t,
-		keys:       *((*[4]string)(d.keys[1:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		name:          d.name,
+		unit:          d.unit,
+		prefix:        t,
+		keys:          *((*[4]string)(d.keys[1:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1458,12 +1575,13 @@ func (d DistributionDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) Distribution
 	t.values[1] = v1
 
 	return DistributionDef3[V2, V3, V4]{
-		name:       d.name,
-		unit:       d.unit,
-		prefix:     t,
-		keys:       *((*[3]string)(d.keys[2:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		name:          d.name,
+		unit:          d.unit,
+		prefix:        t,
+		keys:          *((*[3]string)(d.keys[2:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1477,12 +1595,13 @@ func (d DistributionDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) Distr
 	t.values[2] = v2
 
 	return DistributionDef2[V3, V4]{
-		name:       d.name,
-		unit:       d.unit,
-		prefix:     t,
-		keys:       *((*[2]string)(d.keys[3:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		name:          d.name,
+		unit:          d.unit,
+		prefix:        t,
+		keys:          *((*[2]string)(d.keys[3:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1497,12 +1616,13 @@ func (d DistributionDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3
 	t.values[3] = v3
 
 	return DistributionDef1[V4]{
-		name:       d.name,
-		unit:       d.unit,
-		prefix:     t,
-		keys:       *((*[1]string)(d.keys[4:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		name:          d.name,
+		unit:          d.unit,
+		prefix:        t,
+		keys:          *((*[1]string)(d.keys[4:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1510,10 +1630,11 @@ func (d DistributionDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3
 type SetDef1[V0 TagValue] struct {
 	name string
 
-	prefix     tags
-	keys       [1]string
-	sampleRate float64
-	ok         bool
+	prefix        tags
+	keys          [1]string
+	sampleRate    float64
+	allComparable bool
+	ok            bool
 }
 
 // NewSetDef1 defines a set metric with 1 tag(s).
@@ -1544,7 +1665,9 @@ func NewSetDef1[V0 TagValue](
 
 		keys:       keys,
 		sampleRate: sampleRate,
-		ok:         ok,
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			true,
+		ok: ok,
 	}
 }
 
@@ -1558,9 +1681,10 @@ func (d SetDef1[V0]) Values(v0 V0) SetDef {
 	return SetDef{
 		name: d.name,
 
-		tags:       d.prefix.append(t),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		tags:          d.prefix.append(t),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1568,10 +1692,11 @@ func (d SetDef1[V0]) Values(v0 V0) SetDef {
 type SetDef2[V0 TagValue, V1 TagValue] struct {
 	name string
 
-	prefix     tags
-	keys       [2]string
-	sampleRate float64
-	ok         bool
+	prefix        tags
+	keys          [2]string
+	sampleRate    float64
+	allComparable bool
+	ok            bool
 }
 
 // NewSetDef2 defines a set metric with 2 tag(s).
@@ -1604,7 +1729,10 @@ func NewSetDef2[V0 TagValue, V1 TagValue](
 
 		keys:       keys,
 		sampleRate: sampleRate,
-		ok:         ok,
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			true,
+		ok: ok,
 	}
 }
 
@@ -1619,9 +1747,10 @@ func (d SetDef2[V0, V1]) Values(v0 V0, v1 V1) SetDef {
 	return SetDef{
 		name: d.name,
 
-		tags:       d.prefix.append(t),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		tags:          d.prefix.append(t),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1635,10 +1764,11 @@ func (d SetDef2[V0, V1]) Prefix1(v0 V0) SetDef1[V1] {
 	return SetDef1[V1]{
 		name: d.name,
 
-		prefix:     t,
-		keys:       *((*[1]string)(d.keys[1:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		prefix:        t,
+		keys:          *((*[1]string)(d.keys[1:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1646,10 +1776,11 @@ func (d SetDef2[V0, V1]) Prefix1(v0 V0) SetDef1[V1] {
 type SetDef3[V0 TagValue, V1 TagValue, V2 TagValue] struct {
 	name string
 
-	prefix     tags
-	keys       [3]string
-	sampleRate float64
-	ok         bool
+	prefix        tags
+	keys          [3]string
+	sampleRate    float64
+	allComparable bool
+	ok            bool
 }
 
 // NewSetDef3 defines a set metric with 3 tag(s).
@@ -1684,7 +1815,11 @@ func NewSetDef3[V0 TagValue, V1 TagValue, V2 TagValue](
 
 		keys:       keys,
 		sampleRate: sampleRate,
-		ok:         ok,
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			reflect.TypeOf(zero2).Comparable() &&
+			true,
+		ok: ok,
 	}
 }
 
@@ -1700,9 +1835,10 @@ func (d SetDef3[V0, V1, V2]) Values(v0 V0, v1 V1, v2 V2) SetDef {
 	return SetDef{
 		name: d.name,
 
-		tags:       d.prefix.append(t),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		tags:          d.prefix.append(t),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1716,10 +1852,11 @@ func (d SetDef3[V0, V1, V2]) Prefix1(v0 V0) SetDef2[V1, V2] {
 	return SetDef2[V1, V2]{
 		name: d.name,
 
-		prefix:     t,
-		keys:       *((*[2]string)(d.keys[1:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		prefix:        t,
+		keys:          *((*[2]string)(d.keys[1:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1734,10 +1871,11 @@ func (d SetDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) SetDef1[V2] {
 	return SetDef1[V2]{
 		name: d.name,
 
-		prefix:     t,
-		keys:       *((*[1]string)(d.keys[2:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		prefix:        t,
+		keys:          *((*[1]string)(d.keys[2:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1745,10 +1883,11 @@ func (d SetDef3[V0, V1, V2]) Prefix2(v0 V0, v1 V1) SetDef1[V2] {
 type SetDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue] struct {
 	name string
 
-	prefix     tags
-	keys       [4]string
-	sampleRate float64
-	ok         bool
+	prefix        tags
+	keys          [4]string
+	sampleRate    float64
+	allComparable bool
+	ok            bool
 }
 
 // NewSetDef4 defines a set metric with 4 tag(s).
@@ -1785,7 +1924,12 @@ func NewSetDef4[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue](
 
 		keys:       keys,
 		sampleRate: sampleRate,
-		ok:         ok,
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			reflect.TypeOf(zero2).Comparable() &&
+			reflect.TypeOf(zero3).Comparable() &&
+			true,
+		ok: ok,
 	}
 }
 
@@ -1802,9 +1946,10 @@ func (d SetDef4[V0, V1, V2, V3]) Values(v0 V0, v1 V1, v2 V2, v3 V3) SetDef {
 	return SetDef{
 		name: d.name,
 
-		tags:       d.prefix.append(t),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		tags:          d.prefix.append(t),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1818,10 +1963,11 @@ func (d SetDef4[V0, V1, V2, V3]) Prefix1(v0 V0) SetDef3[V1, V2, V3] {
 	return SetDef3[V1, V2, V3]{
 		name: d.name,
 
-		prefix:     t,
-		keys:       *((*[3]string)(d.keys[1:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		prefix:        t,
+		keys:          *((*[3]string)(d.keys[1:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1836,10 +1982,11 @@ func (d SetDef4[V0, V1, V2, V3]) Prefix2(v0 V0, v1 V1) SetDef2[V2, V3] {
 	return SetDef2[V2, V3]{
 		name: d.name,
 
-		prefix:     t,
-		keys:       *((*[2]string)(d.keys[2:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		prefix:        t,
+		keys:          *((*[2]string)(d.keys[2:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1855,10 +2002,11 @@ func (d SetDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) SetDef1[V3] {
 	return SetDef1[V3]{
 		name: d.name,
 
-		prefix:     t,
-		keys:       *((*[1]string)(d.keys[3:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		prefix:        t,
+		keys:          *((*[1]string)(d.keys[3:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1866,10 +2014,11 @@ func (d SetDef4[V0, V1, V2, V3]) Prefix3(v0 V0, v1 V1, v2 V2) SetDef1[V3] {
 type SetDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue] struct {
 	name string
 
-	prefix     tags
-	keys       [5]string
-	sampleRate float64
-	ok         bool
+	prefix        tags
+	keys          [5]string
+	sampleRate    float64
+	allComparable bool
+	ok            bool
 }
 
 // NewSetDef5 defines a set metric with 5 tag(s).
@@ -1908,7 +2057,13 @@ func NewSetDef5[V0 TagValue, V1 TagValue, V2 TagValue, V3 TagValue, V4 TagValue]
 
 		keys:       keys,
 		sampleRate: sampleRate,
-		ok:         ok,
+		allComparable: reflect.TypeOf(zero0).Comparable() &&
+			reflect.TypeOf(zero1).Comparable() &&
+			reflect.TypeOf(zero2).Comparable() &&
+			reflect.TypeOf(zero3).Comparable() &&
+			reflect.TypeOf(zero4).Comparable() &&
+			true,
+		ok: ok,
 	}
 }
 
@@ -1926,9 +2081,10 @@ func (d SetDef5[V0, V1, V2, V3, V4]) Values(v0 V0, v1 V1, v2 V2, v3 V3, v4 V4) S
 	return SetDef{
 		name: d.name,
 
-		tags:       d.prefix.append(t),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		tags:          d.prefix.append(t),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1942,10 +2098,11 @@ func (d SetDef5[V0, V1, V2, V3, V4]) Prefix1(v0 V0) SetDef4[V1, V2, V3, V4] {
 	return SetDef4[V1, V2, V3, V4]{
 		name: d.name,
 
-		prefix:     t,
-		keys:       *((*[4]string)(d.keys[1:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		prefix:        t,
+		keys:          *((*[4]string)(d.keys[1:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1960,10 +2117,11 @@ func (d SetDef5[V0, V1, V2, V3, V4]) Prefix2(v0 V0, v1 V1) SetDef3[V2, V3, V4] {
 	return SetDef3[V2, V3, V4]{
 		name: d.name,
 
-		prefix:     t,
-		keys:       *((*[3]string)(d.keys[2:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		prefix:        t,
+		keys:          *((*[3]string)(d.keys[2:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1979,10 +2137,11 @@ func (d SetDef5[V0, V1, V2, V3, V4]) Prefix3(v0 V0, v1 V1, v2 V2) SetDef2[V3, V4
 	return SetDef2[V3, V4]{
 		name: d.name,
 
-		prefix:     t,
-		keys:       *((*[2]string)(d.keys[3:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		prefix:        t,
+		keys:          *((*[2]string)(d.keys[3:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
 
@@ -1999,9 +2158,10 @@ func (d SetDef5[V0, V1, V2, V3, V4]) Prefix4(v0 V0, v1 V1, v2 V2, v3 V3) SetDef1
 	return SetDef1[V4]{
 		name: d.name,
 
-		prefix:     t,
-		keys:       *((*[1]string)(d.keys[4:])),
-		sampleRate: d.sampleRate,
-		ok:         d.ok,
+		prefix:        t,
+		keys:          *((*[1]string)(d.keys[4:])),
+		sampleRate:    d.sampleRate,
+		allComparable: d.allComparable,
+		ok:            d.ok,
 	}
 }
