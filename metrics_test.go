@@ -173,3 +173,20 @@ func BenchmarkTagValueSanitize(b *testing.B) {
 		b.Log(total)
 	})
 }
+
+func BenchmarkMetricLookup(b *testing.B) {
+	m := New(noOpPublisher{})
+	b.ReportAllocs()
+	d := CounterDef3[string, int, bool]{
+		name: "benchmark_metric_lookup",
+		keys: [...]string{"", "", ""},
+		ok:   true,
+	}
+
+	foo := "foo"
+
+	for i := 0; i < b.N; i++ {
+		withValues := d.Values(foo, 1, false)
+		m.Counter(withValues)
+	}
+}
