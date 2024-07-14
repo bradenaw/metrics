@@ -89,10 +89,10 @@ type Metrics struct {
 	bg       *xsync.Group
 	flushNow func()
 
-	gauges        xsync.Map[metricKey, *Gauge]
-	counters      xsync.Map[metricKey, *Counter]
-	distributions xsync.Map[metricKey, *Distribution]
-	sets          xsync.Map[metricKey, *Set]
+	gauges        metricMap[*Gauge]
+	counters      metricMap[*Counter]
+	distributions metricMap[*Distribution]
+	sets          metricMap[*Set]
 
 	m       sync.Mutex
 	flushed chan struct{}
