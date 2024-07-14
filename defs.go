@@ -2,7 +2,7 @@ package metrics
 
 type CounterDef struct {
 	name string
-	tags []string
+	tags tags
 	ok   bool
 }
 
@@ -20,7 +20,7 @@ func NewCounterDef(
 
 type GaugeDef struct {
 	name string
-	tags []string
+	tags tags
 	ok   bool
 }
 
@@ -39,7 +39,7 @@ func NewGaugeDef(
 type DistributionDef struct {
 	name       string
 	unit       Unit
-	tags       []string
+	tags       tags
 	sampleRate float64
 	ok         bool
 }
@@ -61,7 +61,7 @@ func NewDistributionDef(
 
 type SetDef struct {
 	name       string
-	tags       []string
+	tags       tags
 	sampleRate float64
 	ok         bool
 }

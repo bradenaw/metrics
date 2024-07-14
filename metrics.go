@@ -217,13 +217,13 @@ func (m *Metrics) Counter(d CounterDef) *Counter {
 		return noOpCounter
 	}
 
-	k := newMetricKey(d.name, d.tags)
+	k := newMetricKey(d.name, d.tags.values[:d.tags.n])
 	c, ok := m.counters.Load(k)
 	if !ok {
 		c = &Counter{
 			m:    m,
 			name: d.name,
-			tags: d.tags,
+			tags: makeTags(d.tags.keys[:d.tags.n], d.tags.values[:d.tags.n]),
 		}
 		c, _ = m.counters.LoadOrStore(k, c)
 	}
@@ -237,13 +237,13 @@ func (m *Metrics) Gauge(d GaugeDef) *Gauge {
 		return noOpGauge
 	}
 
-	k := newMetricKey(d.name, d.tags)
+	k := newMetricKey(d.name, d.tags.values[:d.tags.n])
 	g, ok := m.gauges.Load(k)
 	if !ok {
 		g = &Gauge{
 			m:    m,
 			name: d.name,
-			tags: d.tags,
+			tags: makeTags(d.tags.keys[:d.tags.n], d.tags.values[:d.tags.n]),
 		}
 		g.v.Store(math.Float64bits(math.NaN()))
 		g, _ = m.gauges.LoadOrStore(k, g)
@@ -259,14 +259,14 @@ func (m *Metrics) Distribution(d DistributionDef) *Distribution {
 		return noOpDistribution
 	}
 
-	k := newMetricKey(d.name, d.tags)
+	k := newMetricKey(d.name, d.tags.values[:d.tags.n])
 	c, ok := m.distributions.Load(k)
 	if !ok {
 		c = &Distribution{
 			m:          m,
 			name:       d.name,
 			unit:       d.unit,
-			tags:       d.tags,
+			tags:       makeTags(d.tags.keys[:d.tags.n], d.tags.values[:d.tags.n]),
 			sampleRate: d.sampleRate,
 		}
 		c, _ = m.distributions.LoadOrStore(k, c)
@@ -281,13 +281,13 @@ func (m *Metrics) Set(d SetDef) *Set {
 		return noOpSet
 	}
 
-	k := newMetricKey(d.name, d.tags)
+	k := newMetricKey(d.name, d.tags.values[:d.tags.n])
 	c, ok := m.sets.Load(k)
 	if !ok {
 		c = &Set{
 			m:          m,
 			name:       d.name,
-			tags:       d.tags,
+			tags:       makeTags(d.tags.keys[:d.tags.n], d.tags.values[:d.tags.n]),
 			sampleRate: d.sampleRate,
 		}
 		c, _ = m.sets.LoadOrStore(k, c)
@@ -474,32 +474,34 @@ func (s *Set) Observe(value string) {
 
 // metricKey is used to dedupe metrics so that multiple calls on a def result in the same metric. It
 // contains the name and tags.
-type metricKey string
 
-func newMetricKey(name string, tags []string) metricKey {
-	if len(tags) == 0 {
-		return metricKey(name)
-	}
-
-	n := len(name) + 1
-	for _, tag := range tags {
-		n += len(tag) + 1
-	}
-
-	var sb strings.Builder
-	sb.Grow(n)
-	_, _ = sb.WriteString(name)
-	_, _ = sb.WriteString(":")
-	for i, tag := range tags {
-		if i != 0 {
-			_, _ = sb.WriteString(",")
-		}
-		_, _ = sb.WriteString(tag)
-	}
-	return metricKey(sb.String())
+type metricKey struct {
+	name             string
+	comparableValues [maxTags]any
+	otherValues      [maxTags]string
 }
 
-func makeTag(key string, value TagValue) string {
+func newMetricKey(name string, values []any) metricKey {
+	k := metricKey{name: name}
+	for i := range values {
+		if reflect.ValueOf(values[i]).Comparable() {
+			k.comparableValues[i] = values[i]
+		} else {
+			k.otherValues[i] = tagValueString(values[i])
+		}
+	}
+	return k
+}
+
+func makeTags(keys []string, values []any) []string {
+	tags := make([]string, len(keys))
+	for i := range tags {
+		tags[i] = makeTag(keys[i], values[i])
+	}
+	return tags
+}
+
+func makeTag(key string, value any) string {
 	if len(key) == 0 {
 		return tagValueString(value)
 	}
@@ -585,7 +587,7 @@ func tagValueSanitize(s string) string {
 	return sb.String()
 }
 
-func tagValueString(v TagValue) string {
+func tagValueString(v any) string {
 	switch v := v.(type) {
 	case string:
 		return tagValueSanitize(v)
@@ -795,7 +797,7 @@ func DumpDefs() error {
 	return nil
 }
 
-func joinStrings(a []string, b []string) []string {
+func join[E any](a []E, b []E) []E {
 	if len(a) == 0 {
 		return b
 	}
