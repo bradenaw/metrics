@@ -85,7 +85,7 @@ type TagValuer interface {
 }
 
 type Metrics struct {
-	p        Publisher
+	sender   *newlineDelimPacketSender
 	bg       *xsync.Group
 	flushNow func()
 
@@ -115,7 +115,6 @@ func (p noOpPublisher) Set(name string, value string, tags []string, rate float6
 
 var (
 	NoOpMetrics = &Metrics{
-		p:       noOpPublisher{},
 		bg:      xsync.NewGroup(context.Background()),
 		flushed: make(chan struct{}),
 		polls:   make(map[int]func()),
@@ -137,9 +136,8 @@ var (
 	)
 )
 
-func New(p Publisher) *Metrics {
+func New() *Metrics {
 	m := &Metrics{
-		p:       p,
 		bg:      xsync.NewGroup(context.Background()),
 		flushed: make(chan struct{}),
 		polls:   make(map[int]func()),
@@ -167,6 +165,10 @@ func New(p Publisher) *Metrics {
 		})
 		m.counters.Range(func(_ metricKey, c *Counter) bool {
 			c.publish()
+			return true
+		})
+		m.distributions.Range(func(_ metricKey, d *Distribution) bool {
+			d.publish()
 			return true
 		})
 
@@ -263,15 +265,27 @@ func (m *Metrics) Distribution(d DistributionDef) *Distribution {
 	c, ok := m.distributions.Load(k)
 	if !ok {
 		c = &Distribution{
-			m:          m,
-			name:       d.name,
-			unit:       d.unit,
-			tags:       makeTags(d.tags.keys[:d.tags.n], d.tags.values[:d.tags.n]),
-			sampleRate: d.sampleRate,
+			m:    m,
+			name: d.name,
+			unit: d.unit,
+			tags: makeTags(d.tags.keys[:d.tags.n], d.tags.values[:d.tags.n]),
 		}
 		c, _ = m.distributions.LoadOrStore(k, c)
 	}
 	return c
+}
+
+// Set measures the cardinality of values passed to Observe for each time bucket, that is, it
+// estimates how many _unique_ values have been passed to it.
+type Set struct {
+	m          *Metrics
+	name       string
+	tags       string
+	sampleRate float64
+}
+
+func (s *Set) Observe(value string) {
+	panic("todo")
 }
 
 // Set returns the Set for the given SetDef. For the same SetDef, including one produced from
@@ -358,7 +372,7 @@ func (m *Metrics) Close() {
 type Gauge struct {
 	m    *Metrics
 	name string
-	tags []string
+	tags string
 	v    atomic.Uint64
 }
 
@@ -383,7 +397,14 @@ func (g *Gauge) publish() {
 	if math.IsNaN(v) {
 		return
 	}
-	g.m.p.Gauge(g.name, v, g.tags, 1 /*samplingRate*/)
+
+	g.m.sender.Write([]byte(g.name))
+	g.m.sender.Write([]byte(":"))
+	var b [64]byte
+	g.m.sender.Write(strconv.AppendFloat(b[:0], v, 'f', -1, 64))
+	g.m.sender.Write([]byte("|g|@1|#"))
+	g.m.sender.Write([]byte(g.tags))
+	g.m.sender.WriteNewline()
 }
 
 // Counter is a metric that keeps track of the number of events that happen per time interval.
@@ -393,7 +414,7 @@ func (g *Gauge) publish() {
 type Counter struct {
 	m    *Metrics
 	name string
-	tags []string
+	tags string
 	v    atomic.Int64
 }
 
@@ -403,23 +424,109 @@ func (c *Counter) Add(n int64) {
 
 func (c *Counter) publish() {
 	v := c.v.Swap(0)
-	if v > 0 {
-		c.m.p.Count(c.name, v, c.tags, 1)
+	if v == 0 {
+		return
 	}
+
+	c.m.sender.Write([]byte(c.name))
+	c.m.sender.Write([]byte(":"))
+	var b [20]byte // 20 digits fits 2^64
+	c.m.sender.Write(strconv.AppendInt(b[:0], v, 10 /*base*/))
+	c.m.sender.Write([]byte("|c|@1|#"))
+	c.m.sender.Write([]byte(c.tags))
+	c.m.sender.WriteNewline()
 }
 
 // Distribution produces quantile metrics, e.g. 50th, 90th, 99th percentiles of the values passed to
 // Observe for each time bucket.
 type Distribution struct {
-	m          *Metrics
-	name       string
-	unit       Unit
-	tags       []string
-	sampleRate float64
+	m    *Metrics
+	name string
+	unit Unit
+	tags string
+
+	curr    concurrentSketch
+	prev    sketch
+	scratch sketch
 }
 
 func (d *Distribution) Observe(value float64) {
-	d.m.p.Distribution(d.name, value, d.tags, d.sampleRate)
+	d.curr.Observe(value)
+}
+
+func (d *Distribution) publish() {
+	// https://docs.datadoghq.com/developers/dogstatsd/datagram_shell?tab=metrics
+	//
+	// <METRIC_NAME>:<VALUE1>:<VALUE2>:<VALUE3>|<TYPE>|@<SAMPLE_RATE>|#<TAG_KEY_1>:<TAG_VALUE_1>,<TAG_2>
+	//
+	// 'd' is the type for distribution
+
+	// TODO: we don't actually need the scratch because we can compute the diff for each bucket
+	// _while_ iterating to build the packets, so add diffIter between concurrentSketch and sketch.
+	// TODO: we actually only want to do the single-line with 1/count sample rate when there are a
+	// lot of samples in each bucket, which we can do 'live' a little
+	prev := d.prev
+	curr := d.scratch
+	curr.cloneFrom(&d.curr)
+	d.prev, d.scratch = curr, d.prev
+
+	newObservations := curr.total - prev.total
+	if newObservations == 0 {
+		// No new observations, nothing to emit.
+		return
+	}
+
+	// TODO: track the number of unchanged buckets, and shrink the sketch if it's a high enough
+	// percentage
+	if newObservations < 50 { // TODO: number probably needs to be low enough that we can fit it in a packet, else this needs to be careful to split
+		d.writeStart()
+		curr.diffIter(&prev, func(value float64, count int) bool {
+			if count == 0 {
+				return true
+			}
+			d.writeValues(value, count)
+			return true
+		})
+		d.writeEndNoSample()
+	} else {
+		curr.diffIter(&prev, func(value float64, count int) bool {
+			if count == 0 {
+				return true
+			}
+			d.writeStart()
+			d.writeValues(value, 1)
+			d.writeEnd(1 / float64(count))
+			return true
+		})
+	}
+}
+
+func (d *Distribution) writeStart() {
+	d.m.sender.Write([]byte(d.name))
+}
+
+func (d *Distribution) writeValues(value float64, count int) {
+	var b [64]byte
+	vBytes := strconv.AppendFloat(b[:0], value, 'f', -1, 64)
+	for i := 0; i < count; i++ {
+		d.m.sender.Write([]byte(":"))
+		d.m.sender.Write(vBytes)
+	}
+}
+
+func (d *Distribution) writeEndNoSample() {
+	d.m.sender.Write([]byte("|d|@1|#"))
+	d.m.sender.Write([]byte(d.tags))
+	d.m.sender.WriteNewline()
+}
+
+func (d *Distribution) writeEnd(sampleRate float64) {
+	d.m.sender.Write([]byte("|d|@"))
+	var b [64]byte
+	d.m.sender.Write(strconv.AppendFloat(b[:0], sampleRate, 'f', -1, 64))
+	d.m.sender.Write([]byte("|#"))
+	d.m.sender.Write([]byte(d.tags))
+	d.m.sender.WriteNewline()
 }
 
 var (
@@ -440,36 +547,23 @@ var (
 func (d *Distribution) ObserveDuration(value time.Duration) {
 	switch d.unit {
 	case UnitNanosecond:
-		d.m.p.Distribution(d.name, float64(value.Nanoseconds()), d.tags, d.sampleRate)
+		d.Observe(float64(value.Nanoseconds()))
 	case UnitMicrosecond:
-		d.m.p.Distribution(d.name, value.Seconds()*1_000_000, d.tags, d.sampleRate)
+		d.Observe(value.Seconds() * 1_000_000)
 	case UnitMillisecond:
-		d.m.p.Distribution(d.name, value.Seconds()*1_000, d.tags, d.sampleRate)
+		d.Observe(value.Seconds() * 1_000)
 	case UnitSecond:
-		d.m.p.Distribution(d.name, value.Seconds(), d.tags, d.sampleRate)
+		d.Observe(value.Seconds())
 	case UnitMinute:
-		d.m.p.Distribution(d.name, value.Seconds()/60, d.tags, d.sampleRate)
+		d.Observe(value.Seconds() / 60)
 	case UnitHour:
-		d.m.p.Distribution(d.name, value.Seconds()/3600, d.tags, d.sampleRate)
+		d.Observe(value.Seconds() / 3600)
 	default:
 		_, loaded := badObserveDurationsSet.LoadOrStore(d.name, struct{}{})
 		if !loaded {
 			badObserveDurations.Add(1)
 		}
 	}
-}
-
-// Set measures the cardinality of values passed to Observe for each time bucket, that is, it
-// estimates how many _unique_ values have been passed to it.
-type Set struct {
-	m          *Metrics
-	name       string
-	tags       []string
-	sampleRate float64
-}
-
-func (s *Set) Observe(value string) {
-	s.m.p.Set(s.name, value, s.tags, s.sampleRate)
 }
 
 // metricKey is used to dedupe metrics so that multiple calls on a def result in the same metric. It
@@ -501,12 +595,15 @@ func newMetricKey(name string, n int, values [maxTags]any, allComparable bool) m
 	return k
 }
 
-func makeTags(keys []string, values []any) []string {
-	tags := make([]string, len(keys))
-	for i := range tags {
-		tags[i] = makeTag(keys[i], values[i])
+func makeTags(keys []string, values []any) string {
+	var sb strings.Builder
+	for i := range keys {
+		if i != 0 {
+			sb.WriteByte(',')
+		}
+		sb.WriteString(makeTag(keys[i], values[i]))
 	}
-	return tags
+	return sb.String()
 }
 
 func makeTag(key string, value any) string {
