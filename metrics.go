@@ -445,9 +445,8 @@ type Distribution struct {
 	unit Unit
 	tags string
 
-	curr    concurrentSketch
-	prev    sketch
-	scratch sketch
+	curr concurrentSketch
+	prev sketch
 }
 
 func (d *Distribution) Observe(value float64) {
@@ -461,43 +460,37 @@ func (d *Distribution) publish() {
 	//
 	// 'd' is the type for distribution
 
-	// TODO: we don't actually need the scratch because we can compute the diff for each bucket
-	// _while_ iterating to build the packets, so add diffIter between concurrentSketch and sketch.
-	// TODO: we actually only want to do the single-line with 1/count sample rate when there are a
-	// lot of samples in each bucket, which we can do 'live' a little
-	prev := d.prev
-	curr := d.scratch
-	curr.cloneFrom(&d.curr)
-	d.prev, d.scratch = curr, d.prev
-
-	newObservations := curr.total - prev.total
-	if newObservations == 0 {
-		// No new observations, nothing to emit.
-		return
-	}
-
-	// TODO: track the number of unchanged buckets, and shrink the sketch if it's a high enough
-	// percentage
-	if newObservations < 50 { // TODO: number probably needs to be low enough that we can fit it in a packet, else this needs to be careful to split
-		d.writeStart()
-		curr.diffIter(&prev, func(value float64, count int) bool {
-			if count == 0 {
-				return true
+	// Formatted with 'f',-1, values are all about twenty bytes long which means we can only fit a
+	// few packed values together.
+	maxPerLine := (1400 - len(d.name) - len("|d|@1|#") - len(d.tags) - 1) / 20
+	valuesThisLine := 0
+	d.prev.newObservationsSince(&d.curr, func(value float64, count int) bool {
+		if count < 10 {
+			// TODO: uh, what if maxPerLine is super tiny because of a ton of tags? just let the
+			// packet tear?
+			if valuesThisLine == 0 {
+				d.writeStart()
+			}
+			if valuesThisLine+count > maxPerLine {
+				d.writeEndNoSample()
+				d.writeStart()
+				valuesThisLine = 0
 			}
 			d.writeValues(value, count)
-			return true
-		})
-		d.writeEndNoSample()
-	} else {
-		curr.diffIter(&prev, func(value float64, count int) bool {
-			if count == 0 {
-				return true
+			valuesThisLine += count
+		} else {
+			if valuesThisLine > 0 {
+				d.writeEndNoSample()
+				valuesThisLine = 0
 			}
 			d.writeStart()
 			d.writeValues(value, 1)
 			d.writeEnd(1 / float64(count))
-			return true
-		})
+		}
+		return true
+	})
+	if valuesThisLine > 0 {
+		d.writeEndNoSample()
 	}
 }
 
@@ -507,6 +500,8 @@ func (d *Distribution) writeStart() {
 
 func (d *Distribution) writeValues(value float64, count int) {
 	var b [64]byte
+	// TODO: since value is coming out of a distribution bucket, it's actually a pretty constrained
+	// set and we could just have a lookup table for common values instead
 	vBytes := strconv.AppendFloat(b[:0], value, 'f', -1, 64)
 	for i := 0; i < count; i++ {
 		d.m.sender.Write([]byte(":"))
@@ -523,6 +518,7 @@ func (d *Distribution) writeEndNoSample() {
 func (d *Distribution) writeEnd(sampleRate float64) {
 	d.m.sender.Write([]byte("|d|@"))
 	var b [64]byte
+	// TODO: also consider a lookup table for, say, the first thousand
 	d.m.sender.Write(strconv.AppendFloat(b[:0], sampleRate, 'f', -1, 64))
 	d.m.sender.Write([]byte("|#"))
 	d.m.sender.Write([]byte(d.tags))

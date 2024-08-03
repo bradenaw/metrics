@@ -10,8 +10,10 @@ import (
 const distributionErrorBound = 0.03
 
 type concurrentSketch struct {
-	positive xsync.Map[uint16, *atomic.Uint32]
-	negative xsync.Map[uint16, *atomic.Uint32]
+	positive     xsync.Map[int16, *atomic.Uint32]
+	negative     xsync.Map[int16, *atomic.Uint32]
+	prevPositive map[int16]int
+	prevNegative map[int16]int
 }
 
 func (c *concurrentSketch) Observe(v float64) {
@@ -20,7 +22,9 @@ func (c *concurrentSketch) Observe(v float64) {
 		v = -v
 		target = &c.negative
 	}
-	bucket := uint16(math.Trunc(math.Log(v) / math.Log(1+distributionErrorBound)))
+	// We don't have to worry about overflow here because the largest bucket number is 2^16-1 and
+	// 1.03^(2^16-1) is larger than the max float64.
+	bucket := int16(math.Trunc(math.Log(v) / math.Log(1+distributionErrorBound)))
 	counter, ok := target.Load(bucket)
 	if !ok {
 		counter, _ = target.LoadOrStore(bucket, new(atomic.Uint32))
@@ -28,80 +32,48 @@ func (c *concurrentSketch) Observe(v float64) {
 	counter.Add(1)
 }
 
-type sketch struct {
-	total    int
-	positive map[uint16]int
-	negative map[uint16]int
-}
+// Calls f for all of the Observe()s that happened since the last call to newObservations.
+func (s *concurrentSketch) newObservations(f func(value float64, count int) bool) {
+	// TODO: track the number of unchanged buckets, and shrink the sketch if it's a high enough
+	// percentage
 
-func (s *sketch) cloneFrom(c *concurrentSketch) {
-	for bucket := range s.positive {
-		delete(s.positive, bucket)
-	}
-	for bucket := range s.negative {
-		delete(s.negative, bucket)
-	}
-
-	s.total = 0
-
-	c.positive.Range(func(bucket uint16, counter *atomic.Uint32) bool {
-		if s.positive == nil {
-			s.positive = make(map[uint16]int)
-		}
+	done := false
+	s.positive.Range(func(bucket int16, counter *atomic.Uint32) bool {
 		count := int(counter.Load())
-		s.positive[bucket] = count
-		s.total += count
+		diff := count - s.prevPositive[bucket]
+		if diff == 0 {
+			return true
+		}
+
+		value := math.Pow(1+distributionErrorBound, float64(bucket))
+		if s.prevPositive == nil {
+			s.prevPositive = make(map[int16]int)
+		}
+		s.prevPositive[bucket] = count
+		if !done {
+			if !f(value, diff) {
+				done = true
+			}
+		}
 		return true
 	})
-
-	c.negative.Range(func(bucket uint16, counter *atomic.Uint32) bool {
-		if s.negative == nil {
-			s.negative = make(map[uint16]int)
-		}
+	s.negative.Range(func(bucket int16, counter *atomic.Uint32) bool {
 		count := int(counter.Load())
-		s.negative[bucket] = count
-		s.total += count
+		diff := count - s.prevNegative[bucket]
+		if diff == 0 {
+			return true
+		}
+
+		value := -math.Pow(1+distributionErrorBound, float64(bucket))
+		if s.prevNegative == nil {
+			s.prevNegative = make(map[int16]int)
+		}
+		s.prevNegative[bucket] = count
+		if !done {
+			if !f(value, diff) {
+				done = true
+			}
+		}
 		return true
 	})
-}
-
-func (s *sketch) diffIter(other *sketch, f func(value float64, count int) bool) {
-	// NOTE: Doesn't count buckets that only appear in other, but because of our usage of this, that
-	// never happens because we only ever diff running totals against each other where s is the
-	// newer.
-	for bucket := range s.positive {
-		diff := s.positive[bucket] - other.positive[bucket]
-		if diff == 0 {
-			continue
-		}
-		value := math.Pow(1+distributionErrorBound, float64(bucket))
-		if !f(value, diff) {
-			return
-		}
-	}
-	for bucket := range s.negative {
-		diff := s.negative[bucket] - other.negative[bucket]
-		if diff == 0 {
-			continue
-		}
-		value := -math.Pow(1+distributionErrorBound, float64(bucket))
-		if !f(value, diff) {
-			return
-		}
-	}
-}
-
-func (s *sketch) values(f func(value float64, count int) bool) {
-	for bucket, count := range s.positive {
-		value := math.Pow(1+distributionErrorBound, float64(bucket))
-		if !f(value, count) {
-			break
-		}
-	}
-	for bucket, count := range s.negative {
-		value := -math.Pow(1+distributionErrorBound, float64(bucket))
-		if !f(value, count) {
-			break
-		}
-	}
 }
