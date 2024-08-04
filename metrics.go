@@ -445,12 +445,11 @@ type Distribution struct {
 	unit Unit
 	tags string
 
-	curr concurrentSketch
-	prev sketch
+	observations concurrentSketch
 }
 
 func (d *Distribution) Observe(value float64) {
-	d.curr.Observe(value)
+	d.observations.Observe(value)
 }
 
 func (d *Distribution) publish() {
@@ -461,10 +460,11 @@ func (d *Distribution) publish() {
 	// 'd' is the type for distribution
 
 	// Formatted with 'f',-1, values are all about twenty bytes long which means we can only fit a
-	// few packed values together.
+	// few packed values together. Better formatting (e.g. 4 sigfigs) would give us more room a lot
+	// of the time, and we could keep track of actual # of bytes written instead of this.
 	maxPerLine := (1400 - len(d.name) - len("|d|@1|#") - len(d.tags) - 1) / 20
 	valuesThisLine := 0
-	d.prev.newObservationsSince(&d.curr, func(value float64, count int) bool {
+	d.observations.newObservations(func(bucket distributionBucket, count int) bool {
 		if count < 10 {
 			// TODO: uh, what if maxPerLine is super tiny because of a ton of tags? just let the
 			// packet tear?
@@ -476,7 +476,9 @@ func (d *Distribution) publish() {
 				d.writeStart()
 				valuesThisLine = 0
 			}
-			d.writeValues(value, count)
+			// We might need to split here too, maybe better to do the math underneath this since
+			// only writeValues knows how long the value is going to be to know if it'll fit
+			d.writeValues(bucket, count)
 			valuesThisLine += count
 		} else {
 			if valuesThisLine > 0 {
@@ -484,7 +486,7 @@ func (d *Distribution) publish() {
 				valuesThisLine = 0
 			}
 			d.writeStart()
-			d.writeValues(value, 1)
+			d.writeValues(bucket, 1)
 			d.writeEnd(1 / float64(count))
 		}
 		return true
@@ -498,11 +500,9 @@ func (d *Distribution) writeStart() {
 	d.m.sender.Write([]byte(d.name))
 }
 
-func (d *Distribution) writeValues(value float64, count int) {
+func (d *Distribution) writeValues(bucket distributionBucket, count int) {
 	var b [64]byte
-	// TODO: since value is coming out of a distribution bucket, it's actually a pretty constrained
-	// set and we could just have a lookup table for common values instead
-	vBytes := strconv.AppendFloat(b[:0], value, 'f', -1, 64)
+	vBytes := bucket.AppendString(b[:0])
 	for i := 0; i < count; i++ {
 		d.m.sender.Write([]byte(":"))
 		d.m.sender.Write(vBytes)
