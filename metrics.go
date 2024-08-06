@@ -37,6 +37,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"net/netip"
 	"reflect"
 	"regexp"
 	"runtime"
@@ -136,8 +137,33 @@ var (
 	)
 )
 
-func New() *Metrics {
+type options struct {
+	udpAddr netip.AddrPort
+}
+
+type Option struct{ f func(*options) }
+
+func WithUDPAddrPort(addr netip.AddrPort) Option {
+	return Option{f: func(o *options) {
+		o.udpAddr = addr
+	}}
+}
+
+func New(opts ...Option) (*Metrics, error) {
+	o := options{
+		udpAddr: netip.MustParseAddrPort("127.0.0.1:8125"),
+	}
+	for _, opt := range opts {
+		opt.f(&o)
+	}
+
+	sender, err := newNewlineDelimPacketSender(o.udpAddr)
+	if err != nil {
+		return nil, err
+	}
+
 	m := &Metrics{
+		sender:  sender,
 		bg:      xsync.NewGroup(context.Background()),
 		flushed: make(chan struct{}),
 		polls:   make(map[int]func()),
@@ -171,6 +197,7 @@ func New() *Metrics {
 			d.publish()
 			return true
 		})
+		m.sender.Flush()
 
 		m.m.Lock()
 		close(m.flushed)
@@ -178,7 +205,7 @@ func New() *Metrics {
 		m.m.Unlock()
 	})
 
-	return m
+	return m, nil
 }
 
 // Counter returns the Counter for the given CounterDef. For the same CounterDef, including one
@@ -402,7 +429,7 @@ func (g *Gauge) publish() {
 	g.m.sender.Write([]byte(":"))
 	var b [64]byte
 	g.m.sender.Write(strconv.AppendFloat(b[:0], v, 'f', -1, 64))
-	g.m.sender.Write([]byte("|g|@1|#"))
+	g.m.sender.Write([]byte("|g|#"))
 	g.m.sender.Write([]byte(g.tags))
 	g.m.sender.WriteNewline()
 }
@@ -432,7 +459,7 @@ func (c *Counter) publish() {
 	c.m.sender.Write([]byte(":"))
 	var b [20]byte // 20 digits fits 2^64
 	c.m.sender.Write(strconv.AppendInt(b[:0], v, 10 /*base*/))
-	c.m.sender.Write([]byte("|c|@1|#"))
+	c.m.sender.Write([]byte("|c|#"))
 	c.m.sender.Write([]byte(c.tags))
 	c.m.sender.WriteNewline()
 }
@@ -465,7 +492,9 @@ func (d *Distribution) publish() {
 	maxPerLine := (1400 - len(d.name) - len("|d|@1|#") - len(d.tags) - 1) / 20
 	valuesThisLine := 0
 	d.observations.newObservations(func(bucket distributionBucket, count int) bool {
-		if count < 10 {
+		// This number looks a little generous but remember this might not be the only bucket, and
+		// we have to write the name and tags again if we move on.
+		if count < 50 {
 			// TODO: uh, what if maxPerLine is super tiny because of a ton of tags? just let the
 			// packet tear?
 			if valuesThisLine == 0 {
@@ -510,7 +539,7 @@ func (d *Distribution) writeValues(bucket distributionBucket, count int) {
 }
 
 func (d *Distribution) writeEndNoSample() {
-	d.m.sender.Write([]byte("|d|@1|#"))
+	d.m.sender.Write([]byte("|d|#"))
 	d.m.sender.Write([]byte(d.tags))
 	d.m.sender.WriteNewline()
 }
@@ -519,7 +548,7 @@ func (d *Distribution) writeEnd(sampleRate float64) {
 	d.m.sender.Write([]byte("|d|@"))
 	var b [64]byte
 	// TODO: also consider a lookup table for, say, the first thousand
-	d.m.sender.Write(strconv.AppendFloat(b[:0], sampleRate, 'f', -1, 64))
+	d.m.sender.Write(strconv.AppendFloat(b[:0], sampleRate, 'g', 6, 64))
 	d.m.sender.Write([]byte("|#"))
 	d.m.sender.Write([]byte(d.tags))
 	d.m.sender.WriteNewline()

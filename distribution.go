@@ -111,8 +111,9 @@ func (bucket distributionBucket) appendStringNoLookup(b []byte) []byte {
 	// anyway.
 	//
 	// 'g' will put very large/small values in scientific format. The docs don't promise that
-	// they'll parse this (they just say that values are "An integer or float." without _any_
-	// information about format), but ddagent does indeed call strconv.ParseFloat[1], so whatever.
+	// they'll parse this, but the docs don't really say anything (they just say that values are "An
+	// integer or float."), so depending only on documented behavior is obviously nonsense. But
+	// ddagent does indeed call strconv.ParseFloat[1], so whatever.
 	//
 	// [1]: https://github.com/DataDog/datadog-agent/blob/486de8dc3f9462f403a7135374e7306ef05861e5/comp/dogstatsd/server/parse.go#L167
 	return strconv.AppendFloat(b, bucket.Value(), 'g', 4, 64)

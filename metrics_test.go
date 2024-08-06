@@ -249,56 +249,56 @@ func BenchmarkTagValueSanitize(b *testing.B) {
 	})
 }
 
-func BenchmarkReport(b *testing.B) {
-	m := New(noOpPublisher{})
-
-	counter := m.Counter(CounterDef{name: "benchmark_report_counter", ok: true})
-	b.Run("Counter", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			counter.Add(1)
-		}
-	})
-
-	gauge := m.Gauge(GaugeDef{name: "benchmark_report_gauge", ok: true})
-	b.Run("Gauge", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			gauge.Set(float64(i))
-		}
-	})
-
-	distribution := m.Distribution(DistributionDef{name: "benchmark_report_distribution", ok: true})
-	b.Run("Distribution", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			distribution.Observe(float64(i))
-		}
-	})
-
-	set := m.Set(SetDef{name: "benchmark_report_distribution", ok: true})
-	b.Run("Set", func(b *testing.B) {
-		b.ReportAllocs()
-		for i := 0; i < b.N; i++ {
-			set.Observe("asdf")
-		}
-	})
-}
-
-func BenchmarkMetricLookup(b *testing.B) {
-	m := New(noOpPublisher{})
-	b.ReportAllocs()
-	d := CounterDef3[string, int, bool]{
-		name:          "benchmark_metric_lookup",
-		keys:          [...]string{"", "", ""},
-		allComparable: true,
-		ok:            true,
-	}
-
-	foo := "foo"
-
-	for i := 0; i < b.N; i++ {
-		withValues := d.Values(foo, 1, false)
-		m.Counter(withValues)
-	}
-}
+//func BenchmarkReport(b *testing.B) {
+//	m := New(noOpPublisher{})
+//
+//	counter := m.Counter(CounterDef{name: "benchmark_report_counter", ok: true})
+//	b.Run("Counter", func(b *testing.B) {
+//		b.ReportAllocs()
+//		for i := 0; i < b.N; i++ {
+//			counter.Add(1)
+//		}
+//	})
+//
+//	gauge := m.Gauge(GaugeDef{name: "benchmark_report_gauge", ok: true})
+//	b.Run("Gauge", func(b *testing.B) {
+//		b.ReportAllocs()
+//		for i := 0; i < b.N; i++ {
+//			gauge.Set(float64(i))
+//		}
+//	})
+//
+//	distribution := m.Distribution(DistributionDef{name: "benchmark_report_distribution", ok: true})
+//	b.Run("Distribution", func(b *testing.B) {
+//		b.ReportAllocs()
+//		for i := 0; i < b.N; i++ {
+//			distribution.Observe(float64(i))
+//		}
+//	})
+//
+//	set := m.Set(SetDef{name: "benchmark_report_distribution", ok: true})
+//	b.Run("Set", func(b *testing.B) {
+//		b.ReportAllocs()
+//		for i := 0; i < b.N; i++ {
+//			set.Observe("asdf")
+//		}
+//	})
+//}
+//
+//func BenchmarkMetricLookup(b *testing.B) {
+//	m := New(noOpPublisher{})
+//	b.ReportAllocs()
+//	d := CounterDef3[string, int, bool]{
+//		name:          "benchmark_metric_lookup",
+//		keys:          [...]string{"", "", ""},
+//		allComparable: true,
+//		ok:            true,
+//	}
+//
+//	foo := "foo"
+//
+//	for i := 0; i < b.N; i++ {
+//		withValues := d.Values(foo, 1, false)
+//		m.Counter(withValues)
+//	}
+//}
