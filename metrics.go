@@ -368,6 +368,28 @@ func (g *Gauge) Set(v float64) {
 	g.v.Store(math.Float64bits(v))
 }
 
+// Add adds v to the current value of g. If g is unset, sets g to v.
+func (g *Gauge) Add(v float64) {
+	g.update(func(prev float64) float64 {
+		if math.IsNaN(prev) {
+			return v
+		}
+		return prev + v
+	})
+}
+
+func (g *Gauge) update(f func(prev float64) float64) {
+	for {
+		v := g.v.Load()
+		vf := math.Float64frombits(v)
+		nextf := f(vf)
+		next := math.Float64bits(nextf)
+		if g.v.CompareAndSwap(v, next) {
+			break
+		}
+	}
+}
+
 // Unset unsets the value of the gauge. If the Gauge remains unset, it will have no value for time
 // buckets after this.
 func (g *Gauge) Unset() {
